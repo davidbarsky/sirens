@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 
 public class TaskQueue {
-    public LinkedList<Task> tasks;
+    private LinkedList<Task> tasks;
     public MachineType machineType;
 
     public TaskQueue(LinkedList<Task> tasks, MachineType machineType) {
@@ -14,16 +14,23 @@ public class TaskQueue {
         this.machineType = machineType;
     }
 
-    public Optional<Task> take() {
+    public void add(Task task) {
+        this.tasks.addLast(task);
+    }
+
+    public Optional<Task> peek() {
+       if (this.tasks.isEmpty()) {
+           return Optional.empty();
+       }
+
+       return Optional.of(tasks.peek());
+    }
+
+    public Optional<Task> pop() {
         if (this.tasks.isEmpty()) {
             return Optional.empty();
         }
 
-        Task task = this.tasks.peek();
-        if (task.isReady()) {
-            return Optional.of(this.tasks.pop());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.of(this.tasks.pop());
     }
 }

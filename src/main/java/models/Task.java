@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class Task {
-    public String name;
+    public Integer ID;
     public BuildStatus buildStatus;
     public Optional<StartEndTime> startEndTime;
-    public ArrayList<Task> dependencies;
+    public ArrayList<Integer> dependencies;
 
-    public Task(String name, BuildStatus buildStatus, Optional<StartEndTime> startEndTime, ArrayList<Task> dependencies) {
-        this.name = name;
+    public Task(Integer ID, BuildStatus buildStatus, Optional<StartEndTime> startEndTime, ArrayList<Integer> dependencies) {
+        this.ID = ID;
         this.buildStatus = buildStatus;
         this.startEndTime = startEndTime;
         this.dependencies = dependencies;
@@ -32,13 +32,18 @@ public class Task {
         this.startEndTime = Optional.of(new StartEndTime(startTime, endTime));
     }
 
-    public Boolean isReady() {
-        for (Task dep : dependencies) {
-            if (dep.buildStatus == BuildStatus.NotBuilt) {
-                return false;
-            }
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        return true;
+        Task task = (Task) o;
+
+        return ID.equals(task.ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return ID.hashCode();
     }
 }
