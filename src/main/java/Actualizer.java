@@ -1,20 +1,21 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import models.Task;
 import models.TaskQueue;
 import models.states.BuildStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-
 public class Actualizer {
-    private HashMap<Integer, Task> lookupTable;
+    private Map<Integer, Task> lookupTable;
 
-    public Actualizer(HashMap<Integer, Task> lookupTable) {
+    public Actualizer(Map<Integer, Task> lookupTable) {
         this.lookupTable = lookupTable;
     }
 
-    public ArrayList<Task> makeSchedule(ArrayList<TaskQueue> tasks) {
-        ArrayList<Task> logicalSchedule = new ArrayList<>();
+    public List<Task> makeSchedule(List<TaskQueue> tasks) {
+        List<Task> logicalSchedule = new ArrayList<>();
         Optional<Task> previous = Optional.empty();
 
         for (TaskQueue taskQueue : tasks) {

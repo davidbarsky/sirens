@@ -1,12 +1,18 @@
-import edu.brandeis.ggen.GGenException;
-import edu.brandeis.ggen.RandomGraphGenerator;
-import edu.brandeis.ggen.graph.GGenGraph;
-import edu.brandeis.ggen.graph.Vertex;
-
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import info.rmarcus.ggen4j.GGen;
+import info.rmarcus.ggen4j.GGenCommand;
+import info.rmarcus.ggen4j.GGenException;
+import info.rmarcus.ggen4j.RandomGraphGenerator;
+import info.rmarcus.ggen4j.graph.GGenGraph;
+import info.rmarcus.ggen4j.graph.Vertex;
 import models.Task;
 import models.TaskQueue;
 import models.states.BuildStatus;
@@ -58,8 +64,8 @@ public class GraphGenerator {
     }
 
     private Collection<Vertex> getErdosGNMSources() throws GGenException {
-        RandomGraphGenerator graphGenerator = new RandomGraphGenerator();
-        GGenGraph graph = graphGenerator.erdosGNM(20, 0.5).generateGraph();
+    	GGenCommand.GGEN_PATH = System.getenv("GGEN_PATH");
+        GGenGraph graph = GGen.generateGraph().erdosGNM(20, 10).generateGraph();
 
         return graph.getSources();
     }
