@@ -1,3 +1,5 @@
+package graph;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,7 +12,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenCommand;
 import info.rmarcus.ggen4j.GGenException;
-import info.rmarcus.ggen4j.RandomGraphGenerator;
 import info.rmarcus.ggen4j.graph.GGenGraph;
 import info.rmarcus.ggen4j.graph.Vertex;
 import models.Task;
@@ -22,10 +23,10 @@ import util.Pair;
 public class GraphGenerator {
 
     public Pair<ArrayList<TaskQueue>, HashMap<Integer, Task>> makeTaskQueue() throws GGenException {
-        ArrayList<Vertex> ggenSource = new ArrayList<>(getErdosGNMSources());
+        ArrayList<Vertex> source = new ArrayList<>(getErdosGNMSources());
         LinkedBlockingQueue<Vertex> queue = new LinkedBlockingQueue<>();
 
-        for (Vertex vertex : ggenSource) {
+        for (Vertex vertex : source) {
             queue.add(vertex);
         }
 
@@ -34,13 +35,13 @@ public class GraphGenerator {
             taskQueues.add(new TaskQueue(new LinkedList<Task>(), MachineType.Small));
         }
 
-        HashMap<Integer, Task> lookupTable = new HashMap<>(ggenSource.size());
+        HashMap<Integer, Task> lookupTable = new HashMap<>();
         HashSet<Vertex> visited = new HashSet<>();
         while (!queue.isEmpty()) {
             Vertex vertex = queue.remove();
             for (Vertex child : vertex.getChildren().keySet()) {
                 if (!visited.contains(child)) {
-                    Task task = new Task( child.getID(), BuildStatus.NotBuilt, Optional.empty(), getTaskDependencies(child));
+                    Task task = new Task(child.getID(), BuildStatus.NotBuilt, Optional.empty(), getTaskDependencies(child));
                     this.addToRandomTaskQueue(
                             task,
                             taskQueues

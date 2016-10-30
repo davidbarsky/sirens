@@ -24,8 +24,6 @@ public class Actualizer {
                 Task presentTask = task.get();
                 presentTask.build(previous, 1);
                 logicalSchedule.add(presentTask);
-            } else {
-                break;
             }
         }
 
@@ -43,7 +41,12 @@ public class Actualizer {
 
     private Boolean isBuildable(Task task) {
         for (Integer dependency : task.dependencies) {
-            if (lookupTable.get(dependency).buildStatus == BuildStatus.NotBuilt) {
+            Task taskDependency = lookupTable.get(dependency);
+            if (taskDependency == null) {
+                return false;
+            }
+
+            if (taskDependency.buildStatus == BuildStatus.NotBuilt) {
                 return false;
             }
         }

@@ -2,20 +2,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import graph.GraphGenerator;
 import info.rmarcus.ggen4j.GGenException;
+import info.rmarcus.ggen4j.graph.Vertex;
 import models.Task;
 import models.TaskQueue;
 import util.Pair;
 
 public class Main {
     public static void main(String... args) {
+        GGenWrapper wrapper = new GGenWrapper();
+        try {
+            ArrayList<Vertex> sources = wrapper.getSources();
+            CacheGenerator cacheGenerator = new CacheGenerator();
+            HashMap<Integer, Task> cache = cacheGenerator.makeCache(sources);
+            System.out.println(cache);
+        } catch (GGenException e) {
+            e.printStackTrace();
+        }
+
         try {
             Pair<ArrayList<TaskQueue>, HashMap<Integer, Task>> pair = makeTaskQueue();
 
             ArrayList<TaskQueue> taskQueues = pair.firstValue;
             HashMap<Integer, Task> lookupTable = pair.secondValue;
 
-            List<Task> schedule = buildGraph(taskQueues, lookupTable);
+            List<Task> schedule = makeSchedule(taskQueues, lookupTable);
             schedule.forEach(t -> System.out.println(t.ID));
         } catch (GGenException e) {
             System.out.println(e);
@@ -27,10 +39,9 @@ public class Main {
          return graphGenerator.makeTaskQueue();
     }
 
-    private static List<Task> buildGraph(ArrayList<TaskQueue> taskQueues, HashMap<Integer, Task> lookupTable) {
+    private static List<Task> makeSchedule(ArrayList<TaskQueue> taskQueues, HashMap<Integer, Task> lookupTable) {
         Actualizer actualizer = new Actualizer(lookupTable);
 
-        List<Task> schedule = actualizer.makeSchedule(taskQueues);
-        return schedule;
+        return actualizer.makeSchedule(taskQueues);
     }
 }
