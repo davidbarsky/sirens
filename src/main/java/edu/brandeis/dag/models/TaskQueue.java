@@ -1,5 +1,6 @@
 package edu.brandeis.dag.models;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
@@ -22,7 +23,7 @@ public class TaskQueue {
 	
 	public int getLatestStartTime() {
 		return tasks.stream().filter(t -> t.isBuilt())
-				.max((a, b) -> a.getStartEndTime().get().getEnd() - b.getStartEndTime().get().getEnd())
+				.max(Comparator.comparingInt(a -> a.getStartEndTime().get().getEnd()))
 				.map(t -> t.getStartEndTime().get().getEnd())
 				.orElse(0);
 	}
@@ -41,7 +42,11 @@ public class TaskQueue {
 				.map(t -> t.build())
 				.orElse(Optional.empty());
 	}
-	
+
+	public Queue<Task> getTasks() {
+		return tasks;
+	}
+
 	@Override
 	public String toString() {
 		return "TaskQueue machine type: " + machineType.toString() + "\n"

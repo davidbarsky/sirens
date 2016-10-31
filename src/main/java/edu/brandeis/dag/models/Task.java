@@ -1,5 +1,6 @@
 package edu.brandeis.dag.models;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -8,12 +9,13 @@ import edu.brandeis.dag.DAGException;
 import edu.brandeis.dag.models.states.BuildStatus;
 import edu.brandeis.dag.models.states.MachineType;
 
-public class Task {
+public class Task implements Comparable<Task> {
 	private Integer id;
 	private BuildStatus buildStatus;
 	private Optional<StartEndTime> startEndTime;
 
 	private Map<Task, Integer> dependencies;
+
 	private Map<Task, Integer> dependents;
 
 	private Map<MachineType, Integer> latencies;
@@ -69,7 +71,7 @@ public class Task {
 		// find the latest ending dependency
 		int latestDep = this.dependencies
 				.keySet().stream()
-				.max((a, b) -> a.getStartEndTime().get().getEnd() - b.getStartEndTime().get().getEnd())
+				.max(Comparator.comparingInt(a -> a.getStartEndTime().get().getEnd()))
 				.map(t -> t.getStartEndTime().get().getEnd())
 				.orElse(0);
 
@@ -92,10 +94,20 @@ public class Task {
 		return startEndTime;
 	}
 
+	public Map<Task, Integer> getDependencies() {
+		return dependencies;
+	}
+
+	public Map<Task, Integer> getDependents() {
+		return dependents;
+	}
+
+
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Task))
+		if (!(o instanceof Task)) {
 			return false;
+		}
 
 		return this.id == ((Task)o).id;		
 	}
@@ -111,4 +123,20 @@ public class Task {
 				+ " end: " + startEndTime.map(t -> String.valueOf(t.getEnd())).orElse("<not built>");
 	}
 
+	@Override
+	public int compareTo(Task that) {
+	    if (!this.startEndTime.isPresent() || !that.startEndTime.isPresent()) {
+	    	throw new DAGException("Tasks have not been built; there is no logical way to compare them.");
+		}
+
+		if (this.startEndTime.get().getEnd() <= that.startEndTime.get().getStart() &&
+				this.startEndTime.get().getStart() < this.startEndTime.get().getStart()) {
+			return -1;
+		}else if (this.startEndTime.get().getStart() >= that.startEndTime.get().getEnd() &&
+				this.startEndTime.get().getEnd() >= that.startEndTime.get().getEnd()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
 }

@@ -59,7 +59,7 @@ public class GraphGenerator {
 
 	}
 
-	private static Collection<Vertex> getErdosGNMSources() {
+	protected static Collection<Vertex> getErdosGNMSources() {
 		GGenCommand.GGEN_PATH = System.getenv("GGEN_PATH");
 		if (GGenCommand.GGEN_PATH == null) {
 			throw new DAGException("You need to set the GGEN_PATH environmental variable!");
@@ -77,5 +77,4 @@ public class GraphGenerator {
 			throw new DAGException(e.getMessage());
 		}
 	}
-
 }
