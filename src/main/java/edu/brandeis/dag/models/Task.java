@@ -88,7 +88,7 @@ public class Task implements Comparable<Task> {
 		int myStart = Math.max(latestStart, latestDep);
 		int myEnd = myStart + latencies.get(tq.getMachineType()) + networkingTime;
 
-		this.startEndTime = Optional.of(new StartEndTime(myStart, myEnd));
+		this.startEndTime = Optional.of(new StartEndTime(myStart, myEnd, myEnd - networkingTime));
 		this.buildStatus = BuildStatus.BUILT;
 
 		return startEndTime;

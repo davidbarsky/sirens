@@ -1,13 +1,17 @@
 package edu.brandeis.dag.models;
 
-import edu.brandeis.dag.DAGException;
-import edu.brandeis.dag.models.states.MachineType;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.expectThrows;
 
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import edu.brandeis.dag.DAGException;
+import edu.brandeis.dag.models.states.MachineType;
 
 class TaskTest {
     @Test
