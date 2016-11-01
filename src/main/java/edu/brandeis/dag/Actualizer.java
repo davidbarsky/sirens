@@ -11,7 +11,7 @@ import edu.brandeis.dag.models.TaskQueue;
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static List<Task> actualize(Collection<TaskQueue> tqs) {
+	public static List<TaskQueue> actualize(Collection<TaskQueue> tqs) {
 
 		// keep going while any of our tasks are not built
 		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
@@ -31,13 +31,6 @@ public class Actualizer {
 			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
 		}
 
-		ArrayList<Task> tasks = new ArrayList<>();
-		for (TaskQueue taskQueue : tqs) {
-			for (Task task : taskQueue.getTasks()) {
-				tasks.add(task);
-			}
-		}
-
-		return tasks;
+		return new ArrayList<>(tqs);
 	}
 }

@@ -15,15 +15,15 @@ class ActualizerTest {
     void actualize() {
         ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) GraphGenerator.randomGraph(2);
 
-        List<Task> tasks = Actualizer.actualize(tqs);
-        List<Task> copied = new ArrayList<>(tasks);
+        List<TaskQueue> tasks = Actualizer.actualize(tqs);
+        List<TaskQueue> copied = new ArrayList<>(tasks);
 
-        Collections.sort(copied);
+        copied.forEach(t -> Collections.sort(t.getTasks()));
 
         assertAll("Actualizer",
                 () -> assertEquals(copied, tasks),
-                () -> assertTrue(tasks.stream().allMatch(Task::isBuilt)),
-                () -> assertTrue(tasks.stream().allMatch(Task::buildable))
+                () -> assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::isBuilt))),
+                () -> assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::buildable)))
         );
     }
 }

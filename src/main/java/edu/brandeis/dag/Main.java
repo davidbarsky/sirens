@@ -8,10 +8,8 @@ public class Main {
     public static void main(String... args) {
     	List<TaskQueue> tqs = GraphGenerator.randomGraph(2);
 
-        List<Task> tasks = Actualizer.actualize(tqs);
+        List<TaskQueue> tasks = Actualizer.actualize(tqs);
 
         tasks.forEach(System.out::println);
-
-        System.out.println(Coster.findCost(tasks));
     }
 }

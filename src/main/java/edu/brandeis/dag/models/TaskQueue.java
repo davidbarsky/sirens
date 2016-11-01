@@ -1,15 +1,12 @@
 package edu.brandeis.dag.models;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import edu.brandeis.dag.models.states.MachineType;
 
 public class TaskQueue {
-	private Queue<Task> tasks;
+	private List<Task> tasks;
 	private MachineType machineType;
 
 	public TaskQueue(MachineType machineType) {
@@ -43,7 +40,7 @@ public class TaskQueue {
 				.orElse(Optional.empty());
 	}
 
-	public Queue<Task> getTasks() {
+	public List<Task> getTasks() {
 		return tasks;
 	}
 
