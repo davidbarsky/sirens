@@ -102,12 +102,10 @@ public class Task implements Comparable<Task> {
 		return dependents;
 	}
 
-
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Task)) {
+		if (!(o instanceof Task))
 			return false;
-		}
 
 		return this.id == ((Task)o).id;		
 	}
@@ -125,14 +123,13 @@ public class Task implements Comparable<Task> {
 
 	@Override
 	public int compareTo(Task that) {
-	    if (!this.startEndTime.isPresent() || !that.startEndTime.isPresent()) {
+	    if (!this.startEndTime.isPresent() || !that.startEndTime.isPresent())
 	    	throw new DAGException("Tasks have not been built; there is no logical way to compare them.");
-		}
 
 		if (this.startEndTime.get().getEnd() <= that.startEndTime.get().getStart() &&
 				this.startEndTime.get().getStart() < this.startEndTime.get().getStart()) {
 			return -1;
-		}else if (this.startEndTime.get().getStart() >= that.startEndTime.get().getEnd() &&
+		} else if (this.startEndTime.get().getStart() >= that.startEndTime.get().getEnd() &&
 				this.startEndTime.get().getEnd() >= that.startEndTime.get().getEnd()) {
 			return 1;
 		} else {
