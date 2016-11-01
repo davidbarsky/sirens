@@ -10,7 +10,7 @@ class StartEndTimeTest {
 
     @BeforeAll
     static void init() {
-        startEndTime = new StartEndTime(0, 10);
+        startEndTime = new StartEndTime(0, 10, 5);
     }
 
     @Test
@@ -21,6 +21,11 @@ class StartEndTimeTest {
     @Test
     void getEnd() {
         assertEquals(10, startEndTime.getEnd());
+    }
+    
+    @Test
+    void getNetworkingStart() {
+    	assertEquals(5, startEndTime.getNetworkingStart());
     }
 
 }
