@@ -19,6 +19,11 @@ class ActualizerTest {
         List<Task> copied = new ArrayList<>(tasks);
 
         Collections.sort(copied);
-        assertEquals(tasks, tasks);
+
+        assertAll("Actualizer",
+                () -> assertEquals(copied, tasks),
+                () -> assertTrue(tasks.stream().allMatch(Task::isBuilt)),
+                () -> assertTrue(tasks.stream().allMatch(Task::buildable))
+        );
     }
 }
