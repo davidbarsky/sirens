@@ -1,6 +1,9 @@
-package edu.brandeis.dag;
+package edu.brandeis;
+
 import java.util.List;
 
+import edu.brandeis.dag.Actualizer;
+import edu.brandeis.dag.GraphGenerator;
 import edu.brandeis.dag.models.Task;
 import edu.brandeis.dag.models.TaskQueue;
 
