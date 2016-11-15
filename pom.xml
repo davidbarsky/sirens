@@ -6,7 +6,7 @@
 	<groupId>edu.brandeis</groupId>
 	<artifactId>siren</artifactId>
 	<version>0.0.1</version>
-	<build>
+    <build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -27,7 +27,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-		</plugins>
+        </plugins>
 	</build>
 
 	<dependencies>
@@ -48,5 +48,5 @@
 			<version>5.0.0-M2</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+    </dependencies>
 </project>
