@@ -5,8 +5,8 @@ import edu.brandeis.dag.models.states.MachineType;
 
 import java.util.List;
 
-public class Coster {
-    private Coster() {}
+public class CostAnalyzer {
+    private CostAnalyzer() {}
 
     public static Integer findCost(List<Task> tasks, MachineType machineType) {
         Task first = tasks.get(0);

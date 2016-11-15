@@ -1,12 +1,10 @@
 package edu.brandeis;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import edu.brandeis.dag.Actualizer;
-import edu.brandeis.dag.Coster;
+import edu.brandeis.dag.CostAnalyzer;
 import edu.brandeis.dag.GraphGenerator;
-import edu.brandeis.dag.models.Task;
 import edu.brandeis.dag.models.TaskQueue;
 
 public class Main {
@@ -18,7 +16,7 @@ public class Main {
     	System.out.println("Cost Analysis");
         taskQueues.forEach(tqs -> {
             System.out.println(tqs.getMachineType());
-            System.out.println(Coster.findCost(tqs.getTasks(), tqs.getMachineType()));
+            System.out.println(CostAnalyzer.findCost(tqs.getTasks(), tqs.getMachineType()));
         });
 
         System.out.println("Logical Schedules");
