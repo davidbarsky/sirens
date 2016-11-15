@@ -9,7 +9,7 @@ public class StartEndTime {
     public StartEndTime(int start, int end, int networkStart) {
         this.start = start;
         this.end = end;
-        this.duration = end - start;
+        this.duration = end - start ;
         this.networkingStart = networkStart;
     }
     
