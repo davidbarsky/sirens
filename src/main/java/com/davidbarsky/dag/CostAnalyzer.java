@@ -1,7 +1,7 @@
-package edu.brandeis.dag;
+package com.davidbarsky.dag;
 
-import edu.brandeis.dag.models.Task;
-import edu.brandeis.dag.models.states.MachineType;
+import com.davidbarsky.dag.models.Task;
+import com.davidbarsky.dag.models.states.MachineType;
 
 import java.util.List;
 

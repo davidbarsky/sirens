@@ -1,4 +1,4 @@
-package edu.brandeis.tree;
+package com.davidbarsky.tree;
 
 import java.util.Optional;
 import java.util.TreeSet;

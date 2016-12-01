@@ -1,4 +1,4 @@
-package edu.brandeis.tree;
+package com.davidbarsky.tree;
 
 public class TreeException extends Exception {
 

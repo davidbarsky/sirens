@@ -1,4 +1,4 @@
-package edu.brandeis.dag;
+package com.davidbarsky.dag;
 
 public class DAGException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

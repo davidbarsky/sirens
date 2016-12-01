@@ -1,7 +1,7 @@
-package edu.brandeis.dag;
+package com.davidbarsky.dag;
 
-import edu.brandeis.dag.models.Task;
-import edu.brandeis.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.Task;
+import com.davidbarsky.dag.models.TaskQueue;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

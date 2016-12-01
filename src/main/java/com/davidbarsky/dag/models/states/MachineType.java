@@ -1,6 +1,6 @@
-package edu.brandeis.dag.models.states;
+package com.davidbarsky.dag.models.states;
 
-import edu.brandeis.dag.DAGException;
+import com.davidbarsky.dag.DAGException;
 
 // Associated values are costs of the machine
 public enum MachineType {

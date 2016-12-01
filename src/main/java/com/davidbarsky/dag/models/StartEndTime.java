@@ -1,4 +1,4 @@
-package edu.brandeis.dag.models;
+package com.davidbarsky.dag.models;
 
 public class StartEndTime {
     private final int start;

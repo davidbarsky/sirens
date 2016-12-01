@@ -1,13 +1,13 @@
-package edu.brandeis.dag.models;
+package com.davidbarsky.dag.models;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import edu.brandeis.dag.DAGException;
-import edu.brandeis.dag.models.states.BuildStatus;
-import edu.brandeis.dag.models.states.MachineType;
+import com.davidbarsky.dag.DAGException;
+import com.davidbarsky.dag.models.states.BuildStatus;
+import com.davidbarsky.dag.models.states.MachineType;
 
 public class Task implements Comparable<Task> {
 	private Integer id;

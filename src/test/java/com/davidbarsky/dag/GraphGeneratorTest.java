@@ -1,9 +1,9 @@
-package edu.brandeis.dag;
+package com.davidbarsky.dag;
 
 import info.rmarcus.ggen4j.graph.Vertex;
 import org.junit.jupiter.api.Test;
 
-import edu.brandeis.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.TaskQueue;
 
 import java.util.Collection;
 import java.util.List;

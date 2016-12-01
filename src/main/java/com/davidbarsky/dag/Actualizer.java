@@ -1,12 +1,8 @@
-package edu.brandeis.dag;
+package com.davidbarsky.dag;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Vector;
-import java.util.stream.Collectors;
 
-import edu.brandeis.dag.models.Task;
-import edu.brandeis.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.TaskQueue;
 
 public class Actualizer {
 	private Actualizer() { }

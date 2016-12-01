@@ -1,12 +1,11 @@
-package edu.brandeis;
+package com.davidbarsky;
 
 import java.util.List;
 
-import edu.brandeis.dag.Actualizer;
-import edu.brandeis.dag.CostAnalyzer;
-import edu.brandeis.dag.GraphGenerator;
-import edu.brandeis.dag.models.TaskQueue;
-import edu.brandeis.tree.CostFinder;
+import com.davidbarsky.dag.Actualizer;
+import com.davidbarsky.dag.CostAnalyzer;
+import com.davidbarsky.dag.GraphGenerator;
+import com.davidbarsky.dag.models.TaskQueue;
 
 public class Main {
     public static void main(String... args) {

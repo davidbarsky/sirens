@@ -1,9 +1,9 @@
-package edu.brandeis.dag.models;
+package com.davidbarsky.dag.models;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import edu.brandeis.dag.models.states.MachineType;
+import com.davidbarsky.dag.models.states.MachineType;
 
 public class TaskQueue {
 	private ArrayList<Task> tasks;

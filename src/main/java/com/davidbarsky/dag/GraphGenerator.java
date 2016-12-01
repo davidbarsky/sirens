@@ -1,4 +1,4 @@
-package edu.brandeis.dag;
+package com.davidbarsky.dag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import edu.brandeis.dag.models.Task;
-import edu.brandeis.dag.models.TaskQueue;
-import edu.brandeis.dag.models.states.MachineType;
+import com.davidbarsky.dag.models.Task;
+import com.davidbarsky.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.states.MachineType;
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenCommand;
 import info.rmarcus.ggen4j.GGenException;
@@ -56,7 +56,6 @@ public class GraphGenerator {
 		}
 
 		return queues;
-
 	}
 
 	protected static Collection<Vertex> getErdosGNMSources() {
