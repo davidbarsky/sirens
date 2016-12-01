@@ -15,7 +15,7 @@ class ActualizerTest {
     void actualize() {
         ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) GraphGenerator.randomGraph(2);
 
-        List<TaskQueue> tasks = Actualizer.actualize(tqs);
+        List<TaskQueue> tasks = Actualizer.invoke(tqs);
         List<TaskQueue> copied = new ArrayList<>(tasks);
 
         copied.forEach(t -> Collections.sort(t.getTasks()));

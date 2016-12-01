@@ -11,7 +11,7 @@ import edu.brandeis.dag.models.TaskQueue;
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static List<TaskQueue> actualize(Collection<TaskQueue> tqs) {
+	public static ArrayList<TaskQueue> invoke(Collection<TaskQueue> tqs) {
 
 		// keep going while any of our tasks are not built
 		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {

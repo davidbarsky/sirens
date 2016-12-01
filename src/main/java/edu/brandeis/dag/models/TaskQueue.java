@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 import edu.brandeis.dag.models.states.MachineType;
 
 public class TaskQueue {
-	private List<Task> tasks;
+	private ArrayList<Task> tasks;
 	private MachineType machineType;
 
 	public TaskQueue(MachineType machineType) {
-		this.tasks = new LinkedList<>();
+		this.tasks = new ArrayList<>();
 		this.machineType = machineType;
 	}
 
@@ -40,7 +40,7 @@ public class TaskQueue {
 				.orElse(Optional.empty());
 	}
 
-	public List<Task> getTasks() {
+	public ArrayList<Task> getTasks() {
 		return tasks;
 	}
 

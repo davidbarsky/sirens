@@ -6,12 +6,13 @@ import edu.brandeis.dag.Actualizer;
 import edu.brandeis.dag.CostAnalyzer;
 import edu.brandeis.dag.GraphGenerator;
 import edu.brandeis.dag.models.TaskQueue;
+import edu.brandeis.tree.CostFinder;
 
 public class Main {
     public static void main(String... args) {
     	List<TaskQueue> randomGraph = GraphGenerator.randomGraph(2);
 
-    	List<TaskQueue> taskQueues = Actualizer.actualize(randomGraph);
+    	List<TaskQueue> taskQueues = Actualizer.invoke(randomGraph);
 
     	System.out.println("Cost Analysis");
         taskQueues.forEach(tqs -> {
