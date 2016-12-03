@@ -1,4 +1,4 @@
-package com.davidbarsky.heuristics;
+package com.davidbarsky.schedulers;
 
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
@@ -6,8 +6,8 @@ import com.davidbarsky.dag.models.TaskQueue;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class UNCScheduler {
-    public List<List<Task>> linearCluster(List<TaskQueue> taskQueues) {
+public class UnboundedCluster {
+    public static List<List<Task>> linearCluster(List<TaskQueue> taskQueues) {
         Set<Task> visited = new HashSet<>();
         List<List<Task>> criticalPaths = new ArrayList<>();
 

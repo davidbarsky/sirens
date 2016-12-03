@@ -2,6 +2,7 @@ package com.davidbarsky.dag;
 
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
+import com.davidbarsky.schedulers.RoundRobin;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ActualizerTest {
     @Test
     void actualize() {
-        ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) GraphGenerator.randomGraph(2);
+        ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.invoke(2);
 
         List<TaskQueue> tasks = Actualizer.invoke(tqs);
         List<TaskQueue> copied = new ArrayList<>(tasks);

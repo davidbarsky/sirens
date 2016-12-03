@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
-import com.davidbarsky.dag.GraphGenerator;
 import com.davidbarsky.dag.models.TaskQueue;
+import com.davidbarsky.schedulers.RoundRobin;
 
 public class Main {
     public static void main(String... args) {
-    	List<TaskQueue> randomGraph = GraphGenerator.randomGraph(2);
+    	List<TaskQueue> randomGraph = RoundRobin.invoke(2);
 
     	List<TaskQueue> taskQueues = Actualizer.invoke(randomGraph);
 
