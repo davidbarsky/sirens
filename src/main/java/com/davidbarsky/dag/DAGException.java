@@ -6,4 +6,6 @@ public class DAGException extends RuntimeException {
 	public DAGException(String msg) {
 		super(msg);
 	}
+
+	public DAGException() {super("Invarient Broken!"); }
 }

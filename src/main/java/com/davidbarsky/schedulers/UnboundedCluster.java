@@ -1,12 +1,26 @@
 package com.davidbarsky.schedulers;
 
+import com.davidbarsky.dag.DAGGenerator;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.states.MachineType;
+import info.rmarcus.ggen4j.graph.Vertex;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class UnboundedCluster {
+    public static void linearCluster2(int numQueues) {
+        List<TaskQueue> queues = new ArrayList<>();
+        Map<Integer, Task> tasks = new HashMap<>();
+
+        IntStream.range(0, numQueues)
+                .forEach(k -> queues.add(new TaskQueue(MachineType.SMALL)));
+        Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources();
+    }
+
+
     public static List<List<Task>> linearCluster(List<TaskQueue> taskQueues) {
         Set<Task> visited = new HashSet<>();
         List<List<Task>> criticalPaths = new ArrayList<>();
