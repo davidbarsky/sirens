@@ -1,6 +1,7 @@
 package com.davidbarsky.dag;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import com.davidbarsky.dag.models.TaskQueue;
 
@@ -10,11 +11,11 @@ public class Actualizer {
 	public static ArrayList<TaskQueue> invoke(Collection<TaskQueue> tqs) {
 
 		// keep going while any of our tasks are not built
-		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
+		while (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)) {
 			// each time, try to build the next task on each task queue.
 			boolean builtAny = tqs.stream()
-					.map(tq -> tq.buildNextUnbuiltTask())
-					.anyMatch(opt -> opt.isPresent());
+					.map(TaskQueue::buildNextUnbuiltTask)
+					.anyMatch(Optional::isPresent);
 			
 			// if we couldn't build any tasks in the queue, we should be done!
 			if (!builtAny) {

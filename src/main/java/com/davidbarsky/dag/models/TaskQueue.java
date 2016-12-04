@@ -1,16 +1,22 @@
 package com.davidbarsky.dag.models;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.davidbarsky.dag.models.states.MachineType;
 
 public class TaskQueue {
-	private ArrayList<Task> tasks;
+	private List<Task> tasks;
 	private MachineType machineType;
 
 	public TaskQueue(MachineType machineType) {
 		this.tasks = new ArrayList<>();
+		this.machineType = machineType;
+	}
+
+	public TaskQueue(MachineType machineType, List<Task> tasks) {
+		this.tasks = tasks;
 		this.machineType = machineType;
 	}
 
