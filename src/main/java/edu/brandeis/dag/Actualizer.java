@@ -2,8 +2,6 @@ package edu.brandeis.dag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Vector;
-import java.util.stream.Collectors;
 
 import edu.brandeis.dag.models.Task;
 import edu.brandeis.dag.models.TaskQueue;
@@ -39,5 +37,9 @@ public class Actualizer {
 		}
 
 		return tasks;
+	}
+	
+	public static int getCost(Collection<TaskQueue> tqs) {
+		return Coster.findCost(actualize(tqs));
 	}
 }

@@ -2,6 +2,7 @@ package edu.brandeis.dag.models;
 
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -15,6 +16,11 @@ public class TaskQueue {
 	public TaskQueue(MachineType machineType) {
 		this.tasks = new LinkedList<>();
 		this.machineType = machineType;
+	}
+	
+	public TaskQueue(MachineType machineType, List<Task> tasks) {
+		this(machineType);
+		tasks.forEach(this::add);
 	}
 
 	public void add(Task task) {

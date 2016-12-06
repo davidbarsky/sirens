@@ -136,4 +136,8 @@ public class Task implements Comparable<Task> {
 			return 0;
 		}
 	}
+
+	public int getCostTo(Task task) {
+		return dependents.getOrDefault(task, 0) + dependencies.getOrDefault(task, 0);
+	}
 }
