@@ -1,4 +1,4 @@
-package edu.brandeis.dag.models;
+package com.davidbarsky.dag.models;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

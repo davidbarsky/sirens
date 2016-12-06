@@ -1,4 +1,4 @@
-package edu.brandeis.dag.models.states;
+package com.davidbarsky.dag.models.states;
 
 public enum BuildStatus {
     BUILT,

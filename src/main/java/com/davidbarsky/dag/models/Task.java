@@ -1,16 +1,17 @@
-package edu.brandeis.dag.models;
+package com.davidbarsky.dag.models;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import edu.brandeis.dag.DAGException;
-import edu.brandeis.dag.models.states.BuildStatus;
-import edu.brandeis.dag.models.states.MachineType;
+import com.davidbarsky.dag.DAGException;
+import com.davidbarsky.dag.models.states.BuildStatus;
+import com.davidbarsky.dag.models.states.MachineType;
 
 public class Task implements Comparable<Task> {
 	private Integer id;
+
 	private BuildStatus buildStatus;
 	private Optional<StartEndTime> startEndTime;
 
@@ -60,10 +61,6 @@ public class Task implements Comparable<Task> {
 				.allMatch(t -> t.isBuilt());
 	}
 
-	public Optional<StartEndTime> getStartEndTime() {
-		return startEndTime;
-	}
-
 	public Optional<StartEndTime> build() {
 		if (!buildable())
 			return Optional.empty();
@@ -100,6 +97,22 @@ public class Task implements Comparable<Task> {
 
 	public Map<Task, Integer> getDependents() {
 		return dependents;
+	}
+
+	public BuildStatus getBuildStatus() {
+		return buildStatus;
+	}
+
+	public void setBuildStatus(BuildStatus buildStatus) {
+		this.buildStatus = buildStatus;
+	}
+
+	public Optional<StartEndTime> getStartEndTime() {
+		return startEndTime;
+	}
+
+	public void setStartEndTime(Optional<StartEndTime> startEndTime) {
+		this.startEndTime = startEndTime;
 	}
 
 	@Override

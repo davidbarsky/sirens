@@ -1,20 +1,29 @@
-package edu.brandeis.dag.models;
+package com.davidbarsky.dag.models;
 
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+
+import java.lang.reflect.Array;
+import java.util.*;
+
 import java.util.stream.Collectors;
 
-import edu.brandeis.dag.models.states.MachineType;
+import com.davidbarsky.dag.models.states.MachineType;
 
 public class TaskQueue {
-	private Queue<Task> tasks;
+	private List<Task> tasks;
 	private MachineType machineType;
 
 	public TaskQueue(MachineType machineType) {
-		this.tasks = new LinkedList<>();
+		this.tasks = new ArrayList<>();
+		this.machineType = machineType;
+	}
+
+	public TaskQueue(MachineType machineType, List<Task> tasks) {
+		this.tasks = tasks;
 		this.machineType = machineType;
 	}
 	
@@ -49,7 +58,7 @@ public class TaskQueue {
 				.orElse(Optional.empty());
 	}
 
-	public Queue<Task> getTasks() {
+	public ArrayList<Task> getTasks() {
 		return tasks;
 	}
 

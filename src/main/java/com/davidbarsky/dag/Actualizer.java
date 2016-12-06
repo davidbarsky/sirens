@@ -1,22 +1,21 @@
-package edu.brandeis.dag;
+package com.davidbarsky.dag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import edu.brandeis.dag.models.Task;
-import edu.brandeis.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.TaskQueue;
 
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static List<Task> actualize(Collection<TaskQueue> tqs) {
+	public static ArrayList<TaskQueue> invoke(Collection<TaskQueue> tqs) {
 
 		// keep going while any of our tasks are not built
-		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
+		while (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)) {
 			// each time, try to build the next task on each task queue.
 			boolean builtAny = tqs.stream()
-					.map(tq -> tq.buildNextUnbuiltTask())
-					.anyMatch(opt -> opt.isPresent());
+					.map(TaskQueue::buildNextUnbuiltTask)
+					.anyMatch(Optional::isPresent);
 			
 			// if we couldn't build any tasks in the queue, we should be done!
 			if (!builtAny) {
@@ -29,14 +28,7 @@ public class Actualizer {
 			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
 		}
 
-		ArrayList<Task> tasks = new ArrayList<>();
-		for (TaskQueue taskQueue : tqs) {
-			for (Task task : taskQueue.getTasks()) {
-				tasks.add(task);
-			}
-		}
-
-		return tasks;
+		return new ArrayList<>(tqs);
 	}
 	
 	public static int getCost(Collection<TaskQueue> tqs) {

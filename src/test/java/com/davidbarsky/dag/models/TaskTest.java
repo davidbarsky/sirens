@@ -1,4 +1,4 @@
-package edu.brandeis.dag.models;
+package com.davidbarsky.dag.models;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.expectThrows;
 
 import java.util.HashMap;
 
+import com.davidbarsky.dag.DAGException;
 import org.junit.jupiter.api.Test;
 
-import edu.brandeis.dag.DAGException;
-import edu.brandeis.dag.models.states.MachineType;
+import com.davidbarsky.dag.models.states.MachineType;
 
 class TaskTest {
     @Test
