@@ -1,4 +1,4 @@
-package edu.brandeis.dag.permsolve;
+package info.rmarcus.dag.permsolve;
 
 public class PermSolveException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

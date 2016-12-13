@@ -1,4 +1,4 @@
 @NonNullByDefault
-package edu.brandeis.dag.permsolve;
+package info.rmarcus.dag.permsolve;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;

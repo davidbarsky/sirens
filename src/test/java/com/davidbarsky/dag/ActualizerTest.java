@@ -1,9 +1,9 @@
 package com.davidbarsky.dag;
 
-import com.davidbarsky.dag.models.Task;
-import com.davidbarsky.dag.models.TaskQueue;
-import com.davidbarsky.schedulers.RoundRobin;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,12 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import com.davidbarsky.dag.models.Task;
+import com.davidbarsky.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.states.MachineType;
+import com.davidbarsky.schedulers.RoundRobin;
 
 class ActualizerTest {
     @Test
@@ -48,7 +53,7 @@ class ActualizerTest {
 		tq.add(t1);
 
 		assertThrows(DAGException.class, () -> {
-			Actualizer.actualize(Collections.singletonList(tq));
+			Actualizer.invoke(Collections.singletonList(tq));
 		});
 
 

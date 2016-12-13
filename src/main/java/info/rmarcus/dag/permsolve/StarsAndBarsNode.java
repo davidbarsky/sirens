@@ -1,4 +1,4 @@
-package edu.brandeis.dag.permsolve;
+package info.rmarcus.dag.permsolve;
 
 import java.util.Collections;
 import java.util.HashMap;
