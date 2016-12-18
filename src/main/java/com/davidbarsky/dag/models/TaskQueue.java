@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import com.davidbarsky.dag.models.states.MachineType;
 
 public class TaskQueue {
-	private List<Task> tasks;
+	private ArrayList<Task> tasks;
 	private MachineType machineType;
 
 	public TaskQueue(MachineType machineType) {
@@ -15,7 +15,7 @@ public class TaskQueue {
 		this.machineType = machineType;
 	}
 
-	public TaskQueue(MachineType machineType, List<Task> tasks) {
+	public TaskQueue(MachineType machineType, ArrayList<Task> tasks) {
 		this.tasks = tasks;
 		this.machineType = machineType;
 	}

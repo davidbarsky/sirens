@@ -10,10 +10,10 @@ import info.rmarcus.ggen4j.graph.Vertex;
 import java.util.*;
 
 public class TopologicalSorter {
-    public static TaskQueue invoke(Collection<Vertex> graph) {
+    public ArrayList<TaskQueue> invoke(Collection<Vertex> graph) {
         // Using an unsorted TaskQueues for topological sort source,
         // with only one task queue.
-        List<TaskQueue> unsortedTasks = RoundRobin.invoke(1);
+        List<TaskQueue> unsortedTasks = RoundRobin.invoke(graph.size());
 
         // Our topological sort is running the actualizer.
         ArrayList<TaskQueue> builtTasks = Actualizer
@@ -28,9 +28,6 @@ public class TopologicalSorter {
                     task.setStartEndTime(Optional.empty());
                 });
 
-        return builtTasks
-                .stream()
-                .findFirst()
-                .orElseThrow(DAGException::new);
+        return builtTasks;
     }
 }

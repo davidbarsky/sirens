@@ -16,8 +16,8 @@ class ActualizerTest {
     void actualize() {
         ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.invoke(2);
 
-        List<TaskQueue> tasks = Actualizer.invoke(tqs);
-        List<TaskQueue> copied = new ArrayList<>(tasks);
+        ArrayList<TaskQueue> tasks = Actualizer.invoke(tqs);
+        ArrayList<TaskQueue> copied = new ArrayList<>(tasks);
 
         copied.forEach(t -> Collections.sort(t.getTasks()));
 
