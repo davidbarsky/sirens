@@ -16,7 +16,6 @@ public class Task implements Comparable<Task> {
 	private Optional<StartEndTime> startEndTime;
 
 	private Map<Task, Integer> dependencies;
-
 	private Map<Task, Integer> dependents;
 
 	private Map<MachineType, Integer> latencies;
@@ -31,6 +30,15 @@ public class Task implements Comparable<Task> {
 		this.latencies = latencies;
 		this.tq = tq;
 	}
+	
+	public Task(Integer id, Map<MachineType, Integer> latencies) {
+		this.id = id;
+		this.buildStatus = BuildStatus.NOT_BUILT;
+		this.startEndTime = Optional.empty();
+		this.dependencies = new HashMap<>();
+		this.dependents = new HashMap<>();
+		this.latencies = latencies;
+	}
 
 	public void addDependency(int networkCost, Task t) {
 		dependencies.put(t, networkCost);
@@ -43,6 +51,10 @@ public class Task implements Comparable<Task> {
 
 	public TaskQueue getTaskQueue() {
 		return tq;
+	}
+	
+	public void setTaskQueue(TaskQueue tq) {
+		this.tq = tq;
 	}
 
 	public boolean isBuilt() {
@@ -61,8 +73,13 @@ public class Task implements Comparable<Task> {
 				.allMatch(t -> t.isBuilt());
 	}
 
+	public void unbuild() {
+		this.buildStatus = BuildStatus.NOT_BUILT;
+		this.startEndTime = Optional.empty();
+	}
+	
 	public Optional<StartEndTime> build() {
-		if (!buildable())
+		if (!buildable() || tq == null)
 			return Optional.empty();
 
 		// find the latest ending dependency
@@ -81,7 +98,7 @@ public class Task implements Comparable<Task> {
 				.filter(e -> e.getKey().getTaskQueue() != this.getTaskQueue())
 				.mapToInt(e -> e.getValue())
 				.sum();
-
+		
 		int myStart = Math.max(latestStart, latestDep);
 		int myEnd = myStart + latencies.get(tq.getMachineType()) + networkingTime;
 
@@ -148,5 +165,9 @@ public class Task implements Comparable<Task> {
 		} else {
 			return 0;
 		}
+	}
+	
+	public int getCostTo(Task task) {
+		return dependents.getOrDefault(task, 0) + dependencies.getOrDefault(task, 0);
 	}
 }

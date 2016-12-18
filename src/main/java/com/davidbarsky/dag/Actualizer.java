@@ -3,12 +3,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.davidbarsky.dag.models.TaskQueue;
 
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static ArrayList<TaskQueue> invoke(Collection<TaskQueue> tqs) {
+	public static @NonNull ArrayList<@NonNull TaskQueue> invoke(@NonNull Collection<@NonNull TaskQueue> tqs) {
 
 		// keep going while any of our tasks are not built
 		while (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)) {

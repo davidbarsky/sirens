@@ -1,9 +1,10 @@
 package com.davidbarsky.dag;
 
-import com.davidbarsky.dag.models.Task;
-import com.davidbarsky.dag.models.states.MachineType;
-
 import java.util.List;
+
+import com.davidbarsky.dag.models.Task;
+import com.davidbarsky.dag.models.TaskQueue;
+import com.davidbarsky.dag.models.states.MachineType;
 
 public class CostAnalyzer {
     private CostAnalyzer() {}
@@ -14,5 +15,17 @@ public class CostAnalyzer {
 
         return (last.getStartEndTime().get().getEnd() -
                 first.getStartEndTime().get().getStart()) * machineType.getCost();
+    }
+    
+    public static int findCost(List<TaskQueue> tqs) {
+    	return tqs.stream()
+    			.mapToInt(tq -> (tq.getEndTime() - tq.getStartTime()) * tq.getMachineType().getCost())
+    			.sum();
+    }
+    
+    public static int getLatency(List<TaskQueue> tqs) {
+    	return tqs.stream()
+    			.mapToInt(tq -> tq.getEndTime())
+    			.max().getAsInt();
     }
 }
