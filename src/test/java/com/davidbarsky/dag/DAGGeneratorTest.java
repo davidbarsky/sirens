@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import com.davidbarsky.dag.models.TaskQueue;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,7 +16,7 @@ class DAGGeneratorTest {
 
     @Test
     void randomGraph() {
-        List<TaskQueue> tqs = RoundRobin.invoke(4);
+        ArrayList<TaskQueue> tqs = RoundRobin.invoke(4);
         assertAll("Task Queue",
                 () -> assertEquals(4, tqs.size()),
                 () -> assertNotEquals(5, tqs.size()),
@@ -25,20 +26,20 @@ class DAGGeneratorTest {
 
     @Test
     void getErdosGMNSources() {
-        Collection<Vertex> sources = DAGGenerator.getErdosGNMSources();
+        DAGGenerator generator = new DAGGenerator();
+        Collection<Vertex> sources = generator.getErdosGNMSources(20);
         assertAll("Erdos GMN Generator",
                 () -> assertNotEquals(sources.size(), 0),
-                () -> assertNotNull(sources)
+                () -> assertNotNull(sources),
+                () -> assertEquals(20, sources.size())
         );
 
-        sources.forEach(vertex -> {
-            assertAll("Each individual vertex",
-                    () -> assertNotNull(vertex),
-                    () -> assertNotNull(vertex.getParents()),
-                    () -> assertNotNull(vertex.getChildren()),
-                    () -> assertEquals(vertex.hashCode(), Integer.hashCode(vertex.getID()))
-            );
-        });
+        sources.stream().forEach(vertex -> assertAll("Each individual vertex",
+                () -> assertNotNull(vertex),
+                () -> assertNotNull(vertex.getParents()),
+                () -> assertNotNull(vertex.getChildren()),
+                () -> assertEquals(vertex.hashCode(), Integer.hashCode(vertex.getID()))
+        ));
     }
 
 }
