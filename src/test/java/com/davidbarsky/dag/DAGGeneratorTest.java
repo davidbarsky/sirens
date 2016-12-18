@@ -25,8 +25,8 @@ public class DAGGeneratorTest {
 
 	@Test
 	public void getErdosGMNSources() {
-		Collection<Vertex> sources = DAGGenerator.getErdosGNMSources();
-		assertTrue(sources.size() != 0);
+		Collection<Vertex> sources = DAGGenerator.getErdosGNMSources(20);
+		assertTrue(sources.size() == 20);
 
 
 		sources.forEach(vertex -> {

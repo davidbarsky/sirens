@@ -7,6 +7,9 @@ import java.util.Map.Entry;
 
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.states.MachineType;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenCommand;
@@ -15,13 +18,21 @@ import info.rmarcus.ggen4j.graph.GGenGraph;
 import info.rmarcus.ggen4j.graph.Vertex;
 
 public class DAGGenerator {
-	private DAGGenerator() { }
 	
 	static {
 		GGenCommand.GGEN_PATH = System.getenv("GGEN_PATH");
 	}
+	private DAGGenerator() { }
+
+	public static List<Collection<Vertex>> generateGraphRange(int maxNumVerticies) {
+		return IntStream.range(1, maxNumVerticies + 1)
+				.parallel()
+				.mapToObj(DAGGenerator::getErdosGNMSources)
+				.collect(Collectors.toList());
+	}
+
 	
-	public static Collection<Vertex> getErdosGNMSources() {
+	public static Collection<Vertex> getErdosGNMSources(int numVertices) {
 		
 		if (GGenCommand.GGEN_PATH == null) {
 			throw new DAGException("You need to set the GGEN_PATH environmental variable!");
@@ -29,7 +40,7 @@ public class DAGGenerator {
 
 		GGenGraph graph;
 		try {
-			graph = GGen.generateGraph().erdosGNM(20, 100)
+			graph = GGen.generateGraph().erdosGNM(numVertices, 100)
 					.vertexProperty("latency").uniform(10, 30)
 					.edgeProperty("networking").uniform(50, 120)
 					.generateGraph();

@@ -10,15 +10,15 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 public class RoundRobin {
-    public static List<TaskQueue> invoke(int numQueues) {
-        List<TaskQueue> queues = new ArrayList<>(numQueues);
+    public static ArrayList<TaskQueue> invoke(int numQueues) {
+        ArrayList<TaskQueue> queues = new ArrayList<>(numQueues);
         Map<Integer, Task> tasks = new HashMap<>();
         int i = 0;
 
         IntStream.range(0, numQueues)
                 .forEach(k -> queues.add(new TaskQueue(MachineType.SMALL)));
 
-        Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources();
+        Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources(20);
         // round-robin each vertex to a task queue
         for (Vertex v : vertices) {
             int vertexLatency = (int) (double) Double.valueOf(v.getVertexProperties().get("latency"));
