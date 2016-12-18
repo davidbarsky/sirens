@@ -3,7 +3,6 @@ package com.davidbarsky.dag.models;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.davidbarsky.dag.models.states.MachineType;
@@ -11,15 +10,17 @@ import com.davidbarsky.dag.models.states.MachineType;
 public class TaskQueue {
 	private List<Task> tasks;
 	private MachineType machineType;
+	private int nextUnbuilt;
 
 	public TaskQueue(MachineType machineType) {
 		this.tasks = new ArrayList<>();
 		this.machineType = machineType;
+		this.nextUnbuilt = 0;
 	}
 
 	public TaskQueue(MachineType machineType, List<Task> tasks) {
-		this.tasks = tasks;
-		this.machineType = machineType;
+		this(machineType);
+		this.tasks = new ArrayList<>(tasks);
 		
 		tasks.forEach(this::add);
 	}
@@ -61,11 +62,13 @@ public class TaskQueue {
 		return tasks.stream().anyMatch(t -> !t.isBuilt());
 	}
 
-	public Optional<StartEndTime> buildNextUnbuiltTask() {
-		return tasks.stream().filter(t -> !t.isBuilt())
-				.findFirst()
-				.map(t -> t.build())
-				.orElse(Optional.empty());
+	public boolean buildNextUnbuiltTask() {
+		if (nextUnbuilt < tasks.size() && tasks.get(nextUnbuilt).build().isPresent()) {
+			nextUnbuilt++;
+			return true;
+		}
+		
+		return false;
 	}
 
 	public List<Task> getTasks() {

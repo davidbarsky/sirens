@@ -1,9 +1,7 @@
 package com.davidbarsky.dag;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,16 +9,17 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
 import com.davidbarsky.schedulers.RoundRobin;
 
-class ActualizerTest {
-    @Test
-    void actualize() {
+public class ActualizerTest {
+    @SuppressWarnings("null")
+	@Test
+    public void actualize() {
         ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.invoke(2);
 
         List<TaskQueue> tasks = Actualizer.invoke(tqs);
@@ -28,14 +27,14 @@ class ActualizerTest {
 
         copied.forEach(t -> Collections.sort(t.getTasks()));
 
-        assertAll("Actualizer",
-                () -> assertEquals(copied, tasks),
-                () -> assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::isBuilt))),
-                () -> assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::buildable)))
-        );
+       assertEquals(copied, tasks);
+       assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::isBuilt)));
+       assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::buildable)));
+        
     }
     
-    @Test
+    @SuppressWarnings("null")
+	@Test(expected=DAGException.class)
 	public void impossibleActualize() {
 		TaskQueue tq = new TaskQueue(MachineType.SMALL);
 
@@ -52,11 +51,6 @@ class ActualizerTest {
 		tq.add(t2);
 		tq.add(t1);
 
-		assertThrows(DAGException.class, () -> {
-			Actualizer.invoke(Collections.singletonList(tq));
-		});
-
-
-
+		Actualizer.invoke(Collections.singletonList(tq));
 	}
 }

@@ -55,6 +55,7 @@ public class ScheduleNode {
 			myCost = CostAnalyzer.getLatency(getTaskQueues());
 		} catch (DAGException e) {
 			//System.out.println("Could not schedule partition: " + sbn.toString());
+			System.err.println(e.getMessage());
 			myCost = Integer.MAX_VALUE;
 		}
 		prune.recordNewObserved(myCost, this);

@@ -81,6 +81,9 @@ public class Task implements Comparable<Task> {
 	public Optional<StartEndTime> build() {
 		if (!buildable() || tq == null)
 			return Optional.empty();
+		
+		if (isBuilt())
+			return startEndTime;
 
 		// find the latest ending dependency
 		int latestDep = this.dependencies
@@ -169,5 +172,9 @@ public class Task implements Comparable<Task> {
 	
 	public int getCostTo(Task task) {
 		return dependents.getOrDefault(task, 0) + dependencies.getOrDefault(task, 0);
+	}
+
+	public int getID() {
+		return id;
 	}
 }

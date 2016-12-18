@@ -114,9 +114,9 @@ public class StarsAndBarsNode {
 		Set<Integer> s = new HashSet<>(partitionPoints);
 
 		for (int i = 0; i < numItems; i++) {
-			sb.append(i);
+			sb.append(i + " ");
 			if (s.contains(i))
-				sb.append("|");
+				sb.append("| ");
 		}
 
 		//sb.append(partitionPoints);

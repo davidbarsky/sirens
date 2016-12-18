@@ -1,14 +1,16 @@
 package com.davidbarsky.dag.models;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Before;
+import org.junit.Test;
 
 class StartEndTimeTest {
     static StartEndTime startEndTime;
 
-    @BeforeAll
+    @Before
     static void init() {
         startEndTime = new StartEndTime(0, 10, 5);
     }
