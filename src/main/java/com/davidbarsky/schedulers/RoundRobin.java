@@ -21,7 +21,7 @@ public class RoundRobin {
         Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources();
         // round-robin each vertex to a task queue
         for (Vertex v : vertices) {
-            int vertexLatency = Integer.parseInt(v.getVertexProperties().get("latency"));
+            int vertexLatency = (int) (double) Double.valueOf(v.getVertexProperties().get("latency"));
 
             TaskQueue tq = queues.get(i);
             i = (i + 1) % numQueues;
@@ -40,7 +40,7 @@ public class RoundRobin {
             for (Map.Entry<Vertex, Map<String, String>> child : v.getChildren().entrySet()) {
                 int childID = child.getKey().getID();
                 Task dependent = tasks.get(childID);
-                int networkCost = Integer.parseInt(child.getValue().get("networking"));
+                int networkCost = (int) (double) Double.valueOf(child.getValue().get("networking"));
 
                 dependent.addDependency(networkCost, t);
             }

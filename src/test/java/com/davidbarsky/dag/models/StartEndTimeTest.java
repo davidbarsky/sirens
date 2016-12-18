@@ -7,26 +7,26 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-class StartEndTimeTest {
+public class StartEndTimeTest {
     static StartEndTime startEndTime;
 
     @Before
-    static void init() {
+    public void init() {
         startEndTime = new StartEndTime(0, 10, 5);
     }
 
     @Test
-    void getStart() {
+    public void getStart() {
         assertEquals(0, startEndTime.getStart());
     }
 
     @Test
-    void getEnd() {
+    public void getEnd() {
         assertEquals(10, startEndTime.getEnd());
     }
     
     @Test
-    void getNetworkingStart() {
+    public void getNetworkingStart() {
     	assertEquals(5, startEndTime.getNetworkingStart());
     }
 

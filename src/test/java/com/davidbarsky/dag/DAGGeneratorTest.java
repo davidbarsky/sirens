@@ -14,17 +14,17 @@ import com.davidbarsky.schedulers.RoundRobin;
 import info.rmarcus.ggen4j.graph.Vertex;
 
 
-class DAGGeneratorTest {
+public class DAGGeneratorTest {
 
 	@Test
-	void randomGraph() {
+	public void randomGraph() {
 		List<TaskQueue> tqs = RoundRobin.invoke(4);
 		assertEquals(4, tqs.size());
 
 	}
 
 	@Test
-	void getErdosGMNSources() {
+	public void getErdosGMNSources() {
 		Collection<Vertex> sources = DAGGenerator.getErdosGNMSources();
 		assertTrue(sources.size() != 0);
 

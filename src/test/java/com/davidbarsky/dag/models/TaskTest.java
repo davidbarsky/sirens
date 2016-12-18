@@ -13,9 +13,9 @@ import org.junit.Test;
 import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.states.MachineType;
 
-class TaskTest {
+public class TaskTest {
 	@Test
-	void testAddDependency() {
+	public void testAddDependency() {
 		Task firstTask = new Task(1, new TaskQueue(MachineType.SMALL), new HashMap<>());
 		Task secondTask = new Task(2, new TaskQueue(MachineType.SMALL), new HashMap<>());
 
@@ -29,13 +29,13 @@ class TaskTest {
 	}
 
 	@Test
-	void buildable1() {
+	public void buildable1() {
 		Task firstTask = new Task(1, new TaskQueue(MachineType.SMALL), new HashMap<>());
 		assertTrue(firstTask.buildable());
 	}
 
 	@Test
-	void buildable2() {
+	public void buildable2() {
 		Task firstTask = new Task(1, new TaskQueue(MachineType.SMALL), new HashMap<>());
 		Task secondTask = new Task(2, new TaskQueue(MachineType.SMALL), new HashMap<>());
 		firstTask.addDependency(5, secondTask);
@@ -43,13 +43,13 @@ class TaskTest {
 	}
 
 	@Test
-	void testHashCode() {
+	public void testHashCode() {
 		Task task = new Task(1, new TaskQueue(MachineType.LARGE), new HashMap<>());
 		assertEquals(task.hashCode(), Integer.hashCode(1));
 	}
 
 	@Test(expected=DAGException.class)
-	void compareToWithUnbuiltTasks() {
+	public void compareToWithUnbuiltTasks() {
 		Task firstTask = new Task(1, new TaskQueue(MachineType.LARGE), new HashMap<>());
 		Task secondTask = new Task(2, new TaskQueue(MachineType.LARGE), new HashMap<>());
 
