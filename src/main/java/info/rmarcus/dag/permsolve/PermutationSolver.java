@@ -44,11 +44,11 @@ public class PermutationSolver {
 				ScheduleNode child = sn.getChild(i);
 				
 				if (child.isPruned()) {
-					System.out.println("\tpruned: " + child);
+					//System.out.println("\tpruned: " + child);
 					continue;
 				}
 				
-				System.out.println("\t" + child);
+				//System.out.println("\t" + child);
 				dq.add(child);
 			}
 		}

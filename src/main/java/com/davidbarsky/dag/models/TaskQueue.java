@@ -1,7 +1,6 @@
 package com.davidbarsky.dag.models;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,13 +28,14 @@ public class TaskQueue {
 		task.unbuild();
 		this.tasks.add(task);
 		task.setTaskQueue(this);
+		this.nextUnbuilt = 0;
 	}
 
-	public int getLatestStartTime() {
-		return tasks.stream().filter(t -> t.isBuilt())
-				.max(Comparator.comparingInt(a -> a.getStartEndTime().get().getEnd()))
-				.map(t -> t.getStartEndTime().get().getEnd())
-				.orElse(0);
+	public int geEndTimeOfLastBuiltTask() {
+		if (nextUnbuilt == 0)
+			return 0;
+		
+		return tasks.get(nextUnbuilt-1).getStartEndTime().get().getEnd();
 	}
 	
 	public int getStartTime() {
@@ -59,7 +59,7 @@ public class TaskQueue {
 	}
 
 	public boolean hasUnbuiltTask() {
-		return tasks.stream().anyMatch(t -> !t.isBuilt());
+		return nextUnbuilt < tasks.size();
 	}
 
 	public boolean buildNextUnbuiltTask() {

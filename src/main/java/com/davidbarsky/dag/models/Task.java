@@ -93,7 +93,7 @@ public class Task implements Comparable<Task> {
 				.orElse(0);
 
 		// find the latest starting task on my machine currently
-		int latestStart = tq.getLatestStartTime();
+		int latestStart = tq.geEndTimeOfLastBuiltTask();
 		
 		// figure out how much time we will need to spend doing networking...
 		// (time we will use to write our data to other VMs with our dependents)
