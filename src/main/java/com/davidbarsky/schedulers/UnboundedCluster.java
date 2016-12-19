@@ -9,13 +9,12 @@ import info.rmarcus.ggen4j.graph.Vertex;
 import java.util.*;
 
 public class UnboundedCluster {
+
     // The goal is to find the longest critical path, and place it onto
     // a processor or machine. We'll track visitation state using a set.
     public ArrayList<TaskQueue> linearCluster(int numQueues) {
-        TopologicalSorter topologicalSorter = new TopologicalSorter();
-
         Collection<Vertex> graph = DAGGenerator.getErdosGNMSources(20);
-        ArrayList<TaskQueue> linearizedDag = topologicalSorter.invoke(graph);
+        ArrayList<TaskQueue> linearizedDag = TopologicalSorter.invoke(graph);
 
 //        List<ArrayList<Task>> paths = longestPath(linearizedDag.getTasks());
         ArrayList<TaskQueue> result = new ArrayList<>();

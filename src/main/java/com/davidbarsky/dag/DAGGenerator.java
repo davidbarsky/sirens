@@ -22,7 +22,6 @@ public class DAGGenerator {
 	static {
 		GGenCommand.GGEN_PATH = System.getenv("GGEN_PATH");
 	}
-	private DAGGenerator() { }
 
 	public static List<Collection<Vertex>> generateGraphRange(int maxNumVerticies) {
 		return IntStream.range(1, maxNumVerticies + 1)

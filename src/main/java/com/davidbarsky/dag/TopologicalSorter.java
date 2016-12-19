@@ -10,7 +10,7 @@ import info.rmarcus.ggen4j.graph.Vertex;
 import java.util.*;
 
 public class TopologicalSorter {
-    public ArrayList<TaskQueue> invoke(Collection<Vertex> graph) {
+    public static ArrayList<TaskQueue> invoke(Collection<Vertex> graph) {
         // Using an unsorted TaskQueues for topological sort source,
         // with only one task queue.
         List<TaskQueue> unsortedTasks = RoundRobin.invoke(graph.size());
