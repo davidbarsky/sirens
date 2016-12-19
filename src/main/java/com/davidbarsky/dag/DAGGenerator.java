@@ -1,15 +1,16 @@
 package com.davidbarsky.dag;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.states.MachineType;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenCommand;
@@ -53,12 +54,10 @@ public class DAGGenerator {
 	public static Collection<Vertex> getCholesky() {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().cholesky(5)
-					.vertexProperty("latency").uniform(10, 30)
-					.edgeProperty("networking").uniform(10, 40)
+			graph = GGen.staticGraph().cholesky(20)
+					.vertexProperty("latency").uniform(10, 60)
+					.edgeProperty("networking").uniform(10, 15)
 					.generateGraph();
-
-			System.out.println(graph.toGraphviz());
 			
 			return graph.allVertices();
 		} catch (GGenException e) {
@@ -66,7 +65,7 @@ public class DAGGenerator {
 		}
 	}
 	
-	public static Collection<Task> verticesToTasks(Collection<Vertex> vertices) {
+	public static List<Task> verticesToTasks(Collection<Vertex> vertices) {
 		Map<Integer, Task> tasks = new HashMap<>();
 		
 		int id = 0;
@@ -91,6 +90,6 @@ public class DAGGenerator {
 			}
 		}
 		
-		return tasks.values();
+		return new ArrayList<>(tasks.values());
 	}
 }

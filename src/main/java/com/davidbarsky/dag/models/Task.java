@@ -2,8 +2,11 @@ package com.davidbarsky.dag.models;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.states.BuildStatus;
@@ -79,18 +82,25 @@ public class Task implements Comparable<Task> {
 	}
 	
 	public Optional<StartEndTime> build() {
-		if (!buildable() || tq == null)
+		if (tq == null)
 			return Optional.empty();
 		
 		if (isBuilt())
 			return startEndTime;
 
-		// find the latest ending dependency
-		int latestDep = this.dependencies
-				.keySet().stream()
-				.max(Comparator.comparingInt(a -> a.getStartEndTime().get().getEnd()))
-				.map(t -> t.getStartEndTime().get().getEnd())
-				.orElse(0);
+		// find the latest ending dependency, or, if one of my deps
+		// hasn't been built yet, fail.
+		int maxEnd = Integer.MIN_VALUE;
+		for (Task dep : this.dependencies.keySet()) {
+			if (!dep.isBuilt())
+				return Optional.empty();
+			
+			int theirEnd = dep.getStartEndTime().get().getEnd();
+			maxEnd = (maxEnd < theirEnd ? theirEnd : maxEnd);
+		}
+		
+		int latestDep = maxEnd;
+		
 
 		// find the latest starting task on my machine currently
 		int latestStart = tq.geEndTimeOfLastBuiltTask();
@@ -173,8 +183,11 @@ public class Task implements Comparable<Task> {
 	public int getCostTo(Task task) {
 		return dependents.getOrDefault(task, 0) + dependencies.getOrDefault(task, 0);
 	}
+	
 
 	public int getID() {
 		return id;
 	}
+
+
 }

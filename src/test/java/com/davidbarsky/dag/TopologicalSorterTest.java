@@ -1,19 +1,19 @@
 package com.davidbarsky.dag;
 
-import com.davidbarsky.dag.models.TaskQueue;
-
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
+
+import com.davidbarsky.dag.models.TaskQueue;
 
 
 public class TopologicalSorterTest {
     @Test
     public void invoke() {
         TopologicalSorter sorter = new TopologicalSorter();
-        ArrayList<TaskQueue> sortResult = sorter.invoke(DAGGenerator.getErdosGNMSources(20));
+        List<TaskQueue> sortResult = sorter.invoke(DAGGenerator.getErdosGNMSources(20));
 
         assertEquals(20, sortResult.size());
     }

@@ -1,6 +1,7 @@
 package com.davidbarsky;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
@@ -12,7 +13,7 @@ public class Main {
     public static void main(String... args) {
     	ArrayList<TaskQueue> randomGraph = RoundRobin.invoke(2);
 
-    	ArrayList<TaskQueue> taskQueues = Actualizer.invoke(randomGraph);
+    	List<TaskQueue> taskQueues = Actualizer.invoke(randomGraph);
 
     	System.out.println("Cost Analysis");
         taskQueues.forEach(tqs -> {
