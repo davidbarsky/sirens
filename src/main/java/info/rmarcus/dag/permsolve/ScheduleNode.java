@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.DAGException;
@@ -21,20 +23,26 @@ public class ScheduleNode {
 
 	private int lowerBound;
 	private int myCost;
+	private final @Nullable Integer parentLB;
 
 	private PruningFlyweight prune;
+	private int[][] costs;
 
-	public ScheduleNode(List<Task> t, PruningFlyweight pf) {
+	public ScheduleNode(List<Task> t, PruningFlyweight pf, int[][] costs) {
 		this.tasks = t;
 		sbn = new StarsAndBarsNode(t.size());
 		children = new HashMap<>();
 		lowerBound = 0;
 		prune = pf;
+		parentLB = null;
+		this.costs = costs;
 		calculateMyCost();
 	}
 
 	private ScheduleNode(ScheduleNode parent, StarsAndBarsNode sbn, PruningFlyweight pf) {
 		this.tasks = parent.tasks;
+		this.parentLB = parent.lowerBound;
+		this.costs = parent.costs;
 		this.sbn = sbn;
 		children = new HashMap<>();
 		this.prune = pf;
@@ -43,10 +51,20 @@ public class ScheduleNode {
 	}
 
 	private void calculateLowerBound() {
-		// my lower bound is the sum of the edges that have currently been broken
-		lowerBound = sbn.getAllDisconnectedPairs().stream()
-				.mapToInt(p -> intToTask(p.a).getCostTo(intToTask(p.b)))
+		if (parentLB == null) {
+			// my lower bound is the sum of the edges that have currently been broken
+			lowerBound = sbn.getAllDisconnectedPairs().stream()
+					.mapToInt(p -> costs[p.a][p.b])
+					.sum();
+			return;
+		}
+		
+		// compute the delta with the parent lower bound
+		lowerBound = sbn.getAdditionalDisconnectedPairsFromRightmostSeperator()
+				.stream()
+				.mapToInt(p -> costs[p.a][p.b])
 				.sum();
+		lowerBound += parentLB;
 	}
 
 	private void calculateMyCost() {

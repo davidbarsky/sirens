@@ -15,7 +15,7 @@ public class UnboundedCluster {
         TopologicalSorter topologicalSorter = new TopologicalSorter();
 
         Collection<Vertex> graph = DAGGenerator.getErdosGNMSources(20);
-        ArrayList<TaskQueue> linearizedDag = topologicalSorter.invoke(graph);
+        List<TaskQueue> linearizedDag = topologicalSorter.invoke(graph);
 
 //        List<ArrayList<Task>> paths = longestPath(linearizedDag.getTasks());
         ArrayList<TaskQueue> result = new ArrayList<>();

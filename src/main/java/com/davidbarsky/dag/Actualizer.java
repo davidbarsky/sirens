@@ -1,7 +1,7 @@
 package com.davidbarsky.dag;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -11,7 +11,7 @@ import com.davidbarsky.dag.models.TaskQueue;
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static @NonNull ArrayList<@NonNull TaskQueue> invoke(@NonNull Collection<@NonNull TaskQueue> tqs) {
+	public static @NonNull List<@NonNull TaskQueue> invoke(@NonNull Collection<@NonNull TaskQueue> tqs) {
 
 		// keep going while any of our tasks are not built
 		while (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)) {

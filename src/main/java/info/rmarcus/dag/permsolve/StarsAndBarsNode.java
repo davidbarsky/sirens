@@ -107,6 +107,29 @@ public class StarsAndBarsNode {
 
 		return toR;
 	}
+	
+	/**
+	 * Gets all the pairs of disconnected items that were created by the
+	 * addition of the rightmost (highest value) seperator
+	 * @return the disconnected pairs
+	 */
+	public List<Pair> getAdditionalDisconnectedPairsFromRightmostSeperator() {
+		if (partitionPoints.size() <= 2)
+			return getAllDisconnectedPairs();
+		
+		int midpoint = NullUtils.orThrow(partitionPoints.get(partitionPoints.size() - 1));
+		int leftmost = NullUtils.orThrow(partitionPoints.get(partitionPoints.size() - 2));
+		int rightmost = numItems;
+		List<Pair> toR = new LinkedList<>();
+		
+		for (int i = leftmost; i <= midpoint; i++) {
+			for (int j = midpoint+1; j < rightmost; j++) {
+				toR.add(new Pair(i, j));
+			}
+		}
+		
+		return toR;
+	}
 
 	@Override
 	public String toString() {

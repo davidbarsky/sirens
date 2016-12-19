@@ -1,22 +1,23 @@
 package com.davidbarsky.dag;
 
-import com.davidbarsky.dag.models.Task;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.BuildStatus;
-import com.davidbarsky.dag.models.states.MachineType;
 import com.davidbarsky.schedulers.RoundRobin;
+
 import info.rmarcus.ggen4j.graph.Vertex;
 
-import java.util.*;
-
 public class TopologicalSorter {
-    public ArrayList<TaskQueue> invoke(Collection<Vertex> graph) {
+    public List<TaskQueue> invoke(Collection<Vertex> graph) {
         // Using an unsorted TaskQueues for topological sort source,
         // with only one task queue.
         List<TaskQueue> unsortedTasks = RoundRobin.invoke(graph.size());
 
         // Our topological sort is running the actualizer.
-        ArrayList<TaskQueue> builtTasks = Actualizer
+        List<TaskQueue> builtTasks = Actualizer
                 .invoke(unsortedTasks);
 
         // Deconstruct the tasks, as we only care about ordering

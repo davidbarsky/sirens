@@ -19,7 +19,7 @@ public class TaskQueue {
 
 	public TaskQueue(MachineType machineType, List<Task> tasks) {
 		this(machineType);
-		this.tasks = new ArrayList<>(tasks);
+		tasks.forEach(this::add);
 	}
 
 	public void add(Task task) {
