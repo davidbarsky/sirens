@@ -28,7 +28,7 @@ public class NullUtils {
 		return t;
 	}
 	
-	public static <T> T[] orThrow(T [] t, Supplier<@NonNull RuntimeException> re) {
+	public static <T> T[] orThrow(T @Nullable [] t, Supplier<@NonNull RuntimeException> re) {
 		if (t == null) {
 			@Nullable RuntimeException tt = re.get();
 			throw tt;
