@@ -1,12 +1,17 @@
 package com.davidbarsky.schedulers;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.davidbarsky.dag.DAGGenerator;
 import com.davidbarsky.dag.TopologicalSorter;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
-import info.rmarcus.ggen4j.graph.Vertex;
 
-import java.util.*;
+import info.rmarcus.ggen4j.graph.Vertex;
 
 public class UnboundedCluster {
 
@@ -14,7 +19,7 @@ public class UnboundedCluster {
     // a processor or machine. We'll track visitation state using a set.
     public ArrayList<TaskQueue> linearCluster(int numQueues) {
         Collection<Vertex> graph = DAGGenerator.getErdosGNMSources(20);
-        List<TaskQueue> linearizedDag = topologicalSorter.invoke(graph);
+        List<TaskQueue> linearizedDag = TopologicalSorter.invoke(graph);
 
 //        List<ArrayList<Task>> paths = longestPath(linearizedDag.getTasks());
         ArrayList<TaskQueue> result = new ArrayList<>();

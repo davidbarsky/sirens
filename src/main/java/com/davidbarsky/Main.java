@@ -7,7 +7,6 @@ import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.schedulers.RoundRobin;
-import com.davidbarsky.schedulers.UnboundedClusterPrototype;
 
 public class Main {
     public static void main(String... args) {
@@ -26,6 +25,6 @@ public class Main {
             System.out.println(tqs);
         });
 
-        UnboundedClusterPrototype.linearCluster();
+        //UnboundedClusterPrototype.linearCluster();
     }
 }
