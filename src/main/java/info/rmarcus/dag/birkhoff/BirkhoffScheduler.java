@@ -32,10 +32,7 @@ public class BirkhoffScheduler {
 			return CostAnalyzer.getLatency(Actualizer.invoke(tqs));
 		});
 		
-		List<Task> perm = new ArrayList<>(tasks);
-		
-		List<TaskQueue> tqs = PermutationSolver.greedySolve(perm);
-		tqs = Actualizer.invoke(tqs);
-		System.out.println(tqs);
+		for (int i = 0; i < 1000; i++)
+			mhps.iterate();
 	}
 }

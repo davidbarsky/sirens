@@ -6,10 +6,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.IntStream;
+
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
+import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
@@ -20,7 +22,7 @@ public class PermutationSolver {
 
 
 
-	
+
 
 	private static int[][] getPairwiseCost(List<Task> tasks) {
 		int[][] toR = new int[tasks.size()][tasks.size()];
@@ -66,64 +68,29 @@ public class PermutationSolver {
 
 	}
 
-	private static int findBestPartitionEdgeGreedy(List<Task> t) {
-		// find the point in the list where inserting a partition will
-		// break the lowest edge weights possible, using the 
-		// sums of the columns and rows in the triangular matrix
-		
-		int[][] costs = getPairwiseCost(t);
-		int[] triangCols = new int[t.size()];
-		int[] triangRows = new int[t.size()];
+	private static @Nullable Integer findBestPartitionGreedy(List<Task> t, Set<Integer> currentPartitions) {
+		int bestCost = Integer.MAX_VALUE;
+		Integer bestIdx = null;
 
-		for (int i = 0; i < t.size(); i++)
-			for (int j = 0; j < i; j++)
-				triangRows[i] += costs[i][j];
-			
-		for (int i = 0; i < t.size(); i++)
-			for (int j = i; j < t.size(); j++)
-				triangCols[i] += costs[i][j];
+		for (Integer i : currentPartitions) {			
+			try {
+				Set<Integer> newParts = new HashSet<Integer>(currentPartitions);
+				newParts.remove(i);
+				int costWithout = CostAnalyzer.getLatency(Actualizer.invoke(buildQueuesWithPartitions(t, newParts)));
 
-		int bestIdx = 0;
-		int bestSoFar = Integer.MAX_VALUE;
-
-		int curVal = triangCols[0];
-		for (int i = 1; i < t.size(); i++) {
-			if (bestSoFar > curVal) {
-				bestSoFar = curVal;
-				bestIdx = i - 1;
+				if (costWithout < bestCost) {
+					bestCost = costWithout;
+					bestIdx = i;
+				}
+			} catch (DAGException e) {
+				// skip this one, can't remove it. 
 			}
-			curVal -= triangRows[i];
-			curVal += triangCols[i];
 		}
 
 		return bestIdx;
+
 	}
 
-	private static int findBestPartitionGreedy(List<Task> t, Set<Integer> currentPartitions, int start, int stop) {
-		
-		int currBestIdx = start;
-		int currBestVal = Integer.MAX_VALUE;
-		for (int i = start; i < stop; i++) {
-			Set<Integer> newParts = new HashSet<>(currentPartitions);
-			newParts.add(i);
-			
-			
-			int cost = Integer.MAX_VALUE;
-			try {
-				cost = CostAnalyzer.getLatency(Actualizer.invoke(buildQueuesWithPartitions(t, newParts)));
-			} catch (Exception e) {
-				cost = Integer.MAX_VALUE;
-			}
-			
-			if (cost < currBestVal) {
-				currBestVal = cost;
-				currBestIdx = i;
-			}
-		}
-		
-		return currBestIdx;
-	}
-	
 	private static List<TaskQueue> buildQueuesWithPartitions(List<Task> tasks, Set<Integer> partitions) {
 		LinkedList<TaskQueue> tq = new LinkedList<>();
 		tq.push(new TaskQueue(MachineType.SMALL));
@@ -136,76 +103,39 @@ public class PermutationSolver {
 		}
 		return tq;
 	}
-		
-	public static List<TaskQueue> edgeGreedySolve(List<Task> tasks) {
-		Deque<Pair> toPartition = new LinkedList<>();
-		Set<Integer> partitions = new HashSet<>();
-		
-		toPartition.push(new Pair(0, tasks.size()-1));
-		
-		while (!toPartition.isEmpty()) {
-			Pair next = NullUtils.orThrow(toPartition.pop());
-			int bestIdx = findBestPartitionEdgeGreedy(NullUtils.orThrow(tasks.subList(next.a, next.b)));
-			
-			// see if adding this partition helps or hurts our cost
-			
-			List<TaskQueue> without = buildQueuesWithPartitions(tasks, partitions);
-			int withoutCost = CostAnalyzer.getLatency(Actualizer.invoke(without));
-		
-			Set<Integer> withPartition = new HashSet<>(partitions);
-			withPartition.add(bestIdx);
-			List<TaskQueue> with = buildQueuesWithPartitions(tasks, withPartition);
-			int withCost = CostAnalyzer.getLatency(Actualizer.invoke(with));
-			
-			if (withCost < withoutCost) {
-				partitions.add(bestIdx);
-				toPartition.push(new Pair(next.a, bestIdx));
-				toPartition.push(new Pair(bestIdx, next.b));
-			}
-		}
-		
-		return buildQueuesWithPartitions(tasks, partitions);
-		
-	}
-	
+
 	public static List<TaskQueue> greedySolve(List<Task> tasks) {
-		Deque<Pair> toPartition = new LinkedList<>();
 		Set<Integer> partitions = new HashSet<>();
-		
-		toPartition.push(new Pair(0, tasks.size()-1));
-		
-		while (!toPartition.isEmpty()) {
-			Pair next = NullUtils.orThrow(toPartition.pop());
-			int bestIdx = findBestPartitionGreedy(tasks, partitions, next.a, next.b);
-			
-			// see if adding this partition helps or hurts our cost
-			
-			List<TaskQueue> without = buildQueuesWithPartitions(tasks, partitions);
-			int withoutCost = CostAnalyzer.getLatency(Actualizer.invoke(without));
-		
+
+		for (int i = 0; i < tasks.size()-1; i++)
+			partitions.add(i);
+
+		int currentCost = CostAnalyzer.getLatency(Actualizer.invoke(buildQueuesWithPartitions(tasks, partitions)));
+		while (true) {
+			@Nullable final Integer bestIdx = findBestPartitionGreedy(tasks, partitions);
+			if (bestIdx == null)
+				break;
+
+			// see if removing this partition helps or hurts our cost
 			Set<Integer> withPartition = new HashSet<>(partitions);
-			withPartition.add(bestIdx);
+			withPartition.remove(bestIdx);
+
 			List<TaskQueue> with = buildQueuesWithPartitions(tasks, withPartition);
-			int withCost = CostAnalyzer.getLatency(Actualizer.invoke(with));
-		
-			if (withCost < withoutCost) {
-				partitions.add(bestIdx);
-				toPartition.push(new Pair(next.a, bestIdx));
-				toPartition.push(new Pair(bestIdx, next.b));
+
+			int without = CostAnalyzer.getLatency(Actualizer.invoke(with));
+
+			if (without < currentCost) {
+				partitions.remove(bestIdx);
+			} else {
+				break;
 			}
-		}
-		
+
+		};
+
 		return buildQueuesWithPartitions(tasks, partitions);
-		
+
 	}
-	
-	private static class Pair {
-		final int a, b;
-		Pair(int a, int b) {
-			this.a = a;
-			this.b = b;
-		}
-	}
+
 
 	public static void main(String[] args) {
 		Task t1 = new Task(1, MachineType.latencyMap(2000));
