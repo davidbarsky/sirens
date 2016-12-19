@@ -55,7 +55,7 @@ public class DAGGenerator {
 	public static Collection<Vertex> getCholesky() {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().cholesky(5)
+			graph = GGen.staticGraph().cholesky(20)
 					.vertexProperty("latency").uniform(10, 60)
 					.edgeProperty("networking").uniform(10, 15)
 					.generateGraph();
