@@ -14,7 +14,7 @@ public class UnboundedCluster {
     // a processor or machine. We'll track visitation state using a set.
     public ArrayList<TaskQueue> linearCluster(int numQueues) {
         Collection<Vertex> graph = DAGGenerator.getErdosGNMSources(20);
-        List<TaskQueue> linearizedDag = topologicalSorter.invoke(graph);
+        List<TaskQueue> linearizedDag = TopologicalSorter.invoke(graph);
 
 //        List<ArrayList<Task>> paths = longestPath(linearizedDag.getTasks());
         ArrayList<TaskQueue> result = new ArrayList<>();

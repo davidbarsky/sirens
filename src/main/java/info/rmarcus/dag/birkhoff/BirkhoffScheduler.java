@@ -15,9 +15,7 @@ import info.rmarcus.birkhoffvonneumann.learners.MetropolisHastingsPermutationSea
 import info.rmarcus.dag.permsolve.PermutationSolver;
 
 public class BirkhoffScheduler {
-	
-	
-	
+
 	public static void main(String[] args) {
 		List<Task> tasks = DAGGenerator.verticesToTasks(DAGGenerator.getCholesky());
 		
