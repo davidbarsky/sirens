@@ -1,12 +1,8 @@
 package com.davidbarsky.dag.models;
 
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.eclipse.jdt.annotation.NonNull;
 
 import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.states.BuildStatus;

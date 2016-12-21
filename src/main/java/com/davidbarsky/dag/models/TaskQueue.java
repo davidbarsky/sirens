@@ -79,4 +79,22 @@ public class TaskQueue {
 				+ tasks.stream().map(t -> t.toString())
 				.collect(Collectors.joining("\n")) + "\n";
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		TaskQueue taskQueue = (TaskQueue) o;
+
+		if (!tasks.equals(taskQueue.tasks)) return false;
+		return machineType == taskQueue.machineType;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = tasks.hashCode();
+		result = 31 * result + machineType.hashCode();
+		return result;
+	}
 }
