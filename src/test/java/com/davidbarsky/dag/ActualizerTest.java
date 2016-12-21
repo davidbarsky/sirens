@@ -42,7 +42,6 @@ public class ActualizerTest {
 		latencies.put(MachineType.SMALL, 10);
 		latencies.put(MachineType.LARGE, 10);
 
-
 		Task t1 = new Task(1, tq, latencies);
 		Task t2 = new Task(2, tq, latencies);
 

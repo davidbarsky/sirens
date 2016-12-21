@@ -24,7 +24,5 @@ public class Main {
         taskQueues.forEach(tqs -> {
             System.out.println(tqs);
         });
-
-        //UnboundedClusterPrototype.linearCluster();
     }
 }

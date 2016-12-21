@@ -1,6 +1,5 @@
 package com.davidbarsky.schedulers;
 
-
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -14,6 +13,6 @@ public class RoundRobinTest {
 	public void invoke() {
 		ArrayList<TaskQueue> queues = RoundRobin.invoke(20);
 		assertEquals(20, queues.size());
-	}
 
+	}
 }

@@ -12,7 +12,6 @@ import com.davidbarsky.dag.models.states.MachineType;
 import info.rmarcus.ggen4j.graph.Vertex;
 
 public class UnboundedCluster {
-
     // For each unique critical path, we'll place it on a TaskQueue.
     // The TaskQueues will be sorted in decreasing order.
     public static List<TaskQueue> linearCluster() {
