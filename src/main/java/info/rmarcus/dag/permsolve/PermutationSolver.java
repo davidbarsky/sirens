@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.davidbarsky.dag.Actualizer;
@@ -29,9 +30,6 @@ public class PermutationSolver {
 
 	private static final int NUM_THREADS = 8;
 	
-	@SuppressWarnings("null")
-	private static final ExecutorService exec = Executors.newFixedThreadPool(NUM_THREADS);
-
 
 	private static int[][] getPairwiseCost(List<Task> tasks) {
 		int[][] toR = new int[tasks.size()][tasks.size()];
@@ -110,7 +108,7 @@ public class PermutationSolver {
 		return bestIdx;
 	}
 	
-	private static int findBestPartitionGreedy(List<Task> t, Set<Integer> currentPartitions) {
+	private static int findBestPartitionGreedy(List<Task> t, Set<Integer> currentPartitions, ExecutorService exec) {
 		List<Set<Integer>> chunks = new ArrayList<>();
 		IntStream.range(0, NUM_THREADS).forEach(i -> chunks.add(new HashSet<>()));
 		
@@ -147,13 +145,14 @@ public class PermutationSolver {
 
 	public static List<TaskQueue> greedySolve(List<Task> tasks) {
 		Set<Integer> partitions = new HashSet<>();
-
+		@NonNull ExecutorService es = NullUtils.orThrow(Executors.newFixedThreadPool(NUM_THREADS));
+		
 		for (int i = 0; i < tasks.size()-1; i++)
 			partitions.add(i);
 
 		int currentCost = CostAnalyzer.getLatency(Actualizer.invoke(buildQueuesWithPartitions(tasks, partitions)));
 		while (true) {
-			@Nullable final Integer bestIdx = findBestPartitionGreedy(tasks, partitions);
+			@Nullable final Integer bestIdx = findBestPartitionGreedy(tasks, partitions, es);
 			if (bestIdx == -1)
 				break;
 
@@ -173,6 +172,8 @@ public class PermutationSolver {
 			}
 
 		};
+		
+		es.shutdownNow();
 
 		return buildQueuesWithPartitions(tasks, partitions);
 
@@ -181,10 +182,10 @@ public class PermutationSolver {
 
 
 	public static void main(String[] args) {
-		Task t1 = new Task(4, MachineType.latencyMap(2000));
-		Task t2 = new Task(3, MachineType.latencyMap(2000));
-		Task t3 = new Task(2, MachineType.latencyMap(20));
-		Task t4 = new Task(1, MachineType.latencyMap(20));
+		Task t1 = new Task(3, MachineType.latencyMap(2000));
+		Task t2 = new Task(2, MachineType.latencyMap(2000));
+		Task t3 = new Task(1, MachineType.latencyMap(20));
+		Task t4 = new Task(0, MachineType.latencyMap(20));
 
 		t1.addDependency(2, t3);
 		t1.addDependency(4, t4);
