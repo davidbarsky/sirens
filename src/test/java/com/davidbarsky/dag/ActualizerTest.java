@@ -2,6 +2,7 @@ package com.davidbarsky.dag;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,24 +18,28 @@ import com.davidbarsky.dag.models.states.MachineType;
 import com.davidbarsky.schedulers.RoundRobin;
 
 public class ActualizerTest {
-    @SuppressWarnings("null")
+	@SuppressWarnings("null")
 	@Test
-    public void actualize() {
-        ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.invoke(2);
+	public void actualize() {
+		ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.invoke(2);
 
-        List<TaskQueue> tasks = Actualizer.invoke(tqs);
-        List<TaskQueue> copied = new ArrayList<>(tasks);
+		final List<TaskQueue> tasks = Actualizer.invoke(tqs);
+		List<TaskQueue> copied = new ArrayList<>(tasks);
 
-        copied.forEach(t -> Collections.sort(t.getTasks()));
+		if (tasks == null) {
+			fail("Actualizer returned null!");
+			return;
+		}
+		
+		copied.forEach(t -> Collections.sort(t.getTasks()));
 
-       assertEquals(copied, tasks);
-       assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::isBuilt)));
-       assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::buildable)));
-        
-    }
-    
-    @SuppressWarnings("null")
-	@Test(expected=DAGException.class)
+		assertEquals(copied, tasks);
+		assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::isBuilt)));
+		assertTrue(tasks.stream().map(TaskQueue::getTasks).allMatch(t -> t.stream().allMatch(Task::buildable)));
+
+	}
+
+	@SuppressWarnings("null")
 	public void impossibleActualize() {
 		TaskQueue tq = new TaskQueue(MachineType.SMALL);
 
@@ -42,14 +47,14 @@ public class ActualizerTest {
 		latencies.put(MachineType.SMALL, 10);
 		latencies.put(MachineType.LARGE, 10);
 
-		Task t1 = new Task(1, tq, latencies);
-		Task t2 = new Task(2, tq, latencies);
+		Task t1 = new Task(0, tq, latencies);
+		Task t2 = new Task(1, tq, latencies);
 
 		t2.addDependency(10, t1);
 
 		tq.add(t2);
 		tq.add(t1);
 
-		Actualizer.invoke(Collections.singletonList(tq));
+		assertEquals(Actualizer.invoke(Collections.singletonList(tq)), null);
 	}
 }

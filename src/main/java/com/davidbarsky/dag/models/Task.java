@@ -2,6 +2,7 @@ package com.davidbarsky.dag.models;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.davidbarsky.dag.DAGException;
@@ -40,6 +41,9 @@ public class Task implements Comparable<Task> {
 	}
 
 	public void addDependency(int networkCost, Task t) {
+		if (t == null) {
+			throw new NullPointerException("Null task given as a dependency!");
+		}
 		dependencies.put(t, networkCost);
 		t.addDependent(networkCost, this);
 	}
@@ -77,6 +81,32 @@ public class Task implements Comparable<Task> {
 		this.startEndTime = Optional.empty();
 	}
 	
+	private int findLatestEndingDep() {
+		// find the latest ending dependency, or, if one of my deps
+		// hasn't been built yet, fail.
+		int maxEnd = Integer.MIN_VALUE;
+		for (Task dep : this.dependencies.keySet()) {
+			if (!dep.isBuilt())
+				return -1;
+			
+			int theirEnd = dep.getStartEndTime().get().getEnd();
+			maxEnd = (maxEnd < theirEnd ? theirEnd : maxEnd);
+		}
+
+		return maxEnd;
+	}
+	
+	private int calculateNetworkingTime() {
+		// figure out how much time we will need to spend doing networking...
+		// (time we will use to write our data to other VMs with our dependents)
+		int networkingTime = 0;
+		for (Entry<Task, Integer> e : dependents.entrySet()) {
+			networkingTime += (e.getKey().getTaskQueue() != this.getTaskQueue() ? e.getValue() : 0);
+		}
+		
+		return networkingTime;
+	}
+	
 	public Optional<StartEndTime> build() {
 		if (tq == null)
 			return Optional.empty();
@@ -84,29 +114,18 @@ public class Task implements Comparable<Task> {
 		if (isBuilt())
 			return startEndTime;
 
-		// find the latest ending dependency, or, if one of my deps
-		// hasn't been built yet, fail.
-		int maxEnd = Integer.MIN_VALUE;
-		for (Task dep : this.dependencies.keySet()) {
-			if (!dep.isBuilt())
-				return Optional.empty();
-			
-			int theirEnd = dep.getStartEndTime().get().getEnd();
-			maxEnd = (maxEnd < theirEnd ? theirEnd : maxEnd);
-		}
 		
-		int latestDep = maxEnd;
+		// find the latest ending dependency
+		int latestDep = findLatestEndingDep();
+		if (latestDep == -1)
+			return Optional.empty();
 		
 
 		// find the latest starting task on my machine currently
 		int latestStart = tq.geEndTimeOfLastBuiltTask();
 		
-		// figure out how much time we will need to spend doing networking...
-		// (time we will use to write our data to other VMs with our dependents)
-		int networkingTime = dependents.entrySet().stream()
-				.filter(e -> e.getKey().getTaskQueue() != this.getTaskQueue())
-				.mapToInt(e -> e.getValue())
-				.sum();
+		// compute how long we will have to spend on networking operations
+		int networkingTime = calculateNetworkingTime();
 		
 		int myStart = Math.max(latestStart, latestDep);
 		int myEnd = myStart + latencies.get(tq.getMachineType()) + networkingTime;
@@ -183,6 +202,10 @@ public class Task implements Comparable<Task> {
 
 	public int getID() {
 		return id;
+	}
+
+	public Map<MachineType, Integer> getLatencies() {
+		return latencies;
 	}
 
 

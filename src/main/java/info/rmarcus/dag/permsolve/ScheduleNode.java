@@ -80,7 +80,8 @@ public class ScheduleNode {
 	}
 
 	public List<TaskQueue> getSchedule() {
-		return Actualizer.invoke(getTaskQueues());
+		return NullUtils.orThrow(Actualizer.invoke(getTaskQueues()),
+				() -> new DAGException("Could not build a schedule using these partitions!"));
 	}
 
 	public List<TaskQueue> getTaskQueues() {
@@ -94,8 +95,8 @@ public class ScheduleNode {
 			toR.add(tq);
 		}
 
-		return Actualizer.invoke(toR);
-	}
+		return NullUtils.orThrow(toR,
+				() -> new DAGException("Could not build a schedule using these partitions!"));	}
 
 	public int getNumChildren() {
 		if (prune.isAboveBestObserved(lowerBound))

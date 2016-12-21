@@ -1,17 +1,23 @@
 package info.rmarcus.dag.permsolve;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
-import com.davidbarsky.dag.DAGException;
+import com.davidbarsky.dag.DAGGenerator;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
@@ -21,7 +27,10 @@ import info.rmarcus.NullUtils;
 public class PermutationSolver {
 
 
-
+	private static final int NUM_THREADS = 8;
+	
+	@SuppressWarnings("null")
+	private static final ExecutorService exec = Executors.newFixedThreadPool(NUM_THREADS);
 
 
 	private static int[][] getPairwiseCost(List<Task> tasks) {
@@ -32,7 +41,6 @@ public class PermutationSolver {
 				Task a = NullUtils.orThrow(tasks.get(i));
 				Task b = NullUtils.orThrow(tasks.get(j));
 				int cost = a.getCostTo(b);
-
 				toR[i][j] = cost;
 				toR[j][i] = cost;
 			}
@@ -68,37 +76,70 @@ public class PermutationSolver {
 
 	}
 
-	private static @Nullable Integer findBestPartitionGreedy(List<Task> t, Set<Integer> currentPartitions) {
-		int bestCost = Integer.MAX_VALUE;
-		Integer bestIdx = null;
+	private static int evaluateRemovalOfPart(List<Task> t, Set<Integer> currentPartitions, int toRemove) {
+		Set<Integer> newParts = new HashSet<Integer>(currentPartitions);
+		newParts.remove(toRemove);
+		List<TaskQueue> tqs = buildQueuesWithPartitions(t, newParts);
+		final @Nullable List<TaskQueue> actualized = Actualizer.invoke(tqs);
 
-		for (Integer i : currentPartitions) {			
-			try {
-				Set<Integer> newParts = new HashSet<Integer>(currentPartitions);
-				newParts.remove(i);
-				int costWithout = CostAnalyzer.getLatency(Actualizer.invoke(buildQueuesWithPartitions(t, newParts)));
+		if (actualized == null)
+			return -1;
 
-				if (costWithout < bestCost) {
-					bestCost = costWithout;
-					bestIdx = i;
-				}
-			} catch (DAGException e) {
-				// skip this one, can't remove it. 
+		int costWithout = CostAnalyzer.getLatency(actualized);
+		return costWithout;
+		
+	}
+	
+	private static int evaluateRemovalOfRange(List<Task> t, Set<Integer> current, Set<Integer> toConsider) {
+		List<Task> localCopy = DAGGenerator.cloneTasks(t);
+		
+		int bestIdx = -1;
+		int bestVal = Integer.MAX_VALUE;
+		for (Integer i : toConsider) {
+			int cost = evaluateRemovalOfPart(localCopy, current, i);
+			
+			if (cost == -1 || cost > bestVal) {
+				continue;
 			}
+			
+			// otherwise, we have a new best value!
+			bestIdx = i;
+			bestVal = cost;
 		}
-
+		
 		return bestIdx;
+	}
+	
+	private static int findBestPartitionGreedy(List<Task> t, Set<Integer> currentPartitions) {
+		List<Set<Integer>> chunks = new ArrayList<>();
+		IntStream.range(0, NUM_THREADS).forEach(i -> chunks.add(new HashSet<>()));
+		
+		int cnt = 0;
+		for (Integer i : currentPartitions) {
+			NullUtils.orThrow(chunks.get(cnt++ % NUM_THREADS)).add(i);
+		}
+		
+		Set<Future<Integer>> futures = chunks.stream()
+				.map(s -> exec.submit(() -> evaluateRemovalOfRange(t, currentPartitions, s)))
+				.collect(Collectors.toSet());
 
+		return NullUtils.orThrow(
+				futures.stream()
+				.map(f -> NullUtils.wrapCall(f::get))
+				.map(opt -> opt.get())
+				.max((a, b) -> a - b)
+				.orElse(-1));
+		
 	}
 
 	private static List<TaskQueue> buildQueuesWithPartitions(List<Task> tasks, Set<Integer> partitions) {
-		LinkedList<TaskQueue> tq = new LinkedList<>();
-		tq.push(new TaskQueue(MachineType.SMALL));
+		List<TaskQueue> tq = new ArrayList<>(partitions.size()+1);
+		tq.add(new TaskQueue(MachineType.SMALL));
 		int cnt = 0;
 		for (Task t : tasks) {
-			NullUtils.orThrow(tq.peek()).add(t);
+			NullUtils.orThrow(tq.get(tq.size()-1)).add(t);
 			if (partitions.contains(cnt))
-				tq.push(new TaskQueue(MachineType.SMALL));
+				tq.add(new TaskQueue(MachineType.SMALL));
 			cnt++;
 		}
 		return tq;
@@ -113,19 +154,20 @@ public class PermutationSolver {
 		int currentCost = CostAnalyzer.getLatency(Actualizer.invoke(buildQueuesWithPartitions(tasks, partitions)));
 		while (true) {
 			@Nullable final Integer bestIdx = findBestPartitionGreedy(tasks, partitions);
-			if (bestIdx == null)
+			if (bestIdx == -1)
 				break;
 
 			// see if removing this partition helps or hurts our cost
-			Set<Integer> withPartition = new HashSet<>(partitions);
-			withPartition.remove(bestIdx);
+			Set<Integer> withoutPartition = new HashSet<>(partitions);
+			withoutPartition.remove(bestIdx);
 
-			List<TaskQueue> with = buildQueuesWithPartitions(tasks, withPartition);
+			List<TaskQueue> without = buildQueuesWithPartitions(tasks, withoutPartition);
 
-			int without = CostAnalyzer.getLatency(Actualizer.invoke(with));
+			int withoutCost = CostAnalyzer.getLatency(Actualizer.invoke(without));
 
-			if (without < currentCost) {
+			if (withoutCost <= currentCost) {
 				partitions.remove(bestIdx);
+				currentCost = withoutCost;
 			} else {
 				break;
 			}
@@ -137,11 +179,12 @@ public class PermutationSolver {
 	}
 
 
+
 	public static void main(String[] args) {
-		Task t1 = new Task(1, MachineType.latencyMap(2000));
-		Task t2 = new Task(2, MachineType.latencyMap(2000));
-		Task t3 = new Task(3, MachineType.latencyMap(20));
-		Task t4 = new Task(4, MachineType.latencyMap(20));
+		Task t1 = new Task(4, MachineType.latencyMap(2000));
+		Task t2 = new Task(3, MachineType.latencyMap(2000));
+		Task t3 = new Task(2, MachineType.latencyMap(20));
+		Task t4 = new Task(1, MachineType.latencyMap(20));
 
 		t1.addDependency(2, t3);
 		t1.addDependency(4, t4);

@@ -24,6 +24,9 @@ public class CostAnalyzer {
     }
     
     public static int getLatency(List<TaskQueue> tqs) {
+    	if (tqs == null)
+    		return Integer.MAX_VALUE;
+    	
     	return tqs.stream()
     			.mapToInt(tq -> tq.getEndTime())
     			.max().getAsInt();

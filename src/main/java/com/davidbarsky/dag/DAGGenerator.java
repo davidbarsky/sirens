@@ -9,9 +9,12 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.states.MachineType;
 
+import info.rmarcus.NullUtils;
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenCommand;
 import info.rmarcus.ggen4j.GGenException;
@@ -43,7 +46,7 @@ public class DAGGenerator {
 			graph = GGen.generateGraph().erdosGNM(numVertices, 100)
 					.vertexProperty("latency").uniform(10, 30)
 					.edgeProperty("networking").uniform(50, 120)
-					.generateGraph();
+					.generateGraph().topoSort();
 
 			return graph.allVertices();
 		} catch (GGenException e) {
@@ -54,10 +57,10 @@ public class DAGGenerator {
 	public static Collection<Vertex> getCholesky() {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().cholesky(20)
+			graph = GGen.staticGraph().cholesky(7)
 					.vertexProperty("latency").uniform(10, 60)
 					.edgeProperty("networking").uniform(10, 15)
-					.generateGraph();
+					.generateGraph().topoSort();
 			
 			return graph.allVertices();
 		} catch (GGenException e) {
@@ -68,7 +71,6 @@ public class DAGGenerator {
 	public static List<Task> verticesToTasks(Collection<Vertex> vertices) {
 		Map<Integer, Task> tasks = new HashMap<>();
 		
-		int id = 0;
 		for (Vertex v : vertices) {
 			// TODO, for now assume latency is the same for both
 			// machine types
@@ -78,7 +80,7 @@ public class DAGGenerator {
 				latency.put(mt, (int)l);
 			}
 			
-			tasks.put(v.getID(), new Task(id++, latency));
+			tasks.put(v.getID(), new Task(v.getTopographicalOrder(), latency));
 		}
 		
 		for (Vertex v : vertices) {
@@ -91,5 +93,29 @@ public class DAGGenerator {
 		}
 		
 		return new ArrayList<>(tasks.values());
+	}
+	
+	public static @NonNull List<@NonNull Task> cloneTasks(List<@NonNull Task> tasks) {
+		Map<Integer, @NonNull Task> old = new HashMap<>();
+		Map<Integer, @NonNull Task> toR = new HashMap<>();
+		
+		for (Task t : tasks) {
+			Task newTask = new Task(t.getID(), t.getLatencies());
+			old.put(t.getID(), t);
+			toR.put(newTask.getID(), newTask);
+		}
+		
+		for (Task t : toR.values()) {
+			for (Entry<Task, Integer> depend : old.get(t.getID()).getDependencies().entrySet()) {
+				t.addDependency(depend.getValue(), toR.get(depend.getKey().getID()));
+			}
+		}
+		
+		List<@NonNull Task> l = tasks.stream()
+				.map(t -> toR.get(t.getID()))
+				.collect(Collectors.toList());
+		
+		return NullUtils.orThrow(l);
+		
 	}
 }

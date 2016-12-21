@@ -12,9 +12,13 @@ public class Main {
     public static void main(String... args) {
     	ArrayList<TaskQueue> randomGraph = RoundRobin.invoke(2);
 
-    	List<TaskQueue> taskQueues = Actualizer.invoke(randomGraph);
+    	final List<TaskQueue> taskQueues = Actualizer.invoke(randomGraph);
 
     	System.out.println("Cost Analysis");
+    	
+    	if (taskQueues == null)
+    		return;
+    	
         taskQueues.forEach(tqs -> {
             System.out.println(tqs.getMachineType());
             System.out.println(CostAnalyzer.findCost(tqs.getTasks(), tqs.getMachineType()));

@@ -45,11 +45,7 @@ public class TaskQueue {
 	}
 	
 	public int getEndTime() {
-		return tasks.stream()
-				.filter(t -> t.isBuilt())
-				.mapToInt(t -> t.getStartEndTime().get().getEnd())
-				.max()
-				.orElseThrow(() -> new RuntimeException("No tasks, cannot get end time!"));
+		return tasks.get(tasks.size()-1).getStartEndTime().get().getEnd();
 	}
 
 	public MachineType getMachineType() {
@@ -68,16 +64,35 @@ public class TaskQueue {
 		
 		return false;
 	}
+	
+	public void unbuildAll() {
+		for (Task t : tasks) {
+			t.unbuild();
+			t.setTaskQueue(this);
+		}
+	}
 
 	public List<Task> getTasks() {
 		return tasks;
 	}
+	
+	public boolean hasTask(int taskID) {
+		// TODO we could use a hashmap to make this faster
+		return tasks.stream().mapToInt(t -> t.getID())
+				.anyMatch(i -> i == taskID);
+				
+		
+	}
 
 	@Override
 	public String toString() {
-		return "TaskQueue machine type: " + machineType.toString() + "\n"
+		return  machineType.toString() + "\n"
 				+ tasks.stream().map(t -> t.toString())
 				.collect(Collectors.joining("\n")) + "\n";
+	}
+	
+	public String toShortString() {
+		return tasks.stream().map(t -> String.valueOf(t.getID())).collect(Collectors.joining(" "));
 	}
 
 	@Override

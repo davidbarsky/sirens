@@ -17,9 +17,12 @@ public class TopologicalSorter {
         List<TaskQueue> unsortedTasks = RoundRobin.invoke(graph.size());
 
         // Our topological sort is running the actualizer.
-        List<TaskQueue> builtTasks = Actualizer
+        final List<TaskQueue> builtTasks = Actualizer
                 .invoke(unsortedTasks);
 
+        if (builtTasks == null)
+        	return null;
+        
         // Deconstruct the tasks, as we only care about ordering
         builtTasks
                 .stream()
