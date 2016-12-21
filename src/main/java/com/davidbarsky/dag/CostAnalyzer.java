@@ -28,7 +28,7 @@ public class CostAnalyzer {
     		return Integer.MAX_VALUE;
     	
     	return tqs.stream()
-    			.mapToInt(tq -> tq.getEndTime())
+    			.mapToInt(tq -> tq.getEndTime() + 60)
     			.max().getAsInt();
     }
 }
