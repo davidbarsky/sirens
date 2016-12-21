@@ -124,19 +124,7 @@ public class DAGGenerator {
 		}
 	}
 	
-	public static Collection<Vertex> getStrassen(int n) {
-		GGenGraph graph;
-		try {
-			graph = GGen.staticGraph().strassen(n, 2000, 1)
-					.vertexProperty("latency").uniform(10, 60)
-					.edgeProperty("networking").uniform(10, 60)
-					.generateGraph().topoSort();
-			
-			return graph.allVertices();
-		} catch (GGenException e) {
-			throw new DAGException(e.getMessage());
-		}
-	}
+
 	
 	public static List<Task> verticesToTasks(Collection<Vertex> vertices) {
 		Map<Integer, Task> tasks = new HashMap<>();
@@ -189,9 +177,5 @@ public class DAGGenerator {
 		
 	}
 	
-	public static void main(String[] args) {
-		for (int i = 1; i < 200; i++) {
-			System.out.println(i + ", " + getStrassen(i).size());
-		}
-	}
+
 }
