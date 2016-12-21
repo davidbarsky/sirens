@@ -56,4 +56,15 @@ public class TaskTest {
 		firstTask.compareTo(secondTask);
 	}
 
+	@Test
+	public void isLeaf() {
+		Task task = new Task(1, new TaskQueue(MachineType.LARGE), new HashMap<>());
+		assertTrue(task.isLeaf());
+	}
+
+	@Test
+	public void isSource() {
+		Task task = new Task(1, new TaskQueue(MachineType.LARGE), new HashMap<>());
+		assertTrue(task.isSource());
+	}
 }
