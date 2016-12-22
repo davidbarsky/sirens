@@ -22,7 +22,7 @@ public class UnboundedCluster {
     public List<TaskQueue> linearCluster(int numNodes) {
         List<Task> tasks = TopologicalSorter.apply(numNodes);
         tasks.stream().filter(Task::isSource).forEach(t -> linearClusterDFS(t, new ArrayList<>()));
-        return taskQueues;
+        return taskQueues.stream().distinct().collect(Collectors.toList());
     }
 
     private void linearClusterDFS(Task task,
