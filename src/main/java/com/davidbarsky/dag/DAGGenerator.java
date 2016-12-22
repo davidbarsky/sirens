@@ -33,7 +33,6 @@ public class DAGGenerator {
 				.mapToObj(DAGGenerator::getErdosGNMSources)
 				.collect(Collectors.toList());
 	}
-
 	
 	public static Collection<Vertex> getErdosGNMSources(int numVertices) {
 		
