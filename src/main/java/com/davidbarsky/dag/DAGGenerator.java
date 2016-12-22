@@ -53,12 +53,12 @@ public class DAGGenerator {
 		}
 	}
 	
-	public static Collection<Vertex> getCholesky() {
+	public static Collection<Vertex> getCholesky(int matrixBlocks) {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().cholesky(7)
+			graph = GGen.staticGraph().cholesky(matrixBlocks)
 					.vertexProperty("latency").uniform(10, 60)
-					.edgeProperty("networking").uniform(10, 15)
+					.edgeProperty("networking").uniform(10, 60)
 					.generateGraph().topoSort();
 			
 			return graph.allVertices();
@@ -66,6 +66,64 @@ public class DAGGenerator {
 			throw new DAGException(e.getMessage());
 		}
 	}
+	
+	public static Collection<Vertex> getFibonacci(int n) {
+		GGenGraph graph;
+		try {
+			graph = GGen.staticGraph().fibonacci(n, 1)
+					.vertexProperty("latency").uniform(10, 60)
+					.edgeProperty("networking").uniform(10, 60)
+					.generateGraph().topoSort();
+			
+			return graph.allVertices();
+		} catch (GGenException e) {
+			throw new DAGException(e.getMessage());
+		}
+	}
+	
+	public static Collection<Vertex> getForkJoin(int n) {
+		GGenGraph graph;
+		try {
+			graph = GGen.staticGraph().forkJoin(n, 16)
+					.vertexProperty("latency").uniform(10, 60)
+					.edgeProperty("networking").uniform(10, 60)
+					.generateGraph().topoSort();
+			
+			return graph.allVertices();
+		} catch (GGenException e) {
+			throw new DAGException(e.getMessage());
+		}
+	}
+	
+	public static Collection<Vertex> getPoisson(int n) {
+		GGenGraph graph;
+		try {
+			graph = GGen.staticGraph().poisson2D(20, n)
+					.vertexProperty("latency").uniform(10, 60)
+					.edgeProperty("networking").uniform(10, 60)
+					.generateGraph().topoSort();
+			
+			return graph.allVertices();
+		} catch (GGenException e) {
+			throw new DAGException(e.getMessage());
+		}
+	}
+	
+	public static Collection<Vertex> getSparseLU(int n) {
+		GGenGraph graph;
+		try {
+			graph = GGen.staticGraph().sparseLU(n)
+					.vertexProperty("latency").uniform(10, 60)
+					.edgeProperty("networking").uniform(10, 60)
+					.generateGraph().topoSort();
+			
+			return graph.allVertices();
+		} catch (GGenException e) {
+			throw new DAGException(e.getMessage());
+		}
+	}
+	
+
 	
 	public static List<Task> verticesToTasks(Collection<Vertex> vertices) {
 		Map<Integer, Task> tasks = new HashMap<>();
@@ -117,4 +175,6 @@ public class DAGGenerator {
 		return NullUtils.orThrow(l);
 		
 	}
+	
+
 }

@@ -16,7 +16,7 @@ import info.rmarcus.dag.permsolve.PermutationSolver;
 public class BirkhoffScheduler {
 
 	public static void main(String[] args) {
-		List<Task> tasks = DAGGenerator.verticesToTasks(DAGGenerator.getCholesky());
+		List<Task> tasks = DAGGenerator.verticesToTasks(DAGGenerator.getCholesky(4));
 		
 		System.out.println("Number of tasks: " + tasks.size());
 		
@@ -32,7 +32,7 @@ public class BirkhoffScheduler {
 			return cost;
 		});
 		
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 500; i++) {
 			System.out.println("Iteration " + i);
 			mhps.iterate();
 		}
