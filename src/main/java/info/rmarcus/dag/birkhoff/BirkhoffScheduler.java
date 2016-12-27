@@ -27,7 +27,7 @@ public class BirkhoffScheduler {
 				t.add(tasks.get(i));
 			}
 			
-			List<TaskQueue> tqs = PermutationSolver.greedySolve(t);
+			List<TaskQueue> tqs = PermutationSolver.solve(t);
 			int cost = CostAnalyzer.getLatency(Actualizer.invoke(tqs)); 
 			return cost;
 		});
