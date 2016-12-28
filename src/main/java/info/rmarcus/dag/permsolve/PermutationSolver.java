@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,8 @@ import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
+import info.rmarcus.javautil.IteratorUtilities;
+import info.rmarcus.javautil.StreamUtilities.Pair;
 
 public class PermutationSolver {
 
@@ -178,6 +181,33 @@ public class PermutationSolver {
 		return buildQueuesWithPartitions(tasks, partitions);
 
 	}
+	
+	public static List<TaskQueue> topoSolve(List<Task> tasks) {
+		if (tasks.size() == 0)
+			return new LinkedList<>();
+		
+		Deque<TaskQueue> toR = new LinkedList<>();
+		
+		TaskQueue first = new TaskQueue(MachineType.SMALL);
+		first.add(tasks.get(0));
+		toR.add(first);
+		
+		Iterator<Pair<Task, Task>> it = IteratorUtilities.twoGrams(tasks.iterator());
+		while (it.hasNext()) {
+			Pair<Task, Task> t = it.next();
+			
+			if (t.getB() == null) // ignore the end
+				continue;
+			
+			if (t.getB().getID() < t.getA().getID()) {
+				toR.add(new TaskQueue(MachineType.SMALL));
+			}
+			
+			toR.peekLast().add(t.getB());	
+		}
+		
+		return new ArrayList<>(toR);
+	}
 
 
 
@@ -197,10 +227,10 @@ public class PermutationSolver {
 
 
 
-		final List<Task> tasks = Arrays.asList(t4, t3, t2, t1);
+		final List<Task> tasks = Arrays.asList(t1, t3, t2, t4);
 
 		if (tasks != null) {
-			List<TaskQueue> tqs = greedySolve(tasks);
+			List<TaskQueue> tqs = topoSolve(tasks);
 			System.out.println(tqs);
 		}
 

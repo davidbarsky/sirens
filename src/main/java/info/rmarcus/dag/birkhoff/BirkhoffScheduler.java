@@ -15,26 +15,37 @@ import info.rmarcus.dag.permsolve.PermutationSolver;
 
 public class BirkhoffScheduler {
 
-	public static void main(String[] args) {
-		List<Task> tasks = DAGGenerator.verticesToTasks(DAGGenerator.getCholesky(4));
+	private List<Task> tasks;
+	
+	public void measure(int n) {
+		tasks = DAGGenerator.verticesToTasks(DAGGenerator.getPoisson(n));
 		
 		System.out.println("Number of tasks: " + tasks.size());
 		
-		MetropolisHastingsPermutationSearch mhps = new MetropolisHastingsPermutationSearch(tasks.size(), (d) -> {
-			int[] perm = CoeffAndMatrix.asFlatPerm(d);
-			List<Task> t = new ArrayList<>(tasks.size());
-			for (int i : perm) {
-				t.add(tasks.get(i));
-			}
-			
-			List<TaskQueue> tqs = PermutationSolver.greedySolve(t);
-			int cost = CostAnalyzer.getLatency(Actualizer.invoke(tqs)); 
-			return cost;
-		});
+		MetropolisHastingsPermutationSearch mhps = new MetropolisHastingsPermutationSearch(tasks.size(), this::loss);
 		
-		for (int i = 0; i < 500; i++) {
-			System.out.println("Iteration " + i);
+		for (int i = 0; i < 10000; i++) {
+			//System.out.println("Iteration " + i);
 			mhps.iterate();
 		}
+		
+		System.out.println(loss(mhps.getBest()));
+	}
+	
+	private double loss(double[][] d) {
+		int[] perm = CoeffAndMatrix.asFlatPerm(d);
+		List<Task> t = new ArrayList<>(tasks.size());
+		for (int i : perm) {
+			t.add(tasks.get(i));
+		}
+		
+		List<TaskQueue> tqs = PermutationSolver.topoSolve(t);
+		int cost = CostAnalyzer.getLatency(Actualizer.invoke(tqs)); 
+		return cost;
+	}
+	
+	public static void main(String[] args) {
+		BirkhoffScheduler bs = new BirkhoffScheduler();
+		bs.measure(20);
 	}
 }
