@@ -1,4 +1,4 @@
-package info.rmarcus.dag.permsolve;
+package info.rmarcus.dag.permsolve.optimal;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
 
 import info.rmarcus.NullUtils;
+import info.rmarcus.dag.permsolve.PermSolveException;
 
 public class StarsAndBarsNode {
 	private final int numItems;
@@ -129,6 +130,23 @@ public class StarsAndBarsNode {
 		}
 		
 		return toR;
+	}
+	
+	/**
+	 * Returns true if all but the last partition are increasing in order of size
+	 * @return if the partition sizes are increasing
+	 */
+	public boolean partitionSizesIncreasing() {
+		if (partitionPoints.size() <= 2)
+			return true;
+		
+		int lastSize = partitionPoints.get(1) - partitionPoints.get(0);
+		for (int i = 2; i < partitionPoints.size(); i++) {
+			if (partitionPoints.get(i) - partitionPoints.get(i - 1) < lastSize)
+				return false;
+		}
+		
+		return true;
 	}
 
 	@Override

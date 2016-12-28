@@ -1,6 +1,7 @@
 package com.davidbarsky.schedulers;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.davidbarsky.dag.DAGGenerator;
@@ -12,9 +13,42 @@ import com.davidbarsky.dag.models.states.MachineType;
 import info.rmarcus.ggen4j.graph.Vertex;
 
 public class UnboundedCluster {
+    private List<TaskQueue> taskQueues;
+
+    public UnboundedCluster() {
+        taskQueues = new ArrayList<>();
+    }
+
+    public List<TaskQueue> linearCluster(int numNodes) {
+        List<Task> tasks = TopologicalSorter.apply(numNodes);
+        tasks.stream().filter(Task::isSource).forEach(t -> linearClusterDFS(t, new ArrayList<>()));
+        return taskQueues.stream().distinct().collect(Collectors.toList());
+    }
+
+    private void linearClusterDFS(Task task,
+                                  List<Task> path) {
+        if (task.isSource()) {
+            List<Task> newPath = new ArrayList<>();
+            for (Task child : task.getDependents().keySet()) {
+                newPath.add(task);
+                linearClusterDFS(child, newPath);
+            }
+        }
+
+        if (task.isLeaf()) {
+            taskQueues.add(new TaskQueue(MachineType.SMALL, path.stream().distinct().collect(Collectors.toList())));
+            return;
+        }
+
+        for (Task child : task.getDependents().keySet()) {
+            path.add(child);
+            linearClusterDFS(child, path);
+        }
+    }
+
     // For each unique critical path, we'll place it on a TaskQueue.
     // The TaskQueues will be sorted in decreasing order.
-    public static List<TaskQueue> linearCluster() {
+    public static List<TaskQueue> linearCluster2() {
         List<TaskQueue> queues = new ArrayList<>();
         Map<Integer, Task> tasks = new HashMap<>();
         Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources(20);

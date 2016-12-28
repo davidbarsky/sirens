@@ -23,6 +23,7 @@ public class BirkhoffScheduler {
 		System.out.println("Number of tasks: " + tasks.size());
 		
 		MetropolisHastingsPermutationSearch mhps = new MetropolisHastingsPermutationSearch(tasks.size(), this::loss);
+
 		
 		for (int i = 0; i < 10000; i++) {
 			//System.out.println("Iteration " + i);

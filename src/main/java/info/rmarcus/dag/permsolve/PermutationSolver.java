@@ -25,8 +25,12 @@ import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
+import info.rmarcus.dag.permsolve.optimal.InOrderScheduleNode;
+import info.rmarcus.dag.permsolve.optimal.PruningFlyweight;
+import info.rmarcus.dag.permsolve.optimal.ScheduleNode;
 import info.rmarcus.javautil.IteratorUtilities;
 import info.rmarcus.javautil.StreamUtilities.Pair;
+
 
 public class PermutationSolver {
 
@@ -55,7 +59,7 @@ public class PermutationSolver {
 		PruningFlyweight pf = new PruningFlyweight();
 		int[][] costs = getPairwiseCost(t);
 
-		dq.push(new ScheduleNode(t, pf, costs));
+		dq.push(new InOrderScheduleNode(t, pf, costs));
 
 		while (!dq.isEmpty()) {
 			ScheduleNode sn = NullUtils.orThrow(dq.remove());
@@ -227,12 +231,10 @@ public class PermutationSolver {
 
 
 
-		final List<Task> tasks = Arrays.asList(t1, t3, t2, t4);
-
-		if (tasks != null) {
-			List<TaskQueue> tqs = topoSolve(tasks);
-			System.out.println(tqs);
-		}
+		final List<Task> tasks = Arrays.asList(t4, t3, t2, t1);
+		
+		List<TaskQueue> tqs = solve(tasks);
+		System.out.println(tqs);
 
 	}
 }

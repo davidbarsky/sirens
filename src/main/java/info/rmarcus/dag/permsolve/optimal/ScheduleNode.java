@@ -1,4 +1,4 @@
-package info.rmarcus.dag.permsolve;
+package info.rmarcus.dag.permsolve.optimal;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,10 +15,11 @@ import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
+import info.rmarcus.dag.permsolve.PermSolveException;
 
 public class ScheduleNode {
 	private final List<Task> tasks;
-	private final StarsAndBarsNode sbn;
+	protected final StarsAndBarsNode sbn;
 	private final Map<Integer, ScheduleNode> children;
 
 	private int lowerBound;
@@ -39,7 +40,7 @@ public class ScheduleNode {
 		calculateMyCost();
 	}
 
-	private ScheduleNode(ScheduleNode parent, StarsAndBarsNode sbn, PruningFlyweight pf) {
+	protected ScheduleNode(ScheduleNode parent, StarsAndBarsNode sbn, PruningFlyweight pf) {
 		this.tasks = parent.tasks;
 		this.parentLB = parent.lowerBound;
 		this.costs = parent.costs;
@@ -70,7 +71,7 @@ public class ScheduleNode {
 	private void calculateMyCost() {
 		//myCost = CostAnalyzer.findCost(getTaskQueues());
 		try {
-			myCost = CostAnalyzer.getLatency(getTaskQueues());
+			myCost = CostAnalyzer.getLatency(getSchedule());
 		} catch (DAGException e) {
 			//System.out.println("Could not schedule partition: " + sbn.toString());
 			System.err.println(e.getMessage());
@@ -85,7 +86,6 @@ public class ScheduleNode {
 	}
 
 	public List<TaskQueue> getTaskQueues() {
-
 		List<TaskQueue> toR = new LinkedList<>();
 		for (List<Integer> partition : sbn.getPartitions()) {
 			TaskQueue tq = new TaskQueue(MachineType.SMALL);
@@ -96,10 +96,11 @@ public class ScheduleNode {
 		}
 
 		return NullUtils.orThrow(toR,
-				() -> new DAGException("Could not build a schedule using these partitions!"));	}
+				() -> new DAGException("Could not build a schedule using these partitions!"));	
+	}
 
 	public int getNumChildren() {
-		if (prune.isAboveBestObserved(lowerBound))
+		if (isPruned())
 			return 0; // I've been pruned!
 
 		return sbn.getNumChildren();
@@ -110,9 +111,13 @@ public class ScheduleNode {
 			return NullUtils.orThrow(children.get(n),
 					() -> new PermSolveException("Child of scheduler node disappeared!"));
 
-		ScheduleNode toR = new ScheduleNode(this, sbn.getChild(n), prune);
+		ScheduleNode toR = getNewChild(this, sbn.getChild(n), prune);
 		children.put(n, toR);
 		return toR;
+	}
+	
+	public ScheduleNode getNewChild(ScheduleNode p, StarsAndBarsNode sbn, PruningFlyweight fw) {
+		return new ScheduleNode(this, sbn, fw);
 	}
 
 	public boolean isPruned() {

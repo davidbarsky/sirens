@@ -106,7 +106,15 @@ public class Task implements Comparable<Task> {
 		
 		return networkingTime;
 	}
-	
+
+	public boolean isLeaf() {
+		return getDependents().isEmpty();
+	}
+
+	public boolean isSource() {
+		return getDependencies().isEmpty();
+	}
+
 	public Optional<StartEndTime> build() {
 		if (tq == null)
 			return Optional.empty();
