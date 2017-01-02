@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,6 +18,7 @@ import java.util.stream.IntStream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -43,40 +42,25 @@ public class PermutationSolver {
 
 	private static final int NUM_THREADS = 8;
 
-	private Map<Task, Set<Task>> closure;
 	private DirectedGraph<Integer, DefaultEdge> dg;
 
 	public PermutationSolver(Collection<Task> tasks) {
-		this.closure = transitiveClosure(tasks);
+		buildGraph(tasks);
 	}
 	
 	private void buildGraph(Collection<Task> tasks) {
 		dg = new DefaultDirectedGraph<Integer, DefaultEdge>(DefaultEdge.class);
 		
 		for (Task t : tasks) {
-			
+			dg.addVertex(t.getID());
+		}
+		
+		for (Task t : tasks) {
+			for (Task child : t.getDependents().keySet())
+				dg.addEdge(t.getID(), child.getID());
 		}
 	}
 
-	private static Map<Task, Set<Task>> transitiveClosure(Collection<Task> tasks) {
-		Map<Task, Set<Task>> toR = new HashMap<>();
-
-		for (Task t : tasks) {
-			toR.put(t, new HashSet<>());
-		}
-
-		for (Task t : tasks) {
-			Deque<Task> children = new LinkedList<>();
-			children.addAll(t.getDependents().keySet());
-			while (!children.isEmpty()) {
-				Task child = children.pop();
-				toR.get(t).add(child);
-				children.addAll(child.getDependents().keySet());
-			}
-		}
-
-		return toR;
-	}
 
 	public List<TaskQueue> forcedSolve(List<Task> tasks) {
 		if (tasks.size() == 0)
@@ -89,13 +73,23 @@ public class PermutationSolver {
 
 		for (Task t : tasks) {
 			TaskQueue proposed = toR.peek();
-			// does T require anything currently in the proposed TQ?
-			if (proposed.getTasks().stream()
-					.anyMatch(already -> closure.get(t).contains(already))) {
-				proposed = new TaskQueue(MachineType.SMALL);
-				toR.push(proposed);
-			} else {
-				System.out.println(t + " is safe.");
+			// check to see if adding an edge from the previous item in this task queue
+			// to this task would create a cycle
+			
+			// if it's empty, then we're fine.
+			if (!proposed.getTasks().isEmpty()) {
+				Task last = proposed.getTasks().get(proposed.getTasks().size()-1);
+				dg.addEdge(last.getID(), t.getID());
+				CycleDetector<Integer, DefaultEdge> cd = new CycleDetector<>(dg);
+				if (cd.detectCyclesContainingVertex(t.getID())) {
+					// this edge creates a cycle!
+					// first, remove the edge.
+					dg.removeEdge(last.getID(), t.getID());
+					
+					// add a new taskqueue
+					proposed = new TaskQueue(MachineType.SMALL);
+					toR.push(proposed);
+				}
 			}
 			
 			proposed.add(t);
