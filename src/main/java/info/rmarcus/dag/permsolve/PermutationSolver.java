@@ -2,11 +2,14 @@ package info.rmarcus.dag.permsolve;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +19,9 @@ import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
@@ -36,7 +42,67 @@ public class PermutationSolver {
 
 
 	private static final int NUM_THREADS = 8;
+
+	private Map<Task, Set<Task>> closure;
+	private DirectedGraph<Integer, DefaultEdge> dg;
+
+	public PermutationSolver(Collection<Task> tasks) {
+		this.closure = transitiveClosure(tasks);
+	}
 	
+	private void buildGraph(Collection<Task> tasks) {
+		dg = new DefaultDirectedGraph<Integer, DefaultEdge>(DefaultEdge.class);
+		
+		for (Task t : tasks) {
+			
+		}
+	}
+
+	private static Map<Task, Set<Task>> transitiveClosure(Collection<Task> tasks) {
+		Map<Task, Set<Task>> toR = new HashMap<>();
+
+		for (Task t : tasks) {
+			toR.put(t, new HashSet<>());
+		}
+
+		for (Task t : tasks) {
+			Deque<Task> children = new LinkedList<>();
+			children.addAll(t.getDependents().keySet());
+			while (!children.isEmpty()) {
+				Task child = children.pop();
+				toR.get(t).add(child);
+				children.addAll(child.getDependents().keySet());
+			}
+		}
+
+		return toR;
+	}
+
+	public List<TaskQueue> forcedSolve(List<Task> tasks) {
+		if (tasks.size() == 0)
+			return new LinkedList<>();
+
+		Deque<TaskQueue> toR = new LinkedList<>();
+
+		TaskQueue first = new TaskQueue(MachineType.SMALL);
+		toR.add(first);
+
+		for (Task t : tasks) {
+			TaskQueue proposed = toR.peek();
+			// does T require anything currently in the proposed TQ?
+			if (proposed.getTasks().stream()
+					.anyMatch(already -> closure.get(t).contains(already))) {
+				proposed = new TaskQueue(MachineType.SMALL);
+				toR.push(proposed);
+			} else {
+				System.out.println(t + " is safe.");
+			}
+			
+			proposed.add(t);
+		}
+
+		return new ArrayList<>(toR);
+	}
 
 	private static int[][] getPairwiseCost(List<Task> tasks) {
 		int[][] toR = new int[tasks.size()][tasks.size()];
@@ -92,38 +158,38 @@ public class PermutationSolver {
 
 		int costWithout = CostAnalyzer.getLatency(actualized);
 		return costWithout;
-		
+
 	}
-	
+
 	private static int evaluateRemovalOfRange(List<Task> t, Set<Integer> current, Set<Integer> toConsider) {
 		List<Task> localCopy = DAGGenerator.cloneTasks(t);
-		
+
 		int bestIdx = -1;
 		int bestVal = Integer.MAX_VALUE;
 		for (Integer i : toConsider) {
 			int cost = evaluateRemovalOfPart(localCopy, current, i);
-			
+
 			if (cost == -1 || cost > bestVal) {
 				continue;
 			}
-			
+
 			// otherwise, we have a new best value!
 			bestIdx = i;
 			bestVal = cost;
 		}
-		
+
 		return bestIdx;
 	}
-	
+
 	private static int findBestPartitionGreedy(List<Task> t, Set<Integer> currentPartitions, ExecutorService exec) {
 		List<Set<Integer>> chunks = new ArrayList<>();
 		IntStream.range(0, NUM_THREADS).forEach(i -> chunks.add(new HashSet<>()));
-		
+
 		int cnt = 0;
 		for (Integer i : currentPartitions) {
 			NullUtils.orThrow(chunks.get(cnt++ % NUM_THREADS)).add(i);
 		}
-		
+
 		Set<Future<Integer>> futures = chunks.stream()
 				.map(s -> exec.submit(() -> evaluateRemovalOfRange(t, currentPartitions, s)))
 				.collect(Collectors.toSet());
@@ -134,7 +200,7 @@ public class PermutationSolver {
 				.map(opt -> opt.get())
 				.max((a, b) -> a - b)
 				.orElse(-1));
-		
+
 	}
 
 	private static List<TaskQueue> buildQueuesWithPartitions(List<Task> tasks, Set<Integer> partitions) {
@@ -153,7 +219,7 @@ public class PermutationSolver {
 	public static List<TaskQueue> greedySolve(List<Task> tasks) {
 		Set<Integer> partitions = new HashSet<>();
 		@NonNull ExecutorService es = NullUtils.orThrow(Executors.newFixedThreadPool(NUM_THREADS));
-		
+
 		for (int i = 0; i < tasks.size()-1; i++)
 			partitions.add(i);
 
@@ -179,37 +245,37 @@ public class PermutationSolver {
 			}
 
 		};
-		
+
 		es.shutdownNow();
 
 		return buildQueuesWithPartitions(tasks, partitions);
 
 	}
-	
+
 	public static List<TaskQueue> topoSolve(List<Task> tasks) {
 		if (tasks.size() == 0)
 			return new LinkedList<>();
-		
+
 		Deque<TaskQueue> toR = new LinkedList<>();
-		
+
 		TaskQueue first = new TaskQueue(MachineType.SMALL);
 		first.add(tasks.get(0));
 		toR.add(first);
-		
+
 		Iterator<Pair<Task, Task>> it = IteratorUtilities.twoGrams(tasks.iterator());
 		while (it.hasNext()) {
 			Pair<Task, Task> t = it.next();
-			
+
 			if (t.getB() == null) // ignore the end
 				continue;
-			
+
 			if (t.getB().getID() < t.getA().getID()) {
 				toR.add(new TaskQueue(MachineType.SMALL));
 			}
-			
+
 			toR.peekLast().add(t.getB());	
 		}
-		
+
 		return new ArrayList<>(toR);
 	}
 
@@ -232,7 +298,7 @@ public class PermutationSolver {
 
 
 		final List<Task> tasks = Arrays.asList(t4, t3, t2, t1);
-		
+
 		List<TaskQueue> tqs = solve(tasks);
 		System.out.println(tqs);
 

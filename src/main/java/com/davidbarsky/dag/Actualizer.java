@@ -38,8 +38,13 @@ public class Actualizer {
 		}
 		
 		// now build the tasks in order
-		for (TaskQueue tq : orderedTQs) {
-			if (!tq.buildNextUnbuiltTask())
+//		for (TaskQueue tq : orderedTQs) {
+//			if (!tq.buildNextUnbuiltTask())
+//				return null;
+//		}
+		
+		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
+			if (tqs.stream().allMatch(tq -> tq.buildNextUnbuiltTask() == false))
 				return null;
 		}
 		

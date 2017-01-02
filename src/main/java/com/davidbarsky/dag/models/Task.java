@@ -183,8 +183,7 @@ public class Task implements Comparable<Task> {
 	
 	@Override
 	public String toString() {
-		return "Task " + id + " start: " + startEndTime.map(t -> String.valueOf(t.getStart())).orElse("<not built>")
-				+ " end: " + startEndTime.map(t -> String.valueOf(t.getEnd())).orElse("<not built>");
+		return id + (this.isBuilt() ? "B" : "");
 	}
 
 	@Override

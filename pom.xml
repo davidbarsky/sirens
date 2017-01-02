@@ -30,6 +30,10 @@
 			<id>my-local-repo</id>
 			<url>file://${basedir}/lib</url>
 		</repository>
+		<repository>
+			<id>clojars.org</id>
+			<url>http://clojars.org/repo</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -53,5 +57,16 @@
 			<artifactId>birkhoff</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>dynamic-critical-path</groupId>
+			<artifactId>dynamic-critical-path</artifactId>
+			<version>0.2.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
 	</dependencies>
 </project>
