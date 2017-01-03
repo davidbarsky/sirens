@@ -70,7 +70,7 @@ public class BirkhoffScheduler {
 	public static void main(String[] args) {
 		BirkhoffScheduler bs = new BirkhoffScheduler();
 		long t = System.currentTimeMillis();
-		bs.measure(5);
+		bs.measure(20);
 		System.out.println(bs.getBest());
 		//System.out.println(System.currentTimeMillis() - t);
 	}

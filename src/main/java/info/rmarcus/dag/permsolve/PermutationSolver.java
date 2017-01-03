@@ -42,23 +42,79 @@ public class PermutationSolver {
 
 	private static final int NUM_THREADS = 8;
 
-	private DirectedGraph<Integer, DefaultEdge> dg;
-
+	private boolean[][] graph;
+	private int[] dfsStack;
+	private int[] neighborCount;
+	private int[] colors;
+	
 	public PermutationSolver(Collection<Task> tasks) {
 		buildGraph(tasks);
 	}
 	
 	private void buildGraph(Collection<Task> tasks) {
-		dg = new DefaultDirectedGraph<Integer, DefaultEdge>(DefaultEdge.class);
+		graph = new boolean[tasks.size()][tasks.size()];
 		
-		for (Task t : tasks) {
-			dg.addVertex(t.getID());
+		for (Task parent : tasks) {
+			for (Task child : parent.getDependents().keySet()) {
+				graph[parent.getID()][child.getID()] = true;
+			}
 		}
 		
-		for (Task t : tasks) {
-			for (Task child : t.getDependents().keySet())
-				dg.addEdge(t.getID(), child.getID());
+		dfsStack = new int[tasks.size()];
+		colors = new int[tasks.size()];
+		neighborCount = new int[tasks.size()];
+	}
+	
+	private boolean checkGraphForCycle() {
+		Arrays.fill(dfsStack, -1);
+		Arrays.fill(colors, 0);
+		Arrays.fill(neighborCount, 0);
+		
+		int stackPtr = 0;
+		
+		// push the root onto the stack
+		dfsStack[0] = 0;
+		colors[0] = 1; // make it gray
+		stackPtr++;
+		
+		while (stackPtr != 0) {
+			int taskID = dfsStack[stackPtr - 1];
+			
+			// mark myself gray
+			colors[taskID] = 1;
+			
+			if (neighborCount[taskID] < graph.length) {
+				// add my next neighbor to the stack
+				int i = neighborCount[taskID];
+				for (; i < graph.length; i++) {
+					if (graph[taskID][i]) {
+						if (colors[i] == 1) // found another gray! it's a cycle
+							return true;
+						
+						if (colors[i] == 0) {
+							// add white nodes to the stack
+							dfsStack[stackPtr++] = i;
+							break;
+						}
+					}
+				}
+				
+				neighborCount[taskID] = i + 1;
+				continue;
+			}
+			
+			if (colors[taskID] == 1) {
+				// I was already gray, so set my color to black and
+				// stop (I'm being popped off the stack)
+				colors[taskID] = 2; 
+				dfsStack[--stackPtr] = -1;
+				continue;
+			}
+			
 		}
+		
+		return false;
+		
 	}
 
 
@@ -79,12 +135,13 @@ public class PermutationSolver {
 			// if it's empty, then we're fine.
 			if (!proposed.getTasks().isEmpty()) {
 				Task last = proposed.getTasks().get(proposed.getTasks().size()-1);
-				dg.addEdge(last.getID(), t.getID());
-				CycleDetector<Integer, DefaultEdge> cd = new CycleDetector<>(dg);
-				if (cd.detectCyclesContainingVertex(t.getID())) {
+				
+				graph[last.getID()][t.getID()] = true;
+				
+				if (checkGraphForCycle()) {
 					// this edge creates a cycle!
 					// first, remove the edge.
-					dg.removeEdge(last.getID(), t.getID());
+					graph[last.getID()][t.getID()] = false;
 					
 					// add a new taskqueue
 					proposed = new TaskQueue(MachineType.SMALL);
