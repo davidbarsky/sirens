@@ -31,15 +31,14 @@ public class BirkhoffScheduler {
 		
 		System.out.println("Number of tasks: " + tasks.size());
 		
-//		Set<List<String>> clusters = DynamicCriticalPath.schedule(DAGGenerator.getVertexWeightMap(vertices), DAGGenerator.getEdgeWeightMap(vertices));
-//		System.out.println(clusters);
-//		Collection<TaskQueue> tqs = DAGGenerator.clustersToTasks(vertices, clusters);
-//		tqs = Actualizer.invoke(tqs);
-//		System.out.println("Cost: " + CostAnalyzer.getLatency((List<TaskQueue>) tqs));
+		Set<List<String>> clusters = DynamicCriticalPath.schedule(DAGGenerator.getVertexWeightMap(vertices), DAGGenerator.getEdgeWeightMap(vertices));
+		System.out.println(clusters);
+		Collection<TaskQueue> tqs = DAGGenerator.clustersToTasks(vertices, clusters);
+		tqs = Actualizer.invoke(tqs);
+		System.out.println("Cost: " + CostAnalyzer.getLatency((List<TaskQueue>) tqs));
 		
 		mhps = new MetropolisHastingsPermutationSearch(tasks.size(), this::loss);
-		for (int i = 0; i < 200000; i++) {
-			//System.out.println("Iteration " + i);
+		for (int i = 0; i < 100000; i++) {
 			mhps.iterate();
 		}
 		
@@ -70,7 +69,7 @@ public class BirkhoffScheduler {
 	public static void main(String[] args) {
 		BirkhoffScheduler bs = new BirkhoffScheduler();
 		long t = System.currentTimeMillis();
-		bs.measure(20);
+		bs.measure(8);
 		System.out.println(bs.getBest());
 		//System.out.println(System.currentTimeMillis() - t);
 	}

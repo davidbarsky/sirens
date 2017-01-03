@@ -42,7 +42,7 @@ public class PermutationSolver {
 
 	private static final int NUM_THREADS = 8;
 
-	private boolean[][] graph;
+	private int[][] graph;
 	private int[] dfsStack;
 	private int[] neighborCount;
 	private int[] colors;
@@ -52,11 +52,15 @@ public class PermutationSolver {
 	}
 	
 	private void buildGraph(Collection<Task> tasks) {
-		graph = new boolean[tasks.size()][tasks.size()];
+		graph = new int[tasks.size()][tasks.size()];
+		
+		for (int i = 0; i < graph.length; i++)
+			Arrays.fill(graph[i], -1);
 		
 		for (Task parent : tasks) {
+			int i = 0;
 			for (Task child : parent.getDependents().keySet()) {
-				graph[parent.getID()][child.getID()] = true;
+				graph[parent.getID()][i++] = child.getID();
 			}
 		}
 		
@@ -83,23 +87,23 @@ public class PermutationSolver {
 			// mark myself gray
 			colors[taskID] = 1;
 			
-			if (neighborCount[taskID] < graph.length) {
+			int i = neighborCount[taskID];
+			if (graph[taskID][i] != -1) {
 				// add my next neighbor to the stack
-				int i = neighborCount[taskID];
-				for (; i < graph.length; i++) {
-					if (graph[taskID][i]) {
-						if (colors[i] == 1) // found another gray! it's a cycle
-							return true;
-						
-						if (colors[i] == 0) {
-							// add white nodes to the stack
-							dfsStack[stackPtr++] = i;
-							break;
-						}
+				for (; graph[taskID][i] != -1; i++) {
+					int child = graph[taskID][i];
+					if (colors[child] == 1) // found another gray! it's a cycle
+						return true;
+
+					if (colors[child] == 0) {
+						// add white nodes to the stack
+						dfsStack[stackPtr++] = child;
+						break;
 					}
+
 				}
 				
-				neighborCount[taskID] = i + 1;
+				neighborCount[taskID] = (graph[taskID][i] == -1 ? i : i + 1);
 				continue;
 			}
 			
@@ -136,12 +140,25 @@ public class PermutationSolver {
 			if (!proposed.getTasks().isEmpty()) {
 				Task last = proposed.getTasks().get(proposed.getTasks().size()-1);
 				
-				graph[last.getID()][t.getID()] = true;
+				int i = 0;
+				boolean alreadyPresent = false;
+				while (graph[last.getID()][i] != -1) {
+					if (graph[last.getID()][i] == t.getID()) {
+						alreadyPresent = true;
+						break;
+					}
+						
+					i++;
+				}
+				
+				if (!alreadyPresent)
+					graph[last.getID()][i] = t.getID();
 				
 				if (checkGraphForCycle()) {
 					// this edge creates a cycle!
 					// first, remove the edge.
-					graph[last.getID()][t.getID()] = false;
+					if (!alreadyPresent)
+						graph[last.getID()][i] = -1;
 					
 					// add a new taskqueue
 					proposed = new TaskQueue(MachineType.SMALL);
