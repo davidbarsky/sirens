@@ -2,6 +2,7 @@ package com.davidbarsky.dag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -37,24 +38,29 @@ public class Actualizer {
 		}
 		
 		// now build the tasks in order
-		for (TaskQueue tq : orderedTQs) {
-			if (!tq.buildNextUnbuiltTask())
+//		for (TaskQueue tq : orderedTQs) {
+//			if (!tq.buildNextUnbuiltTask())
+//				return null;
+//		}
+		
+		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
+			if (tqs.stream().allMatch(tq -> tq.buildNextUnbuiltTask() == false))
 				return null;
 		}
 		
 		
 		// check invariant: all tasks should now be built
-//		if (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())){
+		if (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())){
 //			String violating = tqs.stream()
 //					.flatMap(tq -> tq.getTasks().stream())
 //					.filter(t -> !t.isBuilt())
 //					.map(t -> String.valueOf(t.getID()))
 //					.collect(Collectors.joining(","));
-//		
-//			System.out.println(tqs.stream().map(tq -> tq.toShortString()).collect(Collectors.joining("|")));
-//			
-//			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
-//		}
+		
+			System.out.println(tqs.stream().map(tq -> tq.toShortString()).collect(Collectors.joining("|")));
+			
+			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
+		}
 
 		return new ArrayList<>(tqs);
 	}

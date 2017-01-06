@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.davidbarsky.dag.models.Task;
+import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
@@ -150,6 +152,47 @@ public class DAGGenerator {
 		}
 		
 		return new ArrayList<>(tasks.values());
+	}
+	
+	public static Map<String, Integer> getVertexWeightMap(Collection<Vertex> vertices) {
+		return vertices.stream()
+				.collect(Collectors.toMap(
+						v -> "v" + v.getID(), 
+						v -> Double.valueOf(v.getVertexProperties().get("latency")).intValue()));
+	}
+	
+	public static Map<String, Map<String, Integer>> getEdgeWeightMap(Collection<Vertex> vertices) {
+		Map<String, Map<String, Integer>> toR = new HashMap<>();
+		
+		for (Vertex v : vertices) {
+			String parent = "v" + v.getID();
+			Map<String, Integer> edges = new HashMap<>();
+			for (Entry<Vertex, Map<String, String>> e : v.getChildren().entrySet()) {
+				edges.put("v" + e.getKey().getID(), Double.valueOf(e.getValue().get("networking")).intValue());
+			}
+			toR.put(parent, edges);
+		}
+		
+		return toR;
+	}
+	
+	public static Collection<TaskQueue> clustersToTasks(Collection<Vertex> vertices, Set<List<String>> clusters) {
+		Map<String, Task> m = verticesToTasks(vertices).stream()
+				.collect(Collectors.toMap(v -> "v" + v.getID(), v -> v));
+		
+		Collection<TaskQueue> toR = new ArrayList<>(clusters.size());
+		
+		for (List<String> cluster : clusters) {
+			TaskQueue toAdd = new TaskQueue(MachineType.SMALL);
+			
+			for (String vertex : cluster) {
+				toAdd.add(m.get(vertex));
+			}
+			
+			toR.add(toAdd);
+		}
+		
+		return toR;
 	}
 	
 	public static @NonNull List<@NonNull Task> cloneTasks(List<@NonNull Task> tasks) {
