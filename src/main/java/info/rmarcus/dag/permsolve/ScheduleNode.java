@@ -80,7 +80,7 @@ public class ScheduleNode {
 	}
 
 	public List<TaskQueue> getSchedule() {
-		return NullUtils.orThrow(Actualizer.invoke(getTaskQueues()),
+		return NullUtils.orThrow(Actualizer.actualize(getTaskQueues()),
 				() -> new DAGException("Could not build a schedule using these partitions!"));
 	}
 

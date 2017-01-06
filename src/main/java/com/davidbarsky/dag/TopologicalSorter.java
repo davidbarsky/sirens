@@ -64,7 +64,7 @@ public class TopologicalSorter {
 
         // Our topological sort is running the actualizer.
         final List<TaskQueue> builtTasks = Actualizer
-                .invoke(unsortedTasks);
+                .actualize(unsortedTasks);
 
         if (builtTasks == null)
         	return null;
