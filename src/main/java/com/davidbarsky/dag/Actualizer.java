@@ -13,8 +13,8 @@ import com.davidbarsky.dag.models.TaskQueue;
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static @Nullable List<@NonNull TaskQueue> actualize(@NonNull List<@NonNull TaskQueue> tqs) {
-		tqs.forEach(tq -> tq.unbuildAll());
+	public static @Nullable List<@NonNull TaskQueue> actualize(@NonNull Collection<@NonNull TaskQueue> tqs) {
+		tqs.forEach(TaskQueue::unbuildAll);
 		
 		int numTasks = tqs.stream().mapToInt(tq -> tq.getTasks().size()).sum();
 		
