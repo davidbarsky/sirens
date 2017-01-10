@@ -58,7 +58,7 @@ public class DAGGenerator {
 	public static Collection<Vertex> getCholesky(int matrixBlocks) {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().cholesky(matrixBlocks)
+			graph = GGen.dataflowGraph().cholesky(matrixBlocks)
 					.vertexProperty("latency").uniform(10, 60)
 					.edgeProperty("networking").uniform(10, 60)
 					.generateGraph().topoSort();
@@ -100,7 +100,7 @@ public class DAGGenerator {
 	public static Collection<Vertex> getPoisson(int n) {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().poisson2D(20, n)
+			graph = GGen.dataflowGraph().poisson2D(20, n)
 					.vertexProperty("latency").uniform(10, 60)
 					.edgeProperty("networking").uniform(10, 60)
 					.generateGraph().topoSort();
@@ -114,7 +114,7 @@ public class DAGGenerator {
 	public static Collection<Vertex> getSparseLU(int n) {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().sparseLU(n)
+			graph = GGen.dataflowGraph().sparseLU(n)
 					.vertexProperty("latency").uniform(10, 60)
 					.edgeProperty("networking").uniform(10, 60)
 					.generateGraph().topoSort();

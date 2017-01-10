@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>info.rmarcus</groupId>
 			<artifactId>ggen4j</artifactId>
-			<version>0.2.0</version>
+			<version>0.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
@@ -81,7 +81,7 @@
 		<dependency>
 			<groupId>dynamic-critical-path</groupId>
 			<artifactId>dynamic-critical-path</artifactId>
-			<version>0.2.4-SNAPSHOT</version>
+			<version>0.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jgrapht</groupId>
