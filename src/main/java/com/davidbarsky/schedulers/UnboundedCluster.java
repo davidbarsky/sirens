@@ -15,8 +15,8 @@ import com.davidbarsky.dag.models.states.MachineType;
 public class UnboundedCluster {
     private UnboundedCluster() {}
 
-    public static List<TaskQueue> linearCluster(int numNodes) {
-        List<Task> tasks = TopologicalSorter.apply(numNodes);
+    public static List<TaskQueue> generateSchedule(int numNodes) {
+        List<Task> tasks = TopologicalSorter.generateGraph(numNodes);
         List<TaskQueue> paths = new ArrayList<>();
         Set<Task> visited = new HashSet<>();
 

@@ -34,7 +34,7 @@ public class BirkhoffScheduler {
 		Set<List<String>> clusters = DynamicCriticalPath.schedule(DAGGenerator.getVertexWeightMap(vertices), DAGGenerator.getEdgeWeightMap(vertices));
 		System.out.println(clusters);
 		Collection<TaskQueue> tqs = DAGGenerator.clustersToTasks(vertices, clusters);
-		tqs = Actualizer.invoke(tqs);
+		tqs = Actualizer.actualize(tqs);
 		System.out.println("Cost: " + CostAnalyzer.getLatency((List<TaskQueue>) tqs));
 
 		mhps = new MetropolisHastingsPermutationSearch(tasks.size(), this::loss);
@@ -46,7 +46,7 @@ public class BirkhoffScheduler {
 	}
 
 	public List<TaskQueue> getBest() {
-		return Actualizer.invoke(permToTQs(mhps.getBest()));
+		return Actualizer.actualize(permToTQs(mhps.getBest()));
 	}
 
 	private List<TaskQueue> permToTQs(double[][] d) {
@@ -62,7 +62,7 @@ public class BirkhoffScheduler {
 
 	private double loss(double[][] d) {
 		List<TaskQueue> tqs = permToTQs(d);
-		int cost = CostAnalyzer.getLatency(Actualizer.invoke(tqs));
+		int cost = CostAnalyzer.getLatency(Actualizer.actualize(tqs));
 		return cost;
 	}
 

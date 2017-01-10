@@ -8,13 +8,14 @@ import com.davidbarsky.dag.models.states.BuildStatus;
 import com.davidbarsky.dag.models.states.MachineType;
 import com.davidbarsky.schedulers.RoundRobin;
 
+import com.davidbarsky.schedulers.Scheduler;
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenException;
 import info.rmarcus.ggen4j.graph.GGenGraph;
 import info.rmarcus.ggen4j.graph.Vertex;
 
 public class TopologicalSorter {
-    public static List<Task> apply(int numVerticies) {
+    public static List<Task> generateGraph(int numVerticies) {
         try {
             GGenGraph graph = GGen.generateGraph().erdosGNM(numVerticies, 100)
                     .vertexProperty("latency").uniform(10, 30)
@@ -60,7 +61,8 @@ public class TopologicalSorter {
     public static List<TaskQueue> invoke(Collection<Vertex> graph) {
         // Using an unsorted TaskQueues for topological sort source,
         // with only one task queue.
-        List<TaskQueue> unsortedTasks = RoundRobin.invoke(graph.size());
+
+        List<TaskQueue> unsortedTasks = RoundRobin.generateSchedule(graph.size());
 
         // Our topological sort is running the actualizer.
         final List<TaskQueue> builtTasks = Actualizer

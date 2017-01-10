@@ -18,7 +18,7 @@ public class DAGGeneratorTest {
 
 	@Test
 	public void randomGraph() {
-		List<TaskQueue> tqs = RoundRobin.invoke(4);
+		List<TaskQueue> tqs = RoundRobin.generateSchedule(4);
 		assertEquals(4, tqs.size());
 	}
 
