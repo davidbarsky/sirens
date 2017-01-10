@@ -24,7 +24,7 @@ public class BirkhoffScheduler {
 	private MetropolisHastingsPermutationSearch mhps;
 	
 	public void measure(int n) {
-		Collection<Vertex> vertices = DAGGenerator.getSparseLU(n);
+		Collection<Vertex> vertices = DAGGenerator.getCholesky(n);
 		tasks = DAGGenerator.verticesToTasks(vertices);
 		
 		ps = new PermutationSolver(tasks);
@@ -37,12 +37,12 @@ public class BirkhoffScheduler {
 		tqs = Actualizer.invoke(tqs);
 		System.out.println("Cost: " + CostAnalyzer.getLatency((List<TaskQueue>) tqs));
 		
-		mhps = new MetropolisHastingsPermutationSearch(tasks.size(), this::loss);
-		for (int i = 0; i < 100000; i++) {
-			mhps.iterate();
-		}
-		
-		System.out.println(loss(mhps.getBest()));
+//		mhps = new MetropolisHastingsPermutationSearch(tasks.size(), this::loss);
+//		for (int i = 0; i < 10000; i++) {
+//			if (i % 100 == 0)
+//				System.out.println(i);
+//			mhps.iterate();
+//		}
 	}
 	
 	public List<TaskQueue> getBest() {
@@ -69,8 +69,9 @@ public class BirkhoffScheduler {
 	public static void main(String[] args) {
 		BirkhoffScheduler bs = new BirkhoffScheduler();
 		long t = System.currentTimeMillis();
-		bs.measure(8);
-		System.out.println(bs.getBest());
-		//System.out.println(System.currentTimeMillis() - t);
+		bs.measure(16);
+		bs.measure(18);
+		//System.out.println(bs.getBest());
+		System.out.println(System.currentTimeMillis() - t);
 	}
 }
