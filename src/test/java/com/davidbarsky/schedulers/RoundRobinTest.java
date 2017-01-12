@@ -11,7 +11,7 @@ import com.davidbarsky.dag.models.TaskQueue;
 public class RoundRobinTest {
 	@Test
 	public void invoke() {
-		ArrayList<TaskQueue> queues = RoundRobin.invoke(20);
+		ArrayList<TaskQueue> queues = RoundRobin.generateSchedule(20);
 		assertEquals(20, queues.size());
 
 	}

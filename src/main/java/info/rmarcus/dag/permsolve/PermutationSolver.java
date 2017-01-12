@@ -216,7 +216,7 @@ public class PermutationSolver {
 		Set<Integer> newParts = new HashSet<Integer>(currentPartitions);
 		newParts.remove(toRemove);
 		List<TaskQueue> tqs = buildQueuesWithPartitions(t, newParts);
-		final @Nullable List<TaskQueue> actualized = Actualizer.invoke(tqs);
+		final @Nullable List<TaskQueue> actualized = Actualizer.actualize(tqs);
 
 		if (actualized == null)
 			return -1;
@@ -288,7 +288,7 @@ public class PermutationSolver {
 		for (int i = 0; i < tasks.size()-1; i++)
 			partitions.add(i);
 
-		int currentCost = CostAnalyzer.getLatency(Actualizer.invoke(buildQueuesWithPartitions(tasks, partitions)));
+		int currentCost = CostAnalyzer.getLatency(Actualizer.actualize(buildQueuesWithPartitions(tasks, partitions)));
 		while (true) {
 			@Nullable final Integer bestIdx = findBestPartitionGreedy(tasks, partitions, es);
 			if (bestIdx == -1)
@@ -300,7 +300,7 @@ public class PermutationSolver {
 
 			List<TaskQueue> without = buildQueuesWithPartitions(tasks, withoutPartition);
 
-			int withoutCost = CostAnalyzer.getLatency(Actualizer.invoke(without));
+			int withoutCost = CostAnalyzer.getLatency(Actualizer.actualize(without));
 
 			if (withoutCost <= currentCost) {
 				partitions.remove(bestIdx);

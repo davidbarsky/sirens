@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
@@ -195,9 +193,9 @@ public class DAGGenerator {
 		return toR;
 	}
 	
-	public static @NonNull List<@NonNull Task> cloneTasks(List<@NonNull Task> tasks) {
-		Map<Integer, @NonNull Task> old = new HashMap<>();
-		Map<Integer, @NonNull Task> toR = new HashMap<>();
+	public static List<Task> cloneTasks(List<Task> tasks) {
+		Map<Integer, Task> old = new HashMap<>();
+		Map<Integer, Task> toR = new HashMap<>();
 		
 		for (Task t : tasks) {
 			Task newTask = new Task(t.getID(), t.getLatencies());
@@ -211,7 +209,7 @@ public class DAGGenerator {
 			}
 		}
 		
-		List<@NonNull Task> l = tasks.stream()
+		List<Task> l = tasks.stream()
 				.map(t -> toR.get(t.getID()))
 				.collect(Collectors.toList());
 		

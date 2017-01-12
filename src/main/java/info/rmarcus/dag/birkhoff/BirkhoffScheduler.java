@@ -18,7 +18,9 @@ public class BirkhoffScheduler {
 
 	private List<Task> tasks;
 	private MHJointPermutationLearner jps;
-	
+
+
+
 	public void measure(int n) {
 		Collection<Vertex> vertices = DAGGenerator.getSparseLU(n);
 		tasks = DAGGenerator.verticesToTasks(vertices);
@@ -37,8 +39,9 @@ public class BirkhoffScheduler {
 				System.out.println(i);
 			jps.iterate();
 		}
+
 	}
-	
+
 	public List<TaskQueue> getBest() {
 		return permToTQs(jps.getBest().get(0), jps.getBest().get(1));
 	}
@@ -61,7 +64,7 @@ public class BirkhoffScheduler {
 		int cost = CostAnalyzer.getLatency(tqs); 
 		return cost;
 	}
-	
+
 	public static void main(String[] args) {
 		BirkhoffScheduler bs = new BirkhoffScheduler();
 		long t = System.currentTimeMillis();

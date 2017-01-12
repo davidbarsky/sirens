@@ -1,28 +1,34 @@
 package com.davidbarsky;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
-import com.davidbarsky.dag.TopologicalSorter;
-import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
+import com.davidbarsky.schedulers.EdgeZero;
+import com.davidbarsky.schedulers.LinearCluster;
 import com.davidbarsky.schedulers.RoundRobin;
-import com.davidbarsky.schedulers.UnboundedCluster;
+import com.davidbarsky.schedulers.Scheduler;
+
 
 public class Main {
     public static void main(String... args) {
-    	ArrayList<TaskQueue> randomGraph = RoundRobin.invoke(2);
-    	final List<TaskQueue> taskQueues = Actualizer.invoke(randomGraph);
+        // Init
+        Scheduler linearCluster = new LinearCluster();
+        Scheduler edgeZero = new EdgeZero();
+
+    	List<TaskQueue> randomGraph = RoundRobin.generateSchedule(2);
+    	final List<TaskQueue> taskQueues = Actualizer.actualize(randomGraph);
 
     	System.out.println("Cost Analysis");
     	
     	if (taskQueues == null)
     		return;
 
-        UnboundedCluster unboundedCluster = new UnboundedCluster();
-        unboundedCluster.linearCluster(20).forEach(System.out::println);
+        List<TaskQueue> allPaths = linearCluster.generateSchedule(20);
+        Actualizer.actualize(allPaths);
+
+        edgeZero.generateSchedule(20);
 
         taskQueues.forEach(tqs -> {
             System.out.println(tqs.getMachineType());
@@ -30,8 +36,6 @@ public class Main {
         });
 
         System.out.println("Logical Schedules");
-        taskQueues.forEach(tqs -> {
-            System.out.println(tqs);
-        });
+        taskQueues.forEach(System.out::println);
     }
 }

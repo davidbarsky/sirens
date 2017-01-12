@@ -1,6 +1,12 @@
 package com.davidbarsky.dag;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
@@ -14,7 +20,7 @@ import info.rmarcus.ggen4j.graph.GGenGraph;
 import info.rmarcus.ggen4j.graph.Vertex;
 
 public class TopologicalSorter {
-    public static List<Task> apply(int numVerticies) {
+    public static List<Task> generateGraph(int numVerticies) {
         try {
             GGenGraph graph = GGen.generateGraph().erdosGNM(numVerticies, 100)
                     .vertexProperty("latency").uniform(10, 30)
@@ -60,11 +66,12 @@ public class TopologicalSorter {
     public static List<TaskQueue> invoke(Collection<Vertex> graph) {
         // Using an unsorted TaskQueues for topological sort source,
         // with only one task queue.
-        List<TaskQueue> unsortedTasks = RoundRobin.invoke(graph.size());
+
+        List<TaskQueue> unsortedTasks = RoundRobin.generateSchedule(graph.size());
 
         // Our topological sort is running the actualizer.
         final List<TaskQueue> builtTasks = Actualizer
-                .invoke(unsortedTasks);
+                .actualize(unsortedTasks);
 
         if (builtTasks == null)
         	return null;

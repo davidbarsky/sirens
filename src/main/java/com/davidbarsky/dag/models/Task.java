@@ -115,6 +115,30 @@ public class Task implements Comparable<Task> {
 		return getDependencies().isEmpty();
 	}
 
+	public int inDegree() {
+		return getDependents().keySet().size();
+	}
+
+	public int outDegree() {
+		return getDependents().keySet().size();
+	}
+
+	public int edgeWeight() {
+		int inbound = getDependencies()
+				.values()
+				.stream()
+				.mapToInt(Integer::intValue)
+				.sum();
+
+		int outbound = getDependents()
+				.values()
+				.stream()
+				.mapToInt(Integer::intValue)
+				.sum();
+
+		return inbound + outbound;
+	}
+
 	public Optional<StartEndTime> build() {
 		if (tq == null)
 			return Optional.empty();

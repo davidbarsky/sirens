@@ -21,9 +21,9 @@ public class ActualizerTest {
 	@SuppressWarnings("null")
 	@Test
 	public void actualize() {
-		ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.invoke(2);
+		ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.generateSchedule(2);
 
-		final List<TaskQueue> tasks = Actualizer.invoke(tqs);
+		final List<TaskQueue> tasks = Actualizer.actualize(tqs);
 		List<TaskQueue> copied = new ArrayList<>(tasks);
 
 		if (tasks == null) {
@@ -55,6 +55,6 @@ public class ActualizerTest {
 		tq.add(t2);
 		tq.add(t1);
 
-		assertEquals(Actualizer.invoke(Collections.singletonList(tq)), null);
+		assertEquals(Actualizer.actualize(Collections.singletonList(tq)), null);
 	}
 }

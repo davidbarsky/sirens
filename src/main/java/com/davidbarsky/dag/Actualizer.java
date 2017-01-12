@@ -4,17 +4,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
-
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static @Nullable List<@NonNull TaskQueue> invoke(@NonNull Collection<@NonNull TaskQueue> tqs) {
-		tqs.forEach(tq -> tq.unbuildAll());
+	public static List<TaskQueue> actualize(Collection<TaskQueue> tqs) {
+		tqs.forEach(TaskQueue::unbuildAll);
 		
 		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
 			if (tqs.stream().allMatch(tq -> tq.buildNextUnbuiltTask() == false))
