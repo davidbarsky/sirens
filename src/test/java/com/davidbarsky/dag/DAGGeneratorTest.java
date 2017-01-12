@@ -26,7 +26,8 @@ public class DAGGeneratorTest {
 	public void generateGraphRange() {
 		List<Collection<Vertex>> range = DAGGenerator.generateGraphRange(20);
 
-		assertTrue(range.size() == 20);
+		// minimum number is 15 vertices, so we should get 6 results back.
+		assertTrue(range.size() == 6);
 		assertTrue(range.stream().noneMatch(Collection::isEmpty));
 	}
 

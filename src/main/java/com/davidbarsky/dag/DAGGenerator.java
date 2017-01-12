@@ -30,7 +30,7 @@ public class DAGGenerator {
 	}
 
 	public static List<Collection<Vertex>> generateGraphRange(int maxNumVerticies) {
-		return IntStream.range(1, maxNumVerticies + 1)
+		return IntStream.range(15, maxNumVerticies + 1)
 				.parallel()
 				.mapToObj(DAGGenerator::getErdosGNMSources)
 				.collect(Collectors.toList());
