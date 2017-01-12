@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,10 +18,6 @@ import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.CycleDetector;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
@@ -46,47 +43,47 @@ public class PermutationSolver {
 	private int[] dfsStack;
 	private int[] neighborCount;
 	private int[] colors;
-	
+
 	public PermutationSolver(Collection<Task> tasks) {
 		buildGraph(tasks);
 	}
-	
+
 	private void buildGraph(Collection<Task> tasks) {
 		graph = new int[tasks.size()][tasks.size()];
-		
+
 		for (int i = 0; i < graph.length; i++)
 			Arrays.fill(graph[i], -1);
-		
+
 		for (Task parent : tasks) {
 			int i = 0;
 			for (Task child : parent.getDependents().keySet()) {
 				graph[parent.getID()][i++] = child.getID();
 			}
 		}
-		
+
 		dfsStack = new int[tasks.size()];
 		colors = new int[tasks.size()];
 		neighborCount = new int[tasks.size()];
 	}
-	
+
 	private boolean checkGraphForCycle() {
 		Arrays.fill(dfsStack, -1);
 		Arrays.fill(colors, 0);
 		Arrays.fill(neighborCount, 0);
-		
+
 		int stackPtr = 0;
-		
+
 		// push the root onto the stack
 		dfsStack[0] = 0;
 		colors[0] = 1; // make it gray
 		stackPtr++;
-		
+
 		while (stackPtr != 0) {
 			int taskID = dfsStack[stackPtr - 1];
-			
+
 			// mark myself gray
 			colors[taskID] = 1;
-			
+
 			int i = neighborCount[taskID];
 			if (graph[taskID][i] != -1) {
 				// add my next neighbor to the stack
@@ -102,11 +99,11 @@ public class PermutationSolver {
 					}
 
 				}
-				
+
 				neighborCount[taskID] = (graph[taskID][i] == -1 ? i : i + 1);
 				continue;
 			}
-			
+
 			if (colors[taskID] == 1) {
 				// I was already gray, so set my color to black and
 				// stop (I'm being popped off the stack)
@@ -114,11 +111,11 @@ public class PermutationSolver {
 				dfsStack[--stackPtr] = -1;
 				continue;
 			}
-			
+
 		}
-		
+
 		return false;
-		
+
 	}
 
 
@@ -135,11 +132,11 @@ public class PermutationSolver {
 			TaskQueue proposed = toR.peek();
 			// check to see if adding an edge from the previous item in this task queue
 			// to this task would create a cycle
-			
+
 			// if it's empty, then we're fine.
 			if (!proposed.getTasks().isEmpty()) {
 				Task last = proposed.getTasks().get(proposed.getTasks().size()-1);
-				
+
 				int i = 0;
 				boolean alreadyPresent = false;
 				while (graph[last.getID()][i] != -1) {
@@ -147,25 +144,25 @@ public class PermutationSolver {
 						alreadyPresent = true;
 						break;
 					}
-						
+
 					i++;
 				}
-				
+
 				if (!alreadyPresent)
 					graph[last.getID()][i] = t.getID();
-				
+
 				if (checkGraphForCycle()) {
 					// this edge creates a cycle!
 					// first, remove the edge.
 					if (!alreadyPresent)
 						graph[last.getID()][i] = -1;
-					
+
 					// add a new taskqueue
 					proposed = new TaskQueue(MachineType.SMALL);
 					toR.push(proposed);
 				}
 			}
-			
+
 			proposed.add(t);
 		}
 
@@ -320,9 +317,39 @@ public class PermutationSolver {
 
 	}
 
-	public static List<TaskQueue> topoSolve(List<Task> tasks) {
+	public static List<TaskQueue> topoSolve(List<Task> tasks, int[] topoPriority) {
 		if (tasks.size() == 0)
 			return new LinkedList<>();
+		
+		// first, produce a topological ordering of the graph using the
+		// given priorities
+		
+		// a mapping between an element ID and a topo order pos
+		int[] topoIdx = new int[tasks.size()];
+		
+		PriorityQueue<Task> pq = new PriorityQueue<>((a, b) -> topoPriority[a.getID()] - topoPriority[b.getID()]);
+		Set<Task> complete = new HashSet<>();
+
+		// add all parent-free nodes to the PQ
+		pq.addAll(tasks.stream()
+				.filter(t -> t.getDependencies().isEmpty())
+				.collect(Collectors.toSet()));
+
+		while (complete.size() != tasks.size()) {
+			// remove an element from the PQ and put this as the next element in our ordering
+			Task next = pq.poll();
+			topoIdx[next.getID()] = complete.size();
+			complete.add(next);
+			
+			// examine all of next's children to see if they are now parent free.
+			// put the ones that are now parent free into the PQ.
+			next.getDependents().keySet().stream()
+			.filter(t -> complete.containsAll(t.getDependencies().keySet()))
+			.forEach(t -> pq.add(t));
+		}
+
+		// now, partition the tasks by inserting a partition whenever the 
+		// next task has a lower topological sort value than the current task
 
 		Deque<TaskQueue> toR = new LinkedList<>();
 
@@ -337,14 +364,15 @@ public class PermutationSolver {
 			if (t.getB() == null) // ignore the end
 				continue;
 
-			if (t.getB().getID() < t.getA().getID()) {
+			if (topoIdx[t.getB().getID()] < topoIdx[t.getA().getID()]) {
 				toR.add(new TaskQueue(MachineType.SMALL));
 			}
 
 			toR.peekLast().add(t.getB());	
 		}
 
-		return new ArrayList<>(toR);
+		List<TaskQueue> tqs = new ArrayList<>(toR);
+		return Actualizer.invokeWithTopo(tqs, topoIdx);
 	}
 
 

@@ -26,10 +26,8 @@
 	</build>
 
 	<repositories>
-		<repository>
-			<id>my-local-repo</id>
-			<url>file://${basedir}/lib</url>
-		</repository>
+		<!--<repository> <id>my-local-repo</id> <url>file://${basedir}/lib</url> 
+			</repository> -->
 		<repository>
 			<id>clojars.org</id>
 			<url>http://clojars.org/repo</url>
@@ -54,8 +52,8 @@
 		</dependency>
 		<dependency>
 			<groupId>info.rmarcus</groupId>
-			<artifactId>birkhoff</artifactId>
-			<version>1.0.0</version>
+			<artifactId>birkhoffvonneumann</artifactId>
+			<version>0.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>dynamic-critical-path</groupId>

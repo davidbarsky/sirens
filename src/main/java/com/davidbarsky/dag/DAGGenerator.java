@@ -119,6 +119,8 @@ public class DAGGenerator {
 					.edgeProperty("networking").uniform(10, 60)
 					.generateGraph().topoSort();
 			
+			System.out.println(graph.toGraphviz());
+			
 			return graph.allVertices();
 		} catch (GGenException e) {
 			throw new DAGException(e.getMessage());
