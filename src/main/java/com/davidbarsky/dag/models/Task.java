@@ -115,6 +115,10 @@ public class Task implements Comparable<Task> {
 		return getDependencies().isEmpty();
 	}
 
+	public boolean isFreeNode() {
+		return getDependencies().size() == 0 && getDependents().size() == 0;
+	}
+
 	public int inDegree() {
 		return getDependents().keySet().size();
 	}

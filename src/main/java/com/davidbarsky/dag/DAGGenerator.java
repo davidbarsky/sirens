@@ -30,14 +30,13 @@ public class DAGGenerator {
 	}
 
 	public static List<Collection<Vertex>> generateGraphRange(int maxNumVerticies) {
-		return IntStream.range(1, maxNumVerticies + 1)
+		return IntStream.rangeClosed(0, maxNumVerticies)
 				.parallel()
 				.mapToObj(DAGGenerator::getErdosGNMSources)
 				.collect(Collectors.toList());
 	}
 	
 	public static Collection<Vertex> getErdosGNMSources(int numVertices) {
-		
 		if (GGenCommand.GGEN_PATH == null) {
 			throw new DAGException("You need to set the GGEN_PATH environmental variable!");
 		}

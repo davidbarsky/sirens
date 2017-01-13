@@ -6,9 +6,9 @@ import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.BuildStatus;
 import com.davidbarsky.dag.models.states.MachineType;
+import com.davidbarsky.schedulers.BoundedScheduler;
 import com.davidbarsky.schedulers.RoundRobin;
 
-import com.davidbarsky.schedulers.Scheduler;
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenException;
 import info.rmarcus.ggen4j.graph.GGenGraph;
@@ -56,30 +56,5 @@ public class TopologicalSorter {
         }
 
         return sortedTaskGraph;
-    }
-
-    public static List<TaskQueue> invoke(Collection<Vertex> graph) {
-        // Using an unsorted TaskQueues for topological sort source,
-        // with only one task queue.
-
-        List<TaskQueue> unsortedTasks = RoundRobin.generateSchedule(graph.size());
-
-        // Our topological sort is running the actualizer.
-        final List<TaskQueue> builtTasks = Actualizer
-                .actualize(unsortedTasks);
-
-        if (builtTasks == null)
-        	return null;
-        
-        // Deconstruct the tasks, as we only care about ordering
-        builtTasks
-                .stream()
-                .flatMap(taskQueue -> taskQueue.getTasks().stream())
-                .forEach(task -> {
-                    task.setBuildStatus(BuildStatus.NOT_BUILT);
-                    task.setStartEndTime(Optional.empty());
-                });
-
-        return builtTasks;
     }
 }

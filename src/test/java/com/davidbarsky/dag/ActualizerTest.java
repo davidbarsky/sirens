@@ -10,6 +10,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import com.davidbarsky.schedulers.BoundedScheduler;
 import org.junit.Test;
 
 import com.davidbarsky.dag.models.Task;
@@ -21,7 +22,8 @@ public class ActualizerTest {
 	@SuppressWarnings("null")
 	@Test
 	public void actualize() {
-		ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) RoundRobin.generateSchedule(2);
+		BoundedScheduler roundRobin = new RoundRobin();
+		ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) roundRobin.generateSchedule(2);
 
 		final List<TaskQueue> tasks = Actualizer.actualize(tqs);
 		List<TaskQueue> copied = new ArrayList<>(tasks);

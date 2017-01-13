@@ -1,23 +1,20 @@
 package com.davidbarsky;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.models.TaskQueue;
-import com.davidbarsky.schedulers.EdgeZero;
-import com.davidbarsky.schedulers.LinearCluster;
-import com.davidbarsky.schedulers.RoundRobin;
-import com.davidbarsky.schedulers.Scheduler;
+import com.davidbarsky.schedulers.*;
 
 public class Main {
     public static void main(String... args) {
         // Init
-        Scheduler linearCluster = new LinearCluster();
-        Scheduler edgeZero = new EdgeZero();
+        UnboundedScheduler linearCluster = new LinearCluster();
+        UnboundedScheduler edgeZero = new EdgeZero();
+        BoundedScheduler roundRobin = new RoundRobin();
 
-    	List<TaskQueue> randomGraph = RoundRobin.generateSchedule(2);
+    	List<TaskQueue> randomGraph = roundRobin.generateSchedule(2);
     	final List<TaskQueue> taskQueues = Actualizer.actualize(randomGraph);
 
     	System.out.println("Cost Analysis");
@@ -25,10 +22,8 @@ public class Main {
     	if (taskQueues == null)
     		return;
 
-        List<TaskQueue> allPaths = linearCluster.generateSchedule(20);
+        List<TaskQueue> allPaths = linearCluster.generateSchedule(40);
         Actualizer.actualize(allPaths);
-
-        edgeZero.generateSchedule(20);
 
         taskQueues.forEach(tqs -> {
             System.out.println(tqs.getMachineType());

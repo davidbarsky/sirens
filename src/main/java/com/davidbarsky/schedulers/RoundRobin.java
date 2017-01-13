@@ -9,11 +9,11 @@ import info.rmarcus.ggen4j.graph.Vertex;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class RoundRobin {
+public class RoundRobin implements BoundedScheduler {
 
     public RoundRobin() {}
 
-    public static ArrayList<TaskQueue> generateSchedule(int numQueues) {
+    public List<TaskQueue> generateSchedule(int numQueues) {
         ArrayList<TaskQueue> queues = new ArrayList<>(numQueues);
         Map<Integer, Task> tasks = new HashMap<>();
         int i = 0;

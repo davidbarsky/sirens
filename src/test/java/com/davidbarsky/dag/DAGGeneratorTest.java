@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.List;
 
+import com.davidbarsky.schedulers.BoundedScheduler;
 import org.junit.Test;
 
 import com.davidbarsky.dag.models.TaskQueue;
@@ -18,7 +19,8 @@ public class DAGGeneratorTest {
 
 	@Test
 	public void randomGraph() {
-		List<TaskQueue> tqs = RoundRobin.generateSchedule(4);
+		BoundedScheduler roundRobin = new RoundRobin();
+		List<TaskQueue> tqs = roundRobin.generateSchedule(4);
 		assertEquals(4, tqs.size());
 	}
 
@@ -42,5 +44,4 @@ public class DAGGeneratorTest {
 			assertEquals(vertex.hashCode(), Integer.hashCode(vertex.getID()));
 		});
 	}
-
 }
