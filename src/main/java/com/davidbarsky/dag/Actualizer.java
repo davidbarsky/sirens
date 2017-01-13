@@ -13,21 +13,22 @@ public class Actualizer {
 	public static List<TaskQueue> actualize(Collection<TaskQueue> tqs) {
 		tqs.forEach(TaskQueue::unbuildAll);
 
-		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
-			if (tqs.stream().allMatch(tq -> tq.buildNextUnbuiltTask() == false))
-				return null;
+		while (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)) {
+			if (tqs.stream().noneMatch(TaskQueue::buildNextUnbuiltTask)) {
+				throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
+			}
 		}
 
 
 		// check invariant: all tasks should now be built
-		if (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())){
+		if (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)){
 //			String violating = tqs.stream()
 //					.flatMap(tq -> tq.getTasks().stream())
 //					.filter(t -> !t.isBuilt())
 //					.map(t -> String.valueOf(t.getID()))
 //					.collect(Collectors.joining(","));
 
-			System.out.println(tqs.stream().map(tq -> tq.toShortString()).collect(Collectors.joining("|")));
+			System.out.println(tqs.stream().map(TaskQueue::toShortString).collect(Collectors.joining("|")));
 
 			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
 		}
@@ -36,7 +37,7 @@ public class Actualizer {
 	}
 
 	public static List<TaskQueue> invokeWithTopo(Collection<TaskQueue> tqs, int[] topo) {
-		tqs.forEach(tq -> tq.unbuildAll());
+		tqs.forEach(TaskQueue::unbuildAll);
 
 		int numTasks = tqs.stream().mapToInt(tq -> tq.getTasks().size()).sum();
 
@@ -61,11 +62,10 @@ public class Actualizer {
 
 		// now build the tasks in order
 		for (TaskQueue tq : orderedTQs) {
-			if (!tq.buildNextUnbuiltTask())
+			if (!tq.buildNextUnbuiltTask()) {
 				throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
+			}
 		}
-
-
 
 		// check invariant: all tasks should now be built
 		if (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)){
