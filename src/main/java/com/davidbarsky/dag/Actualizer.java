@@ -13,7 +13,7 @@ import com.davidbarsky.dag.models.TaskQueue;
 public class Actualizer {
 	private Actualizer() { }
 	
-	public static @Nullable List<@NonNull TaskQueue> actualize(@NonNull Collection<@NonNull TaskQueue> tqs) {
+	public static List<@NonNull TaskQueue> actualize(@NonNull Collection<@NonNull TaskQueue> tqs) {
 		tqs.forEach(TaskQueue::unbuildAll);
 		
 		int numTasks = tqs.stream().mapToInt(tq -> tq.getTasks().size()).sum();
@@ -43,21 +43,22 @@ public class Actualizer {
 //				return null;
 //		}
 		
-		while (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())) {
-			if (tqs.stream().allMatch(tq -> tq.buildNextUnbuiltTask() == false))
-				return null;
+		while (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)) {
+			if (tqs.stream().noneMatch(TaskQueue::buildNextUnbuiltTask)) {
+				throw new DAGException("No Tasks to build, invariant broken.");
+			}
 		}
 		
 		
 		// check invariant: all tasks should now be built
-		if (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask())){
+		if (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)){
 //			String violating = tqs.stream()
 //					.flatMap(tq -> tq.getTasks().stream())
 //					.filter(t -> !t.isBuilt())
 //					.map(t -> String.valueOf(t.getID()))
 //					.collect(Collectors.joining(","));
 		
-			System.out.println(tqs.stream().map(tq -> tq.toShortString()).collect(Collectors.joining("|")));
+			System.out.println(tqs.stream().map(TaskQueue::toShortString).collect(Collectors.joining("|")));
 			
 			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
 		}
