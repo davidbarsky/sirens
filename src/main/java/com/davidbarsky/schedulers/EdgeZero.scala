@@ -10,7 +10,7 @@ import com.davidbarsky.dag.models.{TaskQueue, Task}
 // Since the EZ algorithm considers only the communication costs among nodes
 // to make scheduling decisions, it does not guarantee optimal schedules
 // for both fork and join structures.
-class EdgeZero extends Scheduler {
+class EdgeZero extends UnboundedScheduler {
   override def generateSchedule(numNodes: Int): util.List[TaskQueue] = {
 
     // We generate the graph, and sort it by the node's edge weight
@@ -20,11 +20,21 @@ class EdgeZero extends Scheduler {
       .asScala
       .sortWith(_.edgeWeight > _.edgeWeight)
 
+    graph.foreach(findTLevel)
+
     val visited = mutable.Set[Task]()
     for (task: Task <- graph) {
 
     }
 
     new util.ArrayList[TaskQueue]()
+  }
+
+  def findTLevel(task: Task): Int = {
+    0
+  }
+
+  def findBLevel(task: Task): Int = {
+    0
   }
 }

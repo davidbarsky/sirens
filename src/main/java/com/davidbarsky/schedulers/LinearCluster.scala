@@ -1,5 +1,8 @@
 package com.davidbarsky.schedulers
 
+import java.util
+import java.util.stream.Collectors
+
 import collection.JavaConverters._
 import java.util.{List => JavaList}
 
@@ -13,34 +16,49 @@ import scala.collection.mutable.ListBuffer
 // Since the LC algorithm does not schedule nodes on different paths
 // to the same processor, it cannot guarantee optimal solutions
 // for both fork and join structures.
-class LinearCluster extends Scheduler {
+class LinearCluster extends UnboundedScheduler {
 
   // For the number of nodes we're working with, a DFS combined
   // with a scheduling each path onto a TaskQueue appears to be sufficient.
   def generateSchedule(numNodes: Int): JavaList[TaskQueue] = {
-    val visited = mutable.Set[Task]()
-    val paths = ListBuffer[TaskQueue]()
+    val visited = new util.HashSet[Task]()
+    val paths = new util.ArrayList[TaskQueue]()
 
     def recurse(node: Task, path: TaskQueue): Unit = {
+      if (visited.contains(node)) {
+        return
+      }
       visited.add(node)
       path.add(node)
       if (node.isLeaf) {
-        paths.append(path)
+        paths.add(path)
       }
 
       node.getDependents
         .keySet()
         .asScala
-        .diff(visited)
         .foreach { t =>
           recurse(t, path)
         }
     }
 
-    val graph = TopologicalSorter.generateGraph(numNodes).asScala
-    graph.filter(_.isSource).foreach { t => recurse(t, new TaskQueue(MachineType.SMALL)) }
+    def scheduleFreeNodes(graph: util.List[Task]): TaskQueue = {
+      new TaskQueue(
+        MachineType.SMALL,
+        graph
+          .stream()
+          .filter(_.isFreeNode)
+          .collect(Collectors.toList())
+      )
+    }
 
-    paths.toList.asJava
+    val graph = TopologicalSorter.generateGraph(numNodes)
+    graph.stream().filter(_.isSource).forEach { t =>
+      recurse(t, new TaskQueue(MachineType.SMALL))
+    }
+    paths.add(scheduleFreeNodes(graph))
+
+    paths
   }
 
 //  def linearCluster(numNodes: Int): util.List[TaskQueue] = {

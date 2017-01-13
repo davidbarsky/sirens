@@ -4,6 +4,6 @@ import java.util.{List => JavaList}
 
 import com.davidbarsky.dag.models.TaskQueue
 
-trait UnboundedScheduler {
-  def generateSchedule(numNodes: Int): JavaList[TaskQueue]
+trait BoundedScheduler {
+  def generateSchedule(numQueues: Int): JavaList[TaskQueue]
 }
