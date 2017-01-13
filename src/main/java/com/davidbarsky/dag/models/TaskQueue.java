@@ -1,10 +1,11 @@
 package com.davidbarsky.dag.models;
 
+import com.davidbarsky.dag.models.states.MachineType;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.davidbarsky.dag.models.states.MachineType;
 
 public class TaskQueue {
 	private ArrayList<Task> tasks;
@@ -93,6 +94,10 @@ public class TaskQueue {
 	
 	public String toShortString() {
 		return tasks.stream().map(t -> String.valueOf(t.getID())).collect(Collectors.joining(" "));
+	}
+
+	public void sortTasksByID() {
+		Collections.sort(tasks, (a, b) -> (a.getID() - b.getID()));
 	}
 
 	@Override

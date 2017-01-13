@@ -7,6 +7,7 @@ import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.schedulers.*;
 
+
 public class Main {
     public static void main(String... args) {
         // Init
