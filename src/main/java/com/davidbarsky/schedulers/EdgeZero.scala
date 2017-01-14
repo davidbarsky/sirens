@@ -31,7 +31,7 @@ class EdgeZero extends UnboundedScheduler {
   }
 
   def findTLevel(task: Task): Int = {
-    0
+
   }
 
   def findBLevel(task: Task): Int = {

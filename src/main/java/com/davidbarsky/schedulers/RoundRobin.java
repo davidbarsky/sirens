@@ -11,44 +11,43 @@ import java.util.stream.IntStream;
 
 public class RoundRobin implements BoundedScheduler {
 
-    public RoundRobin() {}
+  public RoundRobin() {}
 
-    public List<TaskQueue> generateSchedule(int numQueues) {
-        ArrayList<TaskQueue> queues = new ArrayList<>(numQueues);
-        Map<Integer, Task> tasks = new HashMap<>();
-        int i = 0;
+  public List<TaskQueue> generateSchedule(int numQueues) {
+    ArrayList<TaskQueue> queues = new ArrayList<>(numQueues);
+    Map<Integer, Task> tasks = new HashMap<>();
+    int i = 0;
 
-        IntStream.range(0, numQueues)
-                .forEach(k -> queues.add(new TaskQueue(MachineType.SMALL)));
+    IntStream.range(0, numQueues).forEach(k -> queues.add(new TaskQueue(MachineType.SMALL)));
 
-        Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources(20);
-        // round-robin each vertex to a task queue
-        for (Vertex v : vertices) {
-            int vertexLatency = (int) (double) Double.valueOf(v.getVertexProperties().get("latency"));
+    Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources(20);
+    // round-robin each vertex to a task queue
+    for (Vertex v : vertices) {
+      int vertexLatency = (int) (double) Double.valueOf(v.getVertexProperties().get("latency"));
 
-            TaskQueue tq = queues.get(i);
-            i = (i + 1) % numQueues;
+      TaskQueue tq = queues.get(i);
+      i = (i + 1) % numQueues;
 
-            Map<MachineType, Integer> latencies = new EnumMap<>(MachineType.class);
-            latencies.put(MachineType.SMALL, vertexLatency);
+      Map<MachineType, Integer> latencies = new EnumMap<>(MachineType.class);
+      latencies.put(MachineType.SMALL, vertexLatency);
 
-            Task t = new Task(v.getID(), tq, latencies);
-            tasks.put(v.getID(), t);
-            tq.add(t);
-        }
-
-        // add dependencies
-        for (Vertex v : vertices) {
-            Task t = tasks.get(v.getID());
-            for (Map.Entry<Vertex, Map<String, String>> child : v.getChildren().entrySet()) {
-                int childID = child.getKey().getID();
-                Task dependent = tasks.get(childID);
-                int networkCost = (int) (double) Double.valueOf(child.getValue().get("networking"));
-
-                dependent.addDependency(networkCost, t);
-            }
-        }
-
-        return queues;
+      Task t = new Task(v.getID(), tq, latencies);
+      tasks.put(v.getID(), t);
+      tq.add(t);
     }
+
+    // add dependencies
+    for (Vertex v : vertices) {
+      Task t = tasks.get(v.getID());
+      for (Map.Entry<Vertex, Map<String, String>> child : v.getChildren().entrySet()) {
+        int childID = child.getKey().getID();
+        Task dependent = tasks.get(childID);
+        int networkCost = (int) (double) Double.valueOf(child.getValue().get("networking"));
+
+        dependent.addDependency(networkCost, t);
+      }
+    }
+
+    return queues;
+  }
 }

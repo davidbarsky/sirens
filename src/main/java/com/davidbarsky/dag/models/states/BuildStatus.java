@@ -1,6 +1,6 @@
 package com.davidbarsky.dag.models.states;
 
 public enum BuildStatus {
-    BUILT,
-    NOT_BUILT
+  BUILT,
+  NOT_BUILT
 }

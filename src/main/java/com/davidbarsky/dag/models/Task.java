@@ -1,247 +1,227 @@
 package com.davidbarsky.dag.models;
 
+import com.davidbarsky.dag.DAGException;
+import com.davidbarsky.dag.models.states.BuildStatus;
+import com.davidbarsky.dag.models.states.MachineType;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import com.davidbarsky.dag.DAGException;
-import com.davidbarsky.dag.models.states.BuildStatus;
-import com.davidbarsky.dag.models.states.MachineType;
-
 public class Task implements Comparable<Task> {
-	private Integer id;
+  private Integer id;
 
-	private BuildStatus buildStatus;
-	private Optional<StartEndTime> startEndTime;
+  private BuildStatus buildStatus;
+  private Optional<StartEndTime> startEndTime;
 
-	private Map<Task, Integer> dependencies;
-	private Map<Task, Integer> dependents;
+  private Map<Task, Integer> dependencies;
+  private Map<Task, Integer> dependents;
 
-	private Map<MachineType, Integer> latencies;
-	private TaskQueue tq;
+  private Map<MachineType, Integer> latencies;
+  private TaskQueue tq;
 
-	public Task(Integer id, TaskQueue tq, Map<MachineType, Integer> latencies) {
-		this.id = id;
-		this.buildStatus = BuildStatus.NOT_BUILT;
-		this.startEndTime = Optional.empty();
-		this.dependencies = new HashMap<>();
-		this.dependents = new HashMap<>();
-		this.latencies = latencies;
-		this.tq = tq;
-	}
-	
-	public Task(Integer id, Map<MachineType, Integer> latencies) {
-		this.id = id;
-		this.buildStatus = BuildStatus.NOT_BUILT;
-		this.startEndTime = Optional.empty();
-		this.dependencies = new HashMap<>();
-		this.dependents = new HashMap<>();
-		this.latencies = latencies;
-	}
+  public Task(Integer id, TaskQueue tq, Map<MachineType, Integer> latencies) {
+    this.id = id;
+    this.buildStatus = BuildStatus.NOT_BUILT;
+    this.startEndTime = Optional.empty();
+    this.dependencies = new HashMap<>();
+    this.dependents = new HashMap<>();
+    this.latencies = latencies;
+    this.tq = tq;
+  }
 
-	public void addDependency(int networkCost, Task t) {
-		if (t == null) {
-			throw new NullPointerException("Null task given as a dependency!");
-		}
-		dependencies.put(t, networkCost);
-		t.addDependent(networkCost, this);
-	}
+  public Task(Integer id, Map<MachineType, Integer> latencies) {
+    this.id = id;
+    this.buildStatus = BuildStatus.NOT_BUILT;
+    this.startEndTime = Optional.empty();
+    this.dependencies = new HashMap<>();
+    this.dependents = new HashMap<>();
+    this.latencies = latencies;
+  }
 
-	private void addDependent(int networkCost, Task t) {
-		dependents.put(t, networkCost);
-	}
+  public void addDependency(int networkCost, Task t) {
+    if (t == null) {
+      throw new NullPointerException("Null task given as a dependency!");
+    }
+    dependencies.put(t, networkCost);
+    t.addDependent(networkCost, this);
+  }
 
-	public TaskQueue getTaskQueue() {
-		return tq;
-	}
-	
-	public void setTaskQueue(TaskQueue tq) {
-		this.tq = tq;
-	}
+  private void addDependent(int networkCost, Task t) {
+    dependents.put(t, networkCost);
+  }
 
-	public boolean isBuilt() {
-		if (buildStatus == BuildStatus.BUILT && startEndTime.isPresent())
-			return true;
+  public TaskQueue getTaskQueue() {
+    return tq;
+  }
 
-		if (buildStatus == BuildStatus.BUILT && !startEndTime.isPresent())
-			throw new DAGException("Invariant violated: should not be able to have a built task without a start and end time!");
+  public void setTaskQueue(TaskQueue tq) {
+    this.tq = tq;
+  }
 
-		return false;
-	}
+  public boolean isBuilt() {
+    if (buildStatus == BuildStatus.BUILT && startEndTime.isPresent()) return true;
 
-	public boolean buildable() {
-		return dependencies.keySet()
-				.stream()
-				.allMatch(t -> t.isBuilt());
-	}
+    if (buildStatus == BuildStatus.BUILT && !startEndTime.isPresent())
+      throw new DAGException(
+          "Invariant violated: should not be able to have a built task without a start and end time!");
 
-	public void unbuild() {
-		this.buildStatus = BuildStatus.NOT_BUILT;
-		this.startEndTime = Optional.empty();
-	}
-	
-	private int findLatestEndingDep() {
-		// find the latest ending dependency, or, if one of my deps
-		// hasn't been built yet, fail.
-		int maxEnd = Integer.MIN_VALUE;
-		for (Task dep : this.dependencies.keySet()) {
-			if (!dep.isBuilt())
-				return -1;
-			
-			int theirEnd = dep.getStartEndTime().get().getEnd();
-			maxEnd = (maxEnd < theirEnd ? theirEnd : maxEnd);
-		}
+    return false;
+  }
 
-		return maxEnd;
-	}
-	
-	private int calculateNetworkingTime() {
-		// figure out how much time we will need to spend doing networking...
-		// (time we will use to write our data to other VMs with our dependents)
-		int networkingTime = 0;
-		for (Entry<Task, Integer> e : dependents.entrySet()) {
-			networkingTime += (e.getKey().getTaskQueue() != this.getTaskQueue() ? e.getValue() : 0);
-		}
-		
-		return networkingTime;
-	}
+  public boolean buildable() {
+    return dependencies.keySet().stream().allMatch(t -> t.isBuilt());
+  }
 
-	public boolean isLeaf() {
-		return getDependents().isEmpty();
-	}
+  public void unbuild() {
+    this.buildStatus = BuildStatus.NOT_BUILT;
+    this.startEndTime = Optional.empty();
+  }
 
-	public boolean isSource() {
-		return getDependencies().isEmpty();
-	}
+  private int findLatestEndingDep() {
+    // find the latest ending dependency, or, if one of my deps
+    // hasn't been built yet, fail.
+    int maxEnd = Integer.MIN_VALUE;
+    for (Task dep : this.dependencies.keySet()) {
+      if (!dep.isBuilt()) return -1;
 
-	public boolean isFreeNode() {
-		return getDependencies().size() == 0 && getDependents().size() == 0;
-	}
+      int theirEnd = dep.getStartEndTime().get().getEnd();
+      maxEnd = (maxEnd < theirEnd ? theirEnd : maxEnd);
+    }
 
-	public int inDegree() {
-		return getDependents().keySet().size();
-	}
+    return maxEnd;
+  }
 
-	public int outDegree() {
-		return getDependents().keySet().size();
-	}
+  private int calculateNetworkingTime() {
+    // figure out how much time we will need to spend doing networking...
+    // (time we will use to write our data to other VMs with our dependents)
+    int networkingTime = 0;
+    for (Entry<Task, Integer> e : dependents.entrySet()) {
+      networkingTime += (e.getKey().getTaskQueue() != this.getTaskQueue() ? e.getValue() : 0);
+    }
 
-	public int edgeWeight() {
-		int inbound = getDependencies()
-				.values()
-				.stream()
-				.mapToInt(Integer::intValue)
-				.sum();
+    return networkingTime;
+  }
 
-		int outbound = getDependents()
-				.values()
-				.stream()
-				.mapToInt(Integer::intValue)
-				.sum();
+  public boolean isLeaf() {
+    return getDependents().isEmpty();
+  }
 
-		return inbound + outbound;
-	}
+  public boolean isSource() {
+    return getDependencies().isEmpty();
+  }
 
-	public Optional<StartEndTime> build() {
-		if (tq == null)
-			return Optional.empty();
-		
-		if (isBuilt())
-			return startEndTime;
+  public boolean isFreeNode() {
+    return getDependencies().size() == 0 && getDependents().size() == 0;
+  }
 
-		
-		// find the latest ending dependency
-		int latestDep = findLatestEndingDep();
-		if (latestDep == -1)
-			return Optional.empty();
-		
+  public int inDegree() {
+    return getDependents().keySet().size();
+  }
 
-		// find the latest starting task on my machine currently
-		int latestStart = tq.geEndTimeOfLastBuiltTask();
-		
-		// compute how long we will have to spend on networking operations
-		int networkingTime = calculateNetworkingTime();
-		
-		int myStart = Math.max(latestStart, latestDep);
-		int myEnd = myStart + latencies.get(tq.getMachineType()) + networkingTime;
+  public int outDegree() {
+    return getDependents().keySet().size();
+  }
 
-		this.startEndTime = Optional.of(new StartEndTime(myStart, myEnd, myEnd - networkingTime));
-		this.buildStatus = BuildStatus.BUILT;
+  public int edgeWeight() {
+    int inbound = getDependencies().values().stream().mapToInt(Integer::intValue).sum();
 
-		return startEndTime;
-	}
+    int outbound = getDependents().values().stream().mapToInt(Integer::intValue).sum();
 
-	public Map<Task, Integer> getDependencies() {
-		return dependencies;
-	}
+    return inbound + outbound;
+  }
 
-	public Map<Task, Integer> getDependents() {
-		return dependents;
-	}
+  public Optional<StartEndTime> build() {
+    if (tq == null) return Optional.empty();
 
-	public BuildStatus getBuildStatus() {
-		return buildStatus;
-	}
+    if (isBuilt()) return startEndTime;
 
-	public void setBuildStatus(BuildStatus buildStatus) {
-		this.buildStatus = buildStatus;
-	}
+    // find the latest ending dependency
+    int latestDep = findLatestEndingDep();
+    if (latestDep == -1) return Optional.empty();
 
-	public Optional<StartEndTime> getStartEndTime() {
-		return startEndTime;
-	}
+    // find the latest starting task on my machine currently
+    int latestStart = tq.geEndTimeOfLastBuiltTask();
 
-	public void setStartEndTime(Optional<StartEndTime> startEndTime) {
-		this.startEndTime = startEndTime;
-	}
+    // compute how long we will have to spend on networking operations
+    int networkingTime = calculateNetworkingTime();
 
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof Task))
-			return false;
+    int myStart = Math.max(latestStart, latestDep);
+    int myEnd = myStart + latencies.get(tq.getMachineType()) + networkingTime;
 
-		return this.id == ((Task)o).id;		
-	}
+    this.startEndTime = Optional.of(new StartEndTime(myStart, myEnd, myEnd - networkingTime));
+    this.buildStatus = BuildStatus.BUILT;
 
-	@Override
-	public int hashCode() {
-		return Integer.hashCode(id);
-	}
-	
-	@Override
-	public String toString() {
-		return id + (this.isBuilt() ? "B" : "");
-	}
+    return startEndTime;
+  }
 
-	@Override
-	public int compareTo(Task that) {
-	    if (!this.startEndTime.isPresent() || !that.startEndTime.isPresent())
-	    	throw new DAGException("Tasks have not been built; there is no logical way to compare them.");
+  public Map<Task, Integer> getDependencies() {
+    return dependencies;
+  }
 
-		if (this.startEndTime.get().getEnd() <= that.startEndTime.get().getStart() &&
-				this.startEndTime.get().getStart() < this.startEndTime.get().getStart()) {
-			return -1;
-		} else if (this.startEndTime.get().getStart() >= that.startEndTime.get().getEnd() &&
-				this.startEndTime.get().getEnd() >= that.startEndTime.get().getEnd()) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-	
-	public int getCostTo(Task task) {
-		return dependents.getOrDefault(task, 0) + dependencies.getOrDefault(task, 0);
-	}
-	
+  public Map<Task, Integer> getDependents() {
+    return dependents;
+  }
 
-	public int getID() {
-		return id;
-	}
+  public BuildStatus getBuildStatus() {
+    return buildStatus;
+  }
 
-	public Map<MachineType, Integer> getLatencies() {
-		return latencies;
-	}
+  public void setBuildStatus(BuildStatus buildStatus) {
+    this.buildStatus = buildStatus;
+  }
 
+  public Optional<StartEndTime> getStartEndTime() {
+    return startEndTime;
+  }
 
+  public void setStartEndTime(Optional<StartEndTime> startEndTime) {
+    this.startEndTime = startEndTime;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Task)) return false;
+
+    return this.id == ((Task) o).id;
+  }
+
+  @Override
+  public int hashCode() {
+    return Integer.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return id + (this.isBuilt() ? "B" : "");
+  }
+
+  @Override
+  public int compareTo(Task that) {
+    if (!this.startEndTime.isPresent() || !that.startEndTime.isPresent())
+      throw new DAGException("Tasks have not been built; there is no logical way to compare them.");
+
+    if (this.startEndTime.get().getEnd() <= that.startEndTime.get().getStart()
+        && this.startEndTime.get().getStart() < this.startEndTime.get().getStart()) {
+      return -1;
+    } else if (this.startEndTime.get().getStart() >= that.startEndTime.get().getEnd()
+        && this.startEndTime.get().getEnd() >= that.startEndTime.get().getEnd()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  public int getCostTo(Task task) {
+    return dependents.getOrDefault(task, 0) + dependencies.getOrDefault(task, 0);
+  }
+
+  public int getID() {
+    return id;
+  }
+
+  public Map<MachineType, Integer> getLatencies() {
+    return latencies;
+  }
 }
