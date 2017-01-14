@@ -3,6 +3,7 @@ package com.davidbarsky.schedulers;
 import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.TopologicalSorter;
 import com.davidbarsky.dag.models.Task;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class EdgeZeroTest {
     Integer zeroValue = leveledGraph.values().stream()
             .filter(i -> i == 0)
             .findFirst()
-            .orElseThrow(DAGException::new);
+            .orElseThrow(AssertionError::new);
 
     assertEquals(new Integer(0), zeroValue);
   }
@@ -48,7 +49,7 @@ public class EdgeZeroTest {
     Integer zeroValue = leveledGraph.values().stream()
             .filter(i -> i == 0)
             .findFirst()
-            .orElseThrow(DAGException::new);
+            .orElseThrow(AssertionError::new);
 
     assertEquals(new Integer(0), zeroValue);
   }
