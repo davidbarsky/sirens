@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -30,9 +29,8 @@ public class EdgeZeroTest {
             assertNotNull(task);
         });
 
-        // B-levels must consider computation costs.
-        boolean noZeroValuesPresent = leveledGraph.values()
-                .stream()
+        // B-levels must consider computation costs, so zero-values are *not* possible.
+        boolean noZeroValuesPresent = leveledGraph.values().stream()
                 .noneMatch(i -> i == 0);
         assertTrue(noZeroValuesPresent);
     }
@@ -46,11 +44,9 @@ public class EdgeZeroTest {
             assertNotNull(task);
         });
 
-        List<Integer> zeroValues = leveledGraph.values().stream()
-                .filter(i -> i == 0)
-                .collect(Collectors.toList());
-        assertTrue("At least 1 node in the graph can have a T-level of 0, with no upper bound.",
-                zeroValues.size() >= 1);
+        boolean someZeroValuesPresent = leveledGraph.values().stream()
+                .anyMatch(i -> i == 0);
+        assertTrue(someZeroValuesPresent);
     }
 
     @Test
