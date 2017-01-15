@@ -1,61 +1,60 @@
 package com.davidbarsky.schedulers;
 
-import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.TopologicalSorter;
 import com.davidbarsky.dag.models.Task;
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
 public class EdgeZeroTest {
-  @Test
-  public void findBLevel() throws Exception {
-    List<Task> graph = TopologicalSorter.generateGraph(20);
-    EdgeZero scheduler = new EdgeZero();
+    private List<Task> graph;
+    private EdgeZero scheduler;
 
-    Map<Task, Integer> leveledGraph = scheduler.findBLevel(graph, 1);
-    // Sanity Checks
-    leveledGraph.forEach((task, integer) -> {
-      assertNotNull(integer);
-      assertNotNull(task);
-    });
+    @Before
+    public void init() {
+        graph = TopologicalSorter.generateGraph(20);
+        scheduler = new EdgeZero();
+    }
 
-    // At most 1 node should have a t-level of 0.
-    Integer zeroValue = leveledGraph.values().stream()
-            .filter(i -> i == 0)
-            .findFirst()
-            .orElseThrow(AssertionError::new);
+    @Test
+    public void findBLevel() throws Exception {
+        Map<Task, Integer> leveledGraph = scheduler.findBLevel(graph, 1);
+        // Sanity Checks
+        leveledGraph.forEach((task, integer) -> {
+            assertNotNull(integer);
+            assertNotNull(task);
+        });
 
-    assertEquals(new Integer(0), zeroValue);
-  }
+        // B-levels must consider computation costs.
+        boolean noZeroValuesPresent = leveledGraph.values()
+                .stream()
+                .noneMatch(i -> i == 0);
+        assertTrue(noZeroValuesPresent);
+    }
 
-  @Test
-  public void findTLevel() throws Exception {
-    List<Task> graph = TopologicalSorter.generateGraph(20);
-    EdgeZero scheduler = new EdgeZero();
+    @Test
+    public void findTLevel() throws Exception {
+        Map<Task, Integer> leveledGraph = scheduler.findTLevel(graph, 1);
+        // Sanity Checks
+        leveledGraph.forEach((task, integer) -> {
+            assertNotNull(integer);
+            assertNotNull(task);
+        });
 
-    Map<Task, Integer> leveledGraph = scheduler.findTLevel(graph, 1);
-    // Sanity Checks
-    leveledGraph.forEach((task, integer) -> {
-      assertNotNull(integer);
-      assertNotNull(task);
-    });
+        List<Integer> zeroValues = leveledGraph.values().stream()
+                .filter(i -> i == 0)
+                .collect(Collectors.toList());
+        assertTrue("At least 1 node in the graph can have a T-level of 0, with no upper bound.",
+                zeroValues.size() >= 1);
+    }
 
-    // At most 1 node should have a t-level of 0.
-    Integer zeroValue = leveledGraph.values().stream()
-            .filter(i -> i == 0)
-            .findFirst()
-            .orElseThrow(AssertionError::new);
-
-    assertEquals(new Integer(0), zeroValue);
-  }
-
-  @Test
-  public void generateSchedule() throws Exception {
-    fail("Not implemented yet.");
-  }
+    @Test
+    public void generateSchedule() throws Exception {
+        fail("Not implemented yet.");
+    }
 }

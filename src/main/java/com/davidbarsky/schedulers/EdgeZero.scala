@@ -49,11 +49,11 @@ class EdgeZero extends UnboundedScheduler {
     for (task: Task <- graph.asScala) {
       var max = 0
       for (child: Task <- task.getDependents.keySet().asScala) {
-        if (levels.getOrDefault(child, 0) + computationCost + child.getCostTo(task) > max) {
-          max = levels.getOrDefault(child, 0) + computationCost + child.getCostTo(task)
+        if (child.getCostTo(task) + levels.getOrDefault(task, 0) > max) {
+          max = levels.getOrDefault(child, 0) + child.getCostTo(task)
         }
       }
-      levels.put(task, max)
+      levels.put(task, max + computationCost)
     }
 
     levels
