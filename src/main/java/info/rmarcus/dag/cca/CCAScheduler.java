@@ -19,7 +19,13 @@ public class CCAScheduler {
 			toR.add(toAdd);
 		}
 
-		// next, compute the priority of each cluster, which is the max
+		while (attemptMerge(toR, deadline));
+
+		return toR;
+	}
+
+	private static boolean attemptMerge(List<TaskQueue> toR, int deadline) {
+		// compute the priority of each cluster, which is the max
 		// priority of a task within a cluster
 		Map<TaskQueue, Integer> priority = new HashMap<>();
 
@@ -28,18 +34,61 @@ public class CCAScheduler {
 					.values().stream()
 					.mapToInt(i -> i)
 					.max().orElse(0));
-;		}
+		}
 
 		// for each cluster, find all the clusters with a lower priority and consider a merge.
 		for (TaskQueue tq : toR) {
-			Set<TaskQueue> candidates = toR.stream()
+			TaskQueue[] candidates = toR.stream()
 					.filter(c -> c != tq)
 					.filter(c -> priority.get(c) <= priority.get(tq))
-					.collect(Collectors.toSet());
+					.toArray(i -> new TaskQueue[i]);
+
+			// check every pair c1, c2 in candidates for a merge. For each pair, we need to consider:
+			// 1. the pair alone
+			// 2. the pair on a small machine
+			// 3. the pair on a large machine
+			int aloneCost = score(toR);
+			for (int i = 0; i < candidates.length; i++) {
+				TaskQueue c1 = candidates[i];
+				for (int j = i; j < candidates.length; j++) {
+					TaskQueue c2 = candidates[j];
+
+					// first, try merging the clusters into a small machine
+					int smallMergedCost = scoreCombination(toR, c1, c2, MachineType.SMALL);
+
+					// second, try merging the clusters into a large machine
+					int largeMergedCost = scoreCombination (toR, c1, c2, MachineType.LARGE);
+
+					if (smallMergedCost <= largeMergedCost && smallMergedCost < aloneCost) {
+						// accept the merge onto the small machine
+						toR.remove(c1);
+						toR.remove(c2);
+
+						TaskQueue toAdd = new TaskQueue(MachineType.SMALL);
+						c1.getTasks().forEach(toAdd::add);
+						c2.getTasks().forEach(toAdd::add);
+						toR.add(toAdd);
+						return true;
+					}
+
+					if (largeMergedCost < smallMergedCost && largeMergedCost < aloneCost) {
+						// accept the merge onto the small machine
+						toR.remove(c1);
+						toR.remove(c2);
+
+						TaskQueue toAdd = new TaskQueue(MachineType.LARGE);
+						c1.getTasks().forEach(toAdd::add);
+						c2.getTasks().forEach(toAdd::add);
+						toR.add(toAdd);
+						return true;	
+					}
+				}
+			}
 
 		}
+		// couldn't find any good merges.
+		return false;
 
-		return null;
 	}
 
 	private static Map<Task, Integer> computePriority(Collection<Task> tasks, int deadline) {
@@ -53,6 +102,17 @@ public class CCAScheduler {
 		}
 
 		return toR;
+	}
+
+	private static int scoreCombination(Collection<TaskQueue> tqs, TaskQueue c1, TaskQueue c2, MachineType mt) {
+		Set<TaskQueue> withMerged = new HashSet<>(tqs);
+		withMerged.remove(c1);
+		withMerged.remove(c2);
+		TaskQueue merged = new TaskQueue(mt);
+		c1.getTasks().stream().forEach(merged::add);
+		c2.getTasks().stream().forEach(merged::add);
+		withMerged.add(merged);
+		return score(withMerged);
 	}
 
 	private static int score(Collection<TaskQueue> tqs) {
@@ -75,7 +135,7 @@ public class CCAScheduler {
 			est.put(t, 0);
 			enqueued.add(t);
 		}
-		
+
 		// for each element in the queue, set the earliest start time of each task to
 		// the max of the sum of each parents EST + their latency + their edge to me
 		while (!queue.isEmpty()) {
@@ -89,12 +149,12 @@ public class CCAScheduler {
 
 			// enqueue everything we don't already have
 			next.getDependents().keySet()
-					.stream()
-					.filter(t -> !enqueued.contains(t))
-					.forEach(t -> {
-						enqueued.add(t);
-						queue.add(t);
-					});
+			.stream()
+			.filter(t -> !enqueued.contains(t))
+			.forEach(t -> {
+				enqueued.add(t);
+				queue.add(t);
+			});
 
 		}
 
@@ -123,14 +183,16 @@ public class CCAScheduler {
 					.mapToInt(t -> lft.get(t) + latency(t) + communication(next, t))
 					.min().orElse(deadline);
 
+			
+			lft.put(next, v);
 			// enqueue all of our parents that we don't already have
 			next.getDependencies().keySet()
-					.stream()
-					.filter(t -> !enqueued.contains(t))
-					.forEach(t -> {
-						enqueued.add(t);
-						queue.add(t);
-					});
+			.stream()
+			.filter(t -> !enqueued.contains(t))
+			.forEach(t -> {
+				enqueued.add(t);
+				queue.add(t);
+			});
 		}
 
 		return lft;

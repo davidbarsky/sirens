@@ -13,6 +13,7 @@ import com.davidbarsky.dag.models.TaskQueue;
 
 import info.rmarcus.birkhoffvonneumann.CoeffAndMatrix;
 import info.rmarcus.birkhoffvonneumann.learners.generalized_loss.MHJointPermutationLearner;
+import info.rmarcus.dag.cca.CCAScheduler;
 import info.rmarcus.dag.permsolve.PermutationSolver;
 import info.rmarcus.dynamic_critical_path.DynamicCriticalPath;
 import info.rmarcus.ggen4j.graph.Vertex;
@@ -30,18 +31,18 @@ public class BirkhoffScheduler {
 				
 		System.out.println("Number of tasks: " + tasks.size());
 		
-//		Set<List<String>> clusters = DynamicCriticalPath.schedule(DAGGenerator.getVertexWeightMap(vertices), DAGGenerator.getEdgeWeightMap(vertices));
+//		Set<List<String>> clusters = CCAScheduler.cca(tasks, 1000);
 //		System.out.println(clusters);
 //		Collection<TaskQueue> tqs = DAGGenerator.clustersToTasks(vertices, clusters);
 //		tqs = Actualizer.actualize(tqs);
 //		System.out.println("Cost: " + CostAnalyzer.getLatency((List<TaskQueue>) tqs));
 
-		jps = new MHJointPermutationLearner(new int[] { tasks.size(), tasks.size() }, this::loss);
-		for (int i = 0; i < 10000; i++) {
-			if (i % 100 == 0)
-				System.out.println(i);
-			jps.iterate();
-		}
+//		jps = new MHJointPermutationLearner(new int[] { tasks.size(), tasks.size() }, this::loss);
+//		for (int i = 0; i < 10000; i++) {
+//			if (i % 100 == 0)
+//				System.out.println(i);
+//			jps.iterate();
+//		}
 
 	}
 
