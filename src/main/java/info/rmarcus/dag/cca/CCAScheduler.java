@@ -10,10 +10,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CCAScheduler {
-	public static Collection<TaskQueue> cca(Collection<Task> tasks, int deadline) {
+
+	private List<Task> topo;
+
+	public CCAScheduler(Collection<Task> tasks) {
+		this.topo = tasks.stream()
+				.sorted((a, b) -> a.getID() - b.getID())
+				.collect(Collectors.toList());
+	}
+
+	public Collection<TaskQueue> schedule(int deadline) {
 		// first, cluster each task into it's own task queue (the initial clustering)
-		List<TaskQueue> toR = new ArrayList<>(tasks.size());
-		for (Task t : tasks) {
+		List<TaskQueue> toR = new ArrayList<>(topo.size());
+		for (Task t : topo) {
 			TaskQueue toAdd = new TaskQueue(MachineType.SMALL);
 			toAdd.add(t);
 			toR.add(toAdd);
@@ -24,7 +33,7 @@ public class CCAScheduler {
 		return toR;
 	}
 
-	private static boolean attemptMerge(List<TaskQueue> toR, int deadline) {
+	private boolean attemptMerge(List<TaskQueue> toR, int deadline) {
 		// compute the priority of each cluster, which is the max
 		// priority of a task within a cluster
 		Map<TaskQueue, Integer> priority = new HashMap<>();
@@ -91,11 +100,11 @@ public class CCAScheduler {
 
 	}
 
-	private static Map<Task, Integer> computePriority(Collection<Task> tasks, int deadline) {
+	private Map<Task, Integer> computePriority(Collection<Task> tasks, int deadline) {
 		Map<Task, Integer> toR = new HashMap<>();
 
-		Map<Task, Integer> est = computeEST(tasks);
-		Map<Task, Integer> lft = computeLFT(tasks, deadline);
+		Map<Task, Integer> est = computeEST();
+		Map<Task, Integer> lft = computeLFT(deadline);
 
 		for (Task t : tasks) {
 			toR.put(t, lft.get(t) - est.get(t));
@@ -104,7 +113,7 @@ public class CCAScheduler {
 		return toR;
 	}
 
-	private static int scoreCombination(Collection<TaskQueue> tqs, TaskQueue c1, TaskQueue c2, MachineType mt) {
+	private int scoreCombination(Collection<TaskQueue> tqs, TaskQueue c1, TaskQueue c2, MachineType mt) {
 		Set<TaskQueue> withMerged = new HashSet<>(tqs);
 		withMerged.remove(c1);
 		withMerged.remove(c2);
@@ -115,7 +124,7 @@ public class CCAScheduler {
 		return score(withMerged);
 	}
 
-	private static int score(Collection<TaskQueue> tqs) {
+	private int score(Collection<TaskQueue> tqs) {
 		for (TaskQueue tq : tqs) {
 			tq.unbuildAll();
 			tq.sortTasksByID();
@@ -124,49 +133,29 @@ public class CCAScheduler {
 		return CostAnalyzer.findCost(Actualizer.actualize(tqs));
 	}
 
-	private static Map<Task, Integer> computeEST(Collection<Task> tasks) {
+	private Map<Task, Integer> computeEST() {
 		Map<Task, Integer> est = new HashMap<>();
-		Deque<Task> queue = new LinkedList<>();
-		Set<Task> enqueued = new HashSet<>();
-		queue.addAll(getSources(tasks));
 
-		// the EST of each root is 0
-		for (Task t : queue) {
-			est.put(t, 0);
-			enqueued.add(t);
-		}
-
-		// for each element in the queue, set the earliest start time of each task to
+		// for each task in the list, set the earliest start time of each task to
 		// the max of the sum of each parents EST + their latency + their edge to me
-		while (!queue.isEmpty()) {
-			Task next = queue.pop();
+		for (Task next : topo) {
 			int v = next.getDependencies().keySet()
 					.stream()
 					.mapToInt(t -> communication(t, next) + latency(t) + est.get(t))
 					.max().orElse(0);
 
 			est.put(next, v);
-
-			// enqueue everything we don't already have
-			next.getDependents().keySet()
-			.stream()
-			.filter(t -> !enqueued.contains(t))
-			.forEach(t -> {
-				enqueued.add(t);
-				queue.add(t);
-			});
-
 		}
 
 		return est;
 	}
 
-	private static Map<Task, Integer> computeLFT(Collection<Task> tasks, int deadline) {
+	private Map<Task, Integer> computeLFT(int deadline) {
 		Map<Task, Integer> lft = new HashMap<>();
 		Deque<Task> queue = new LinkedList<>();
 		Set<Task> enqueued = new HashSet<>();
 
-		queue.addAll(getSinks(tasks));
+		queue.addAll(getSinks(topo));
 
 		// the LFT of each sink is the deadline
 		for (Task sink : queue) {
@@ -198,11 +187,11 @@ public class CCAScheduler {
 		return lft;
 	}
 
-	private static int latency(Task t) {
+	private int latency(Task t) {
 		return t.getLatencies().get(t.getTaskQueue().getMachineType());
 	}
 
-	private static int communication(Task t1, Task t2) {
+	private int communication(Task t1, Task t2) {
 		if (t1.getTaskQueue() == t2.getTaskQueue())
 			return 0;
 
@@ -212,13 +201,13 @@ public class CCAScheduler {
 		return t1.getDependents().get(t2);
 	}
 
-	private static Set<Task> getSources(Collection<Task> tasks) {
+	private Set<Task> getSources(Collection<Task> tasks) {
 		return tasks.stream()
 				.filter(t -> t.getDependencies().size() == 0)
 				.collect(Collectors.toSet());
 	}
 
-	private static Set<Task> getSinks(Collection<Task> tasks) {
+	private Set<Task> getSinks(Collection<Task> tasks) {
 		return tasks.stream()
 				.filter(t -> t.getDependents().size() == 0)
 				.collect(Collectors.toSet());
