@@ -2,6 +2,7 @@ package info.rmarcus.dag.cca;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
+import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
@@ -12,11 +13,26 @@ import java.util.stream.Collectors;
 public class CCAScheduler {
 
 	private List<Task> topo;
+	private List<Task> rtopo;
 
 	public CCAScheduler(Collection<Task> tasks) {
 		this.topo = tasks.stream()
 				.sorted((a, b) -> a.getID() - b.getID())
 				.collect(Collectors.toList());
+
+		this.rtopo = new ArrayList<>(topo.size());
+
+		// do a reverse topological sort (i.e. with the edges flipped)
+		Set<Task> remaining = new HashSet<>(tasks);
+		Set<Task> complete = new HashSet<>();
+		while (!remaining.isEmpty()) {
+			Task n = remaining.stream()
+					.filter(t -> complete.containsAll(t.getDependents().keySet()))
+					.findAny().orElseThrow(() -> new DAGException("DAG has cycles!"));
+			remaining.remove(n);
+			complete.add(n);
+			rtopo.add(n);
+		}
 	}
 
 	public Collection<TaskQueue> schedule(int deadline) {
@@ -48,7 +64,6 @@ public class CCAScheduler {
 		// for each cluster, find all the clusters with a lower priority and consider a merge.
 		for (TaskQueue tq : toR) {
 			TaskQueue[] candidates = toR.stream()
-					.filter(c -> c != tq)
 					.filter(c -> priority.get(c) <= priority.get(tq))
 					.toArray(i -> new TaskQueue[i]);
 
@@ -56,10 +71,11 @@ public class CCAScheduler {
 			// 1. the pair alone
 			// 2. the pair on a small machine
 			// 3. the pair on a large machine
+			System.out.println("Considering " + candidates.length + " for merging...");
 			int aloneCost = score(toR);
 			for (int i = 0; i < candidates.length; i++) {
 				TaskQueue c1 = candidates[i];
-				for (int j = i; j < candidates.length; j++) {
+				for (int j = i+1; j < candidates.length; j++) {
 					TaskQueue c2 = candidates[j];
 
 					// first, try merging the clusters into a small machine
@@ -76,6 +92,7 @@ public class CCAScheduler {
 						TaskQueue toAdd = new TaskQueue(MachineType.SMALL);
 						c1.getTasks().forEach(toAdd::add);
 						c2.getTasks().forEach(toAdd::add);
+						toAdd.sortTasksByID();
 						toR.add(toAdd);
 						return true;
 					}
@@ -88,6 +105,7 @@ public class CCAScheduler {
 						TaskQueue toAdd = new TaskQueue(MachineType.LARGE);
 						c1.getTasks().forEach(toAdd::add);
 						c2.getTasks().forEach(toAdd::add);
+						toAdd.sortTasksByID();
 						toR.add(toAdd);
 						return true;	
 					}
@@ -120,14 +138,15 @@ public class CCAScheduler {
 		TaskQueue merged = new TaskQueue(mt);
 		c1.getTasks().stream().forEach(merged::add);
 		c2.getTasks().stream().forEach(merged::add);
+		merged.sortTasksByID();
 		withMerged.add(merged);
+
 		return score(withMerged);
 	}
 
 	private int score(Collection<TaskQueue> tqs) {
 		for (TaskQueue tq : tqs) {
 			tq.unbuildAll();
-			tq.sortTasksByID();
 		}
 
 		return CostAnalyzer.findCost(Actualizer.actualize(tqs));
@@ -152,21 +171,10 @@ public class CCAScheduler {
 
 	private Map<Task, Integer> computeLFT(int deadline) {
 		Map<Task, Integer> lft = new HashMap<>();
-		Deque<Task> queue = new LinkedList<>();
-		Set<Task> enqueued = new HashSet<>();
 
-		queue.addAll(getSinks(topo));
-
-		// the LFT of each sink is the deadline
-		for (Task sink : queue) {
-			lft.put(sink, deadline);
-			enqueued.add(sink);
-		}
-
-		// moving upwards from the bottom of the graph, set every node's LFT
+		// \set every node's LFT
 		// to the minimum of their children's: lft - latency - communication
-		while (!queue.isEmpty()) {
-			Task next = queue.pop();
+		for (Task next : rtopo) {
 			int v = next.getDependents().keySet()
 					.stream()
 					.mapToInt(t -> lft.get(t) + latency(t) + communication(next, t))
@@ -174,14 +182,6 @@ public class CCAScheduler {
 
 			
 			lft.put(next, v);
-			// enqueue all of our parents that we don't already have
-			next.getDependencies().keySet()
-			.stream()
-			.filter(t -> !enqueued.contains(t))
-			.forEach(t -> {
-				enqueued.add(t);
-				queue.add(t);
-			});
 		}
 
 		return lft;

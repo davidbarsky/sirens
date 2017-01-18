@@ -1,5 +1,6 @@
 package com.davidbarsky.dag.models;
 
+import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import java.util.ArrayList;
@@ -24,6 +25,10 @@ public class TaskQueue {
 	}
 
 	public void add(Task task) {
+		if (this.hasTask(task.getID())) {
+			throw new DAGException("cannot add the same task to a task queue twice!");
+		}
+
 		task.unbuild();
 		this.tasks.add(task);
 		task.setTaskQueue(this);
@@ -71,6 +76,8 @@ public class TaskQueue {
 			t.unbuild();
 			t.setTaskQueue(this);
 		}
+
+		nextUnbuilt = 0;
 	}
 
 	public List<Task> getTasks() {
@@ -87,9 +94,9 @@ public class TaskQueue {
 
 	@Override
 	public String toString() {
-		return  machineType.toString() + "\n"
+		return  machineType.toString()
 				+ tasks.stream().map(t -> t.toString())
-				.collect(Collectors.joining("\n")) + "\n";
+				.collect(Collectors.joining(","));
 	}
 	
 	public String toShortString() {
@@ -103,7 +110,7 @@ public class TaskQueue {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (!(o instanceof  TaskQueue)) return false;
 
 		TaskQueue taskQueue = (TaskQueue) o;
 
