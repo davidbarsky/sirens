@@ -84,7 +84,10 @@ public class CCAScheduler {
 					// second, try merging the clusters into a large machine
 					int largeMergedCost = scoreCombination (toR, c1, c2, MachineType.LARGE);
 
+					System.out.println(aloneCost + " // " + smallMergedCost + " // " + largeMergedCost);
+
 					if (smallMergedCost <= largeMergedCost && smallMergedCost < aloneCost) {
+						System.out.println("merge onto small");
 						// accept the merge onto the small machine
 						toR.remove(c1);
 						toR.remove(c2);
@@ -98,7 +101,9 @@ public class CCAScheduler {
 					}
 
 					if (largeMergedCost < smallMergedCost && largeMergedCost < aloneCost) {
-						// accept the merge onto the small machine
+						System.out.println("merge onto large");
+
+						// accept the merge onto the large machine
 						toR.remove(c1);
 						toR.remove(c2);
 
@@ -109,6 +114,7 @@ public class CCAScheduler {
 						toR.add(toAdd);
 						return true;	
 					}
+
 				}
 			}
 
