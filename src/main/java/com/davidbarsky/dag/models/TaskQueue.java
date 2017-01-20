@@ -35,7 +35,7 @@ public class TaskQueue {
 		this.nextUnbuilt = 0;
 	}
 
-	public int geEndTimeOfLastBuiltTask() {
+	public int getEndTimeOfLastBuiltTask() {
 		if (nextUnbuilt == 0)
 			return 0;
 		

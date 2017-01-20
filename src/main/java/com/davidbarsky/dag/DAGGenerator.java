@@ -1,26 +1,18 @@
 package com.davidbarsky.dag;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
-
 import info.rmarcus.NullUtils;
 import info.rmarcus.ggen4j.GGen;
 import info.rmarcus.ggen4j.GGenCommand;
 import info.rmarcus.ggen4j.GGenException;
 import info.rmarcus.ggen4j.graph.GGenGraph;
 import info.rmarcus.ggen4j.graph.Vertex;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class DAGGenerator {
 	
@@ -133,11 +125,13 @@ public class DAGGenerator {
 		for (Vertex v : vertices) {
 			// TODO, for now , assume that the latency on the large machine type
 			// is equal to the latency on the small machine type times a guassian
-			// centered at 0.7
+			// centered at x < 1, bounded by some minimum
 			Map<MachineType, Integer> latency = new EnumMap<>(MachineType.class);
 			int l = (int)(double)Double.valueOf(v.getVertexProperties().get("latency"));
 			latency.put(MachineType.SMALL, l);
-			latency.put(MachineType.LARGE, (int)(l * (r.nextGaussian() + 0.7)));
+
+			int largeLatency = (int)(l * Math.max(0.1, r.nextGaussian() + 0.4));
+			latency.put(MachineType.LARGE, (int)(l * (r.nextGaussian() + 8.7)));
 			
 
 			tasks.put(v.getID(), new Task(v.getTopographicalOrder(), latency));

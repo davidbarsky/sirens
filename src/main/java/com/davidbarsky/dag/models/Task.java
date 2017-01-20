@@ -158,7 +158,7 @@ public class Task implements Comparable<Task> {
 		
 
 		// find the latest starting task on my machine currently
-		int latestStart = tq.geEndTimeOfLastBuiltTask();
+		int latestStart = tq.getEndTimeOfLastBuiltTask();
 		
 		// compute how long we will have to spend on networking operations
 		int networkingTime = calculateNetworkingTime();

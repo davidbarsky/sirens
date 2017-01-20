@@ -1,11 +1,11 @@
 package info.rmarcus.dag.cca;
 
 import com.davidbarsky.dag.Actualizer;
-import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
+import info.rmarcus.dag.sla.SLA;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,8 +14,10 @@ public class CCAScheduler {
 
 	private List<Task> topo;
 	private List<Task> rtopo;
+	private SLA sla;
 
-	public CCAScheduler(Collection<Task> tasks) {
+	public CCAScheduler(Collection<Task> tasks, SLA sla) {
+		this.sla = sla;
 		this.topo = tasks.stream()
 				.sorted((a, b) -> a.getID() - b.getID())
 				.collect(Collectors.toList());
@@ -71,7 +73,7 @@ public class CCAScheduler {
 			// 1. the pair alone
 			// 2. the pair on a small machine
 			// 3. the pair on a large machine
-			System.out.println("Considering " + candidates.length + " for merging...");
+			//System.out.println("Considering " + candidates.length + " for merging...");
 			int aloneCost = score(toR);
 			for (int i = 0; i < candidates.length; i++) {
 				TaskQueue c1 = candidates[i];
@@ -84,10 +86,9 @@ public class CCAScheduler {
 					// second, try merging the clusters into a large machine
 					int largeMergedCost = scoreCombination (toR, c1, c2, MachineType.LARGE);
 
-					System.out.println(aloneCost + " // " + smallMergedCost + " // " + largeMergedCost);
 
 					if (smallMergedCost <= largeMergedCost && smallMergedCost < aloneCost) {
-						System.out.println("merge onto small");
+
 						// accept the merge onto the small machine
 						toR.remove(c1);
 						toR.remove(c2);
@@ -101,7 +102,6 @@ public class CCAScheduler {
 					}
 
 					if (largeMergedCost < smallMergedCost && largeMergedCost < aloneCost) {
-						System.out.println("merge onto large");
 
 						// accept the merge onto the large machine
 						toR.remove(c1);
@@ -155,7 +155,7 @@ public class CCAScheduler {
 			tq.unbuildAll();
 		}
 
-		return CostAnalyzer.findCost(Actualizer.actualize(tqs));
+		return sla.computeTotalCost(Actualizer.actualize(tqs));
 	}
 
 	private Map<Task, Integer> computeEST() {

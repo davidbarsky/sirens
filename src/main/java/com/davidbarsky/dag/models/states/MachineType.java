@@ -1,9 +1,9 @@
 package com.davidbarsky.dag.models.states;
 
+import com.davidbarsky.dag.DAGException;
+
 import java.util.EnumMap;
 import java.util.Map;
-
-import com.davidbarsky.dag.DAGException;
 
 // Associated values are costs of the machine
 public enum MachineType {
@@ -12,7 +12,7 @@ public enum MachineType {
     public Integer getCost() {
         switch (this) {
             case SMALL: return 1;
-            case LARGE: return 2;
+            case LARGE: return 5;
             default: throw new DAGException("Invariant broken; MachineType is not defined");
         }
     }
