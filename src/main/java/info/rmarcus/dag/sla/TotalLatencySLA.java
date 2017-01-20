@@ -3,7 +3,7 @@ package info.rmarcus.dag.sla;
 import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.models.TaskQueue;
 
-import java.util.List;
+import java.util.Collection;
 
 public class TotalLatencySLA extends SLA {
 
@@ -14,7 +14,7 @@ public class TotalLatencySLA extends SLA {
     }
 
     @Override
-    public int computePenalty(List<TaskQueue> tqs) {
+    public int computePenalty(Collection<TaskQueue> tqs) {
         int latency = CostAnalyzer.getLatency(tqs);
         if (latency > deadline)
             return (latency - deadline) * 5;

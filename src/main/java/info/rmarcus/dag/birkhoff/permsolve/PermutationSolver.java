@@ -1,4 +1,4 @@
-package info.rmarcus.dag.permsolve;
+package info.rmarcus.dag.birkhoff.permsolve;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,9 +27,9 @@ import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
-import info.rmarcus.dag.permsolve.optimal.InOrderScheduleNode;
-import info.rmarcus.dag.permsolve.optimal.PruningFlyweight;
-import info.rmarcus.dag.permsolve.optimal.ScheduleNode;
+import info.rmarcus.dag.birkhoff.permsolve.optimal.InOrderScheduleNode;
+import info.rmarcus.dag.birkhoff.permsolve.optimal.PruningFlyweight;
+import info.rmarcus.dag.birkhoff.permsolve.optimal.ScheduleNode;
 import info.rmarcus.javautil.IteratorUtilities;
 import info.rmarcus.javautil.StreamUtilities.Pair;
 

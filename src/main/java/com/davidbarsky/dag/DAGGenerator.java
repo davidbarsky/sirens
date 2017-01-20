@@ -130,7 +130,7 @@ public class DAGGenerator {
 			int l = (int)(double)Double.valueOf(v.getVertexProperties().get("latency"));
 			latency.put(MachineType.SMALL, l);
 
-			int largeLatency = (int)(l * Math.max(0.1, r.nextGaussian() + 0.4));
+			int largeLatency = (int)(l * Math.max(0.01, r.nextGaussian() + 0.1));
 			latency.put(MachineType.LARGE, (int)(l * (r.nextGaussian() + 8.7)));
 			
 

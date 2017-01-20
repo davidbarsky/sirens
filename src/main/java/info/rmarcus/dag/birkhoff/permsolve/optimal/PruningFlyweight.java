@@ -1,9 +1,9 @@
-package info.rmarcus.dag.permsolve.optimal;
+package info.rmarcus.dag.birkhoff.permsolve.optimal;
 
 import org.eclipse.jdt.annotation.Nullable;
 
 import info.rmarcus.NullUtils;
-import info.rmarcus.dag.permsolve.PermSolveException;
+import info.rmarcus.dag.birkhoff.permsolve.PermSolveException;
 
 public class PruningFlyweight {
 	private int bestObservedCost = Integer.MAX_VALUE;

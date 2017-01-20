@@ -48,6 +48,7 @@ public class CCAScheduler {
 
 		while (attemptMerge(toR, deadline));
 
+		toR = Actualizer.actualize(toR);
 		return toR;
 	}
 
@@ -73,8 +74,9 @@ public class CCAScheduler {
 			// 1. the pair alone
 			// 2. the pair on a small machine
 			// 3. the pair on a large machine
-			//System.out.println("Considering " + candidates.length + " for merging...");
 			int aloneCost = score(toR);
+			//System.out.println("Considering " + candidates.length + " for merging... (current score: " + aloneCost + ")");
+
 			for (int i = 0; i < candidates.length; i++) {
 				TaskQueue c1 = candidates[i];
 				for (int j = i+1; j < candidates.length; j++) {
@@ -155,7 +157,8 @@ public class CCAScheduler {
 			tq.unbuildAll();
 		}
 
-		return sla.computeTotalCost(Actualizer.actualize(tqs));
+		tqs = Actualizer.actualize(tqs);
+		return sla.computeTotalCost(tqs);
 	}
 
 	private Map<Task, Integer> computeEST() {

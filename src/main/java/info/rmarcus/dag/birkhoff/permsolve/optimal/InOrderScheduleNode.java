@@ -1,4 +1,4 @@
-package info.rmarcus.dag.permsolve.optimal;
+package info.rmarcus.dag.birkhoff.permsolve.optimal;
 
 import java.util.List;
 
