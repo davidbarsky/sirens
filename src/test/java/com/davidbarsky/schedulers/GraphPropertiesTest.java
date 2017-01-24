@@ -1,5 +1,6 @@
 package com.davidbarsky.schedulers;
 
+import com.davidbarsky.dag.models.states.MachineType;
 import org.junit.Test;
 
 import com.davidbarsky.dag.TopologicalSorter;
@@ -21,7 +22,7 @@ public class GraphPropertiesTest {
 
     @Test
     public void findBottomLevelForGraph() throws Exception {
-        Map<Task, Integer> leveledGraph = GraphProperties.findBottomLevel(graph, 1);
+        Map<Task, Integer> leveledGraph = GraphProperties.findBottomLevel(graph, MachineType.SMALL);
         // Sanity Checks
         leveledGraph.forEach((task, integer) -> {
             assertNotNull(integer);
@@ -36,7 +37,7 @@ public class GraphPropertiesTest {
 
     @Test
     public void findTopLevelForGraph() throws Exception {
-        Map<Task, Integer> leveledGraph = GraphProperties.findTopLevel(graph, 1);
+        Map<Task, Integer> leveledGraph = GraphProperties.findTopLevel(graph, MachineType.SMALL);
         // Sanity Checks
         leveledGraph.forEach((task, integer) -> {
             assertNotNull(integer);
@@ -50,7 +51,7 @@ public class GraphPropertiesTest {
 
     @Test
     public void lengthOfLongestPath() {
-        Integer criticalPathLength = GraphProperties.longestLengthOfCriticalPath(graph);
+        Integer criticalPathLength = GraphProperties.lengthOfLongestCP(graph);
         assertTrue(criticalPathLength != null);
     }
 

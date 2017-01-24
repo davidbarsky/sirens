@@ -3,8 +3,8 @@ package com.davidbarsky.dag.models;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TaskQueue {
@@ -30,23 +30,35 @@ public class TaskQueue {
 		this.nextUnbuilt = 0;
 	}
 
+	public void addAll(TaskQueue taskQueue) {
+		this.tasks.addAll(taskQueue.getTasks());
+	}
+
 	public int geEndTimeOfLastBuiltTask() {
 		if (nextUnbuilt == 0)
 			return 0;
 		
 		return tasks.get(nextUnbuilt-1).getStartEndTime().get().getEnd();
 	}
-	
+
 	public int getStartTime() {
 		return tasks.stream()
-				.filter(t -> t.isBuilt())
+				.filter(Task::isBuilt)
 				.mapToInt(t -> t.getStartEndTime().get().getStart())
 				.min()
 				.orElseThrow(() -> new RuntimeException("No tasks, cannot get start time!"));
 	}
 	
 	public int getEndTime() {
-		return tasks.get(tasks.size()-1).getStartEndTime().get().getEnd();
+		Optional<StartEndTime> startEndTime =
+				tasks.get(tasks.size() - 1).getStartEndTime();
+
+		if (!startEndTime.isPresent()) {
+			Task unbuilt = tasks.get(tasks.size() -1);
+			throw new RuntimeException("Task " + unbuilt + " is not built.");
+		}
+
+		return startEndTime.get().getEnd();
 	}
 
 	public MachineType getMachineType() {
@@ -77,27 +89,26 @@ public class TaskQueue {
 		return tasks;
 	}
 	
-	public boolean hasTask(int taskID) {
+	public boolean hasTask(Task task) {
 		// TODO we could use a hashmap to make this faster
-		return tasks.stream().mapToInt(t -> t.getID())
-				.anyMatch(i -> i == taskID);
-				
-		
+		return tasks.stream().mapToInt(Task::getID)
+				.anyMatch(i -> i == task.getID());
 	}
 
 	@Override
 	public String toString() {
-		return  machineType.toString() + "\n"
-				+ tasks.stream().map(t -> t.toString())
-				.collect(Collectors.joining("\n")) + "\n";
+		return "TaskQueue: " + machineType.toString() + "\n" + "Tasks: "
+				+ tasks.stream().map(Task::toString)
+				.collect(Collectors.joining(", "))
+				+ "\n";
 	}
-	
+
 	public String toShortString() {
 		return tasks.stream().map(t -> String.valueOf(t.getID())).collect(Collectors.joining(" "));
 	}
 
 	public void sortTasksByID() {
-		Collections.sort(tasks, (a, b) -> (a.getID() - b.getID()));
+		tasks.sort((a, b) -> (a.getID() - b.getID()));
 	}
 
 	@Override
@@ -107,8 +118,7 @@ public class TaskQueue {
 
 		TaskQueue taskQueue = (TaskQueue) o;
 
-		if (!tasks.equals(taskQueue.tasks)) return false;
-		return machineType == taskQueue.machineType;
+		return tasks.equals(taskQueue.tasks) && machineType == taskQueue.machineType;
 	}
 
 	@Override

@@ -5,13 +5,10 @@ import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.BuildStatus;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;

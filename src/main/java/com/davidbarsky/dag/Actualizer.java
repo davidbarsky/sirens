@@ -19,7 +19,6 @@ public class Actualizer {
 			}
 		}
 
-
 		// check invariant: all tasks should now be built
 		if (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)){
 //			String violating = tqs.stream()

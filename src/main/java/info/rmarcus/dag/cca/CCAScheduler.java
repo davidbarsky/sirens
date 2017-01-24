@@ -61,7 +61,7 @@ public class CCAScheduler {
 			tq.sortTasksByID();
 		}
 
-		return CostAnalyzer.findCost(Actualizer.actualize(tqs));
+		return CostAnalyzer.findCostOfBuiltTasks(Actualizer.actualize(tqs));
 	}
 
 	private static Map<Task, Integer> computeEST(Collection<Task> tasks) {
@@ -95,7 +95,6 @@ public class CCAScheduler {
 						enqueued.add(t);
 						queue.add(t);
 					});
-
 		}
 
 		return est;

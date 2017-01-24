@@ -9,7 +9,11 @@ import com.davidbarsky.dag.models.states.MachineType;
 public class CostAnalyzer {
     private CostAnalyzer() {}
 
-    public static Integer findCost(List<Task> tasks, MachineType machineType) {
+    public static int findCostOfBuiltTasks(List<Task> tasks, MachineType machineType) {
+        if (tasks.stream().anyMatch(task -> !task.isBuilt())) {
+            throw new RuntimeException("TaskQueues have unbuilt tasks!");
+        }
+
         Task first = tasks.get(0);
         Task last = tasks.get(tasks.size() - 1);
 
@@ -17,7 +21,12 @@ public class CostAnalyzer {
                 first.getStartEndTime().get().getStart()) * machineType.getCost();
     }
     
-    public static int findCost(List<TaskQueue> tqs) {
+    public static int findCostOfBuiltTasks(List<TaskQueue> tqs) {
+        Boolean hasUnbuilt = tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask);
+        if (hasUnbuilt) {
+            throw new DAGException("TaskQueues have unbuilt tasks!");
+        }
+
     	return tqs.stream()
     			.mapToInt(tq -> (tq.getEndTime() - tq.getStartTime()) * tq.getMachineType().getCost())
     			.sum();

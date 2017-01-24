@@ -4,15 +4,16 @@ import java.util
 import java.util.Comparator
 
 import com.davidbarsky.dag.models.Task
+import com.davidbarsky.dag.models.states.MachineType
 
 object GraphProperties {
 
-  def constructAsLateAsPossible(
+  def constructALAP(
       graph: util.List[Task]): util.Map[Task, Integer] = {
     val alap = new util.HashMap[Task, Integer]()
 
     graph.forEach { task: Task =>
-      var min_ft = longestLengthOfCriticalPath(graph)
+      var min_ft = GraphProperties.lengthOfLongestCP(graph)
       task.getDependents.forEach { (child: Task, networkCost: Integer) =>
         if (alap.getOrDefault(child, 0) - task.getCostTo(child) < min_ft) {
           min_ft = alap.getOrDefault(child, 0) - task.getCostTo(child)
@@ -23,7 +24,7 @@ object GraphProperties {
     alap
   }
 
-  def longestLengthOfCriticalPath(graph: util.List[Task]): Integer = {
+  def lengthOfLongestCP(graph: util.List[Task]): Integer = {
     findCriticalPath(graph)
       .stream()
       .sorted(Comparator.comparingInt(_.size()))
@@ -58,9 +59,11 @@ object GraphProperties {
   // on a small/large machine. Since we don't know the *cost* of a task until its scheduled
   // on a machine, tLevel  & bLevel will assume MachineType.SMALL, with a default value of 1.
   def findTopLevel(graph: util.List[Task],
-                   computationCost: Int): util.HashMap[Task, Integer] = {
+                   machineType: MachineType): util.HashMap[Task, Integer] = {
     val levels = new util.HashMap[Task, Integer]()
+
     graph.forEach { task: Task =>
+      val computationCost = task.getLatencies.get(machineType)
       var max = 0
       task.getDependencies.keySet.forEach { parent: Task =>
         if (levels.getOrDefault(parent, 0)
@@ -77,9 +80,10 @@ object GraphProperties {
   }
 
   def findBottomLevel(graph: util.List[Task],
-                      computationCost: Int): util.HashMap[Task, Integer] = {
+                      machineType: MachineType): util.HashMap[Task, Integer] = {
     val levels = new util.HashMap[Task, Integer]()
     graph.forEach { task: Task =>
+      val computationCost = task.getLatencies.get(machineType)
       var max = 0
       task.getDependents.keySet.forEach { child: Task =>
         if (child.getCostTo(task) + levels.getOrDefault(task, 0) > max) {
