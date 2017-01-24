@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,6 +23,8 @@ import info.rmarcus.ggen4j.graph.GGenGraph;
 import info.rmarcus.ggen4j.graph.Vertex;
 
 public class DAGGenerator {
+	
+	private static final Random r = new Random(42);
 
 	static {
 		GGenCommand.GGEN_PATH = System.getenv("GGEN_PATH");
@@ -128,13 +131,14 @@ public class DAGGenerator {
 		Map<Integer, Task> tasks = new HashMap<>();
 
 		for (Vertex v : vertices) {
-			// TODO, for now assume latency is the same for both
-			// machine types
+			// TODO, for now , assume that the latency on the large machine type
+			// is equal to the latency on the small machine type times a guassian
+			// centered at 0.7
 			Map<MachineType, Integer> latency = new EnumMap<>(MachineType.class);
-			double l = Double.valueOf(v.getVertexProperties().get("latency"));
-			for (MachineType mt : MachineType.values()) {
-				latency.put(mt, (int)l);
-			}
+			int l = (int)(double)Double.valueOf(v.getVertexProperties().get("latency"));
+			latency.put(MachineType.SMALL, l);
+			latency.put(MachineType.LARGE, (int)(l * (r.nextGaussian() + 0.7)));
+			
 
 			tasks.put(v.getID(), new Task(v.getTopographicalOrder(), latency));
 		}

@@ -1,21 +1,18 @@
 package info.rmarcus.dag.birkhoff;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.DAGGenerator;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
-
 import info.rmarcus.birkhoffvonneumann.CoeffAndMatrix;
 import info.rmarcus.birkhoffvonneumann.learners.generalized_loss.MHJointPermutationLearner;
+import info.rmarcus.dag.cca.CCAScheduler;
 import info.rmarcus.dag.permsolve.PermutationSolver;
-import info.rmarcus.dynamic_critical_path.DynamicCriticalPath;
 import info.rmarcus.ggen4j.graph.Vertex;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class BirkhoffScheduler {
 
@@ -36,12 +33,17 @@ public class BirkhoffScheduler {
 //		tqs = Actualizer.actualize(tqs);
 //		System.out.println("Cost: " + CostAnalyzer.getLatency((List<TaskQueue>) tqs));
 
-		jps = new MHJointPermutationLearner(new int[] { tasks.size(), tasks.size() }, this::loss);
-		for (int i = 0; i < 10000; i++) {
-			if (i % 100 == 0)
-				System.out.println(i);
-			jps.iterate();
-		}
+		CCAScheduler cca = new CCAScheduler(tasks);
+		Collection<TaskQueue> tqs = cca.schedule(1000);
+		System.out.println(tqs);
+		System.out.println("Done!");
+		
+//		jps = new MHJointPermutationLearner(new int[] { tasks.size(), tasks.size() }, this::loss);
+//		for (int i = 0; i < 10000; i++) {
+//			if (i % 100 == 0)
+//				System.out.println(i);
+//			jps.iterate();
+//		}
 
 	}
 
@@ -71,7 +73,7 @@ public class BirkhoffScheduler {
 	public static void main(String[] args) {
 		BirkhoffScheduler bs = new BirkhoffScheduler();
 		long t = System.currentTimeMillis();
-		bs.measure(12);
+		bs.measure(5);
 		//bs.measure(18);
 		//System.out.println(bs.getBest());
 		System.out.println(System.currentTimeMillis() - t);
