@@ -23,4 +23,9 @@ public enum MachineType {
     	toR.put(LARGE, lat);
     	return toR;
     }
+
+    public static MachineType[] bySize() {
+        return new MachineType[] { SMALL, LARGE };
+    }
+
 }

@@ -18,6 +18,11 @@ public class DAGGenerator {
 	
 	private static final Random r = new Random(42);
 
+	private static final int LATENCY_FLOOR = 50;
+	private static final int LATENCY_CEIL = 200;
+	private static final int EDGE_FLOOR = 10;
+	private static final int EDGE_CEIL = 30;
+
 	static {
 		GGenCommand.GGEN_PATH = System.getenv("GGEN_PATH");
 	}
@@ -51,8 +56,8 @@ public class DAGGenerator {
 		GGenGraph graph;
 		try {
 			graph = GGen.dataflowGraph().cholesky(matrixBlocks)
-					.vertexProperty("latency").uniform(10, 60)
-					.edgeProperty("networking").uniform(10, 60)
+					.vertexProperty("latency").uniform(LATENCY_FLOOR, LATENCY_CEIL)
+					.edgeProperty("networking").uniform(EDGE_FLOOR, EDGE_CEIL)
 					.generateGraph().topoSort();
 
 			return graph.allVertices();
@@ -65,8 +70,8 @@ public class DAGGenerator {
 		GGenGraph graph;
 		try {
 			graph = GGen.staticGraph().fibonacci(n, 1)
-					.vertexProperty("latency").uniform(10, 60)
-					.edgeProperty("networking").uniform(10, 60)
+					.vertexProperty("latency").uniform(LATENCY_FLOOR, LATENCY_CEIL)
+					.edgeProperty("networking").uniform(EDGE_FLOOR, EDGE_CEIL)
 					.generateGraph().topoSort();
 
 			return graph.allVertices();
@@ -79,8 +84,8 @@ public class DAGGenerator {
 		GGenGraph graph;
 		try {
 			graph = GGen.staticGraph().forkJoin(n, 16)
-					.vertexProperty("latency").uniform(10, 60)
-					.edgeProperty("networking").uniform(10, 60)
+					.vertexProperty("latency").uniform(LATENCY_FLOOR, LATENCY_CEIL)
+					.edgeProperty("networking").uniform(EDGE_FLOOR, EDGE_CEIL)
 					.generateGraph().topoSort();
 
 			return graph.allVertices();
@@ -93,8 +98,8 @@ public class DAGGenerator {
 		GGenGraph graph;
 		try {
 			graph = GGen.dataflowGraph().poisson2D(20, n)
-					.vertexProperty("latency").uniform(10, 60)
-					.edgeProperty("networking").uniform(10, 60)
+					.vertexProperty("latency").uniform(LATENCY_FLOOR, LATENCY_CEIL)
+					.edgeProperty("networking").uniform(EDGE_FLOOR, EDGE_CEIL)
 					.generateGraph().topoSort();
 
 			return graph.allVertices();
@@ -107,8 +112,8 @@ public class DAGGenerator {
 		GGenGraph graph;
 		try {
 			graph = GGen.dataflowGraph().sparseLU(n)
-					.vertexProperty("latency").uniform(10, 60)
-					.edgeProperty("networking").uniform(10, 60)
+					.vertexProperty("latency").uniform(LATENCY_FLOOR, LATENCY_CEIL)
+					.edgeProperty("networking").uniform(EDGE_FLOOR, EDGE_CEIL)
 					.generateGraph().topoSort();
 
 			return graph.allVertices();
@@ -131,7 +136,7 @@ public class DAGGenerator {
 			latency.put(MachineType.SMALL, l);
 
 			int largeLatency = (int)(l * Math.max(0.1, r.nextGaussian() + 0.4));
-			latency.put(MachineType.LARGE, (int)(l * (r.nextGaussian() + 8.7)));
+			latency.put(MachineType.LARGE, largeLatency);
 			
 
 			tasks.put(v.getID(), new Task(v.getTopographicalOrder(), latency));

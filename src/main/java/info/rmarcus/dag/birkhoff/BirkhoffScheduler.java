@@ -34,12 +34,12 @@ public class BirkhoffScheduler {
 		System.out.println("Number of tasks: " + tasks.size());
 		SLA sla = new TotalLatencySLA(DEADLINE);
 
-
-		Set<List<String>> clusters = DynamicCriticalPath.schedule(DAGGenerator.getVertexWeightMap(vertices), DAGGenerator.getEdgeWeightMap(vertices));
-		Collection<TaskQueue> tqs = DAGGenerator.clustersToTasks(vertices, clusters);
-		tqs = Actualizer.actualize(tqs);
-		System.out.println(tqs);
-		sla.printBreakdown((List<TaskQueue>) tqs);
+		Collection<TaskQueue> tqs;
+		//Set<List<String>> clusters = DynamicCriticalPath.schedule(DAGGenerator.getVertexWeightMap(vertices), DAGGenerator.getEdgeWeightMap(vertices));
+		//tqs = DAGGenerator.clustersToTasks(vertices, clusters);
+		//tqs = Actualizer.actualize(tqs);
+		//System.out.println(tqs);
+		//sla.printBreakdown((List<TaskQueue>) tqs);
 
 		CCAScheduler cca = new CCAScheduler(tasks, sla);
 		tqs = cca.schedule(DEADLINE);
@@ -47,12 +47,12 @@ public class BirkhoffScheduler {
 		sla.printBreakdown((List<TaskQueue>) tqs);
 		System.out.println("Done!");
 		
-//		jps = new MHJointPermutationLearner(new int[] { tasks.size(), tasks.size() }, this::loss);
-//		for (int i = 0; i < 10000; i++) {
-//			if (i % 100 == 0)
-//				System.out.println(i);
-//			jps.iterate();
-//		}
+		jps = new MHJointPermutationLearner(new int[] { tasks.size(), tasks.size() }, this::loss);
+		for (int i = 0; i < 10000; i++) {
+			if (i % 100 == 0)
+				System.out.println(i);
+			jps.iterate();
+		}
 
 	}
 
@@ -63,12 +63,12 @@ public class BirkhoffScheduler {
 	private List<TaskQueue> permToTQs(double[][] d, double[][] topo) {
 		int[] perm = CoeffAndMatrix.asFlatPerm(d);
 		int[] topoPerm = CoeffAndMatrix.asFlatPerm(topo);
-		
+
 		List<Task> t = new ArrayList<>(tasks.size());
 		for (int i : perm) {
 			t.add(tasks.get(i));
 		}
-		
+
 		List<TaskQueue> tqs = PermutationSolver.topoSolve(t, topoPerm);
 		return tqs;
 	}
