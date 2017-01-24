@@ -1,4 +1,4 @@
-package info.rmarcus.dag.permsolve.optimal;
+package info.rmarcus.dag.birkhoff.permsolve.optimal;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,7 +15,7 @@ import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
-import info.rmarcus.dag.permsolve.PermSolveException;
+import info.rmarcus.dag.birkhoff.permsolve.PermSolveException;
 
 public class ScheduleNode {
 	private final List<Task> tasks;

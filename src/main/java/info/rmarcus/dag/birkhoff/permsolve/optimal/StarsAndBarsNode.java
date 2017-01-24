@@ -1,4 +1,4 @@
-package info.rmarcus.dag.permsolve.optimal;
+package info.rmarcus.dag.birkhoff.permsolve.optimal;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
 
 import info.rmarcus.NullUtils;
-import info.rmarcus.dag.permsolve.PermSolveException;
+import info.rmarcus.dag.birkhoff.permsolve.PermSolveException;
 
 public class StarsAndBarsNode {
 	private final int numItems;

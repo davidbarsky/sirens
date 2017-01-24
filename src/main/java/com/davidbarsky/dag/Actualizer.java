@@ -1,11 +1,11 @@
 package com.davidbarsky.dag;
+import com.davidbarsky.dag.models.Task;
+import com.davidbarsky.dag.models.TaskQueue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.davidbarsky.dag.models.Task;
-import com.davidbarsky.dag.models.TaskQueue;
 
 public class Actualizer {
 	private Actualizer() { }

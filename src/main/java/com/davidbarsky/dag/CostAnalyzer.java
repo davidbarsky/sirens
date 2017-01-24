@@ -1,10 +1,11 @@
 package com.davidbarsky.dag;
 
-import java.util.List;
-
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.MachineType;
+
+import java.util.Collection;
+import java.util.List;
 
 public class CostAnalyzer {
     private CostAnalyzer() {}
@@ -17,16 +18,19 @@ public class CostAnalyzer {
                 first.getStartEndTime().get().getStart()) * machineType.getCost();
     }
     
-    public static int findCost(List<TaskQueue> tqs) {
+    public static int findCost(Collection<TaskQueue> tqs) {
+        if (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask()))
+            throw new DAGException("You must actualize this schedule before costing it!");
+
     	return tqs.stream()
     			.mapToInt(tq -> (tq.getEndTime() - tq.getStartTime()) * tq.getMachineType().getCost())
     			.sum();
     }
     
-    public static int getLatency(List<TaskQueue> tqs) {
-    	if (tqs == null)
-    		return Integer.MAX_VALUE;
-    	
+    public static int getLatency(Collection<TaskQueue> tqs) {
+        if (tqs.stream().anyMatch(tq -> tq.hasUnbuiltTask()))
+            throw new DAGException("You must actualize this schedule before costing it!");
+
     	return tqs.stream()
     			.mapToInt(tq -> tq.getEndTime() + 60)
     			.max().getAsInt();

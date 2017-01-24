@@ -137,7 +137,6 @@ public class DAGGenerator {
 
 			int largeLatency = (int)(l * Math.max(0.1, r.nextGaussian() + 0.4));
 			latency.put(MachineType.LARGE, largeLatency);
-			
 
 			tasks.put(v.getID(), new Task(v.getTopographicalOrder(), latency));
 		}
