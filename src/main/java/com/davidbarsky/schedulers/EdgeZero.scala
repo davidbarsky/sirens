@@ -94,7 +94,7 @@ class EdgeZero extends UnboundedScheduler {
 //        buffer += newList
 //    }
 //    buffer.toList
-  }9
+  }
 
   private def zeroableCandidates(source: Task,
                                  rest: List[TaskQueue],
