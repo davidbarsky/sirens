@@ -25,7 +25,7 @@ public class TaskQueue {
 	}
 
 	public void add(Task task) {
-		if (this.hasTask(task.getID())) {
+		if (this.hasTask(task)) {
 			throw new DAGException("cannot add the same task to a task queue twice!");
 		}
 
