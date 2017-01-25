@@ -5,11 +5,10 @@ import java.util.Comparator
 import java.util.stream.Collectors
 
 import scala.collection.JavaConverters._
-import com.davidbarsky.dag.TopologicalSorter
+import com.davidbarsky.dag.{Actualizer, CostAnalyzer, TopologicalSorter}
 import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 
-import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.{Set => MutableSet}
 
@@ -57,55 +56,48 @@ class EdgeZero extends UnboundedScheduler {
         }
 
         // Then, we find the unvisited, zeroable neighbors
-        val neighbors = zeroableCandidates(task, as, visited)
-        neighbors
-          .foreach { t: Task =>
-            newTaskQueue.add(t)
-          }
+        val neighbors = findNearestNeighbors(task, as, visited)
+        neighbors.foreach { t =>
+          newTaskQueue.add(t)
+        }
 
         // Save visitation state
         visited.add(task)
-        neighbors.foreach { t: Task =>
+        neighbors.foreach { t =>
           visited.add(t)
         }
       }
-      newTaskQueue.unbuildAll()
 
-      def topologicallySortQueue(taskQueue: TaskQueue): TaskQueue = {
-        val sortedList: util.List[Task] = taskQueue.getTasks.asScala
-          .sortWith(_.getID < _.getID)
-          .asJava
+      val sortedQueue: TaskQueue = topologicallySort(newTaskQueue)
+//      val intermediate: List[TaskQueue] =
+//        generateIntermediate(sortedQueue, as, buffer, index)
+//      val cost = costIntermediateList(intermediate)
+//      println(cost)
 
-        sortedList.forEach(t => t.edgeWeight)
-        new TaskQueue(defaultMachineType, sortedList)
-      }
-
-      buffer += topologicallySortQueue(newTaskQueue)
+      buffer += sortedQueue
     }
 
     buffer.filter { tq =>
       tq.getTasks.size != 0
     }.toList
-
-    //    as.view.zipWithIndex.foreach {
-    //      case (taskQueue: TaskQueue, index: Int) =>
-    //        val (_, after) = as.splitAt(index + 1)
-    //        val neighbors = taskQueue.getTasks.asScala
-    //          .flatMap(t => zeroableCandidates(t, as, visited))
-    //          .filterNot(t => visited.contains(t))
-    //
-    //        accumulator.addAll(taskQueue)
-    //
-    //        val newList: List[TaskQueue] = accumulator +: after
-    //
-    //        buffer += newList
-    //    }
-    //    buffer.toList
   }
 
-  private def zeroableCandidates(source: Task,
-                                 rest: List[TaskQueue],
-                                 visited: MutableSet[Task]): List[Task] = {
+  def generateIntermediate(sortedQueue: TaskQueue,
+                           original: List[TaskQueue],
+                           buffer: ListBuffer[TaskQueue],
+                           currentIndex: Int): List[TaskQueue] = {
+    val (_, after) = original.splitAt(currentIndex + 1)
+    (buffer.clone() += sortedQueue).toList ++ after
+  }
+
+  def costIntermediateList(as: List[TaskQueue]): Int = {
+    val builtGraph = Actualizer.actualize(as.asJava)
+    CostAnalyzer.getLatency(builtGraph)
+  }
+
+  def findNearestNeighbors(source: Task,
+                           rest: List[TaskQueue],
+                           visited: MutableSet[Task]): List[Task] = {
     val dependencies = source.getDependencies.keySet().asScala.toList
     val dependents = source.getDependents.keySet().asScala.toList
 
@@ -113,15 +105,19 @@ class EdgeZero extends UnboundedScheduler {
     val neighbors = dependencies ++ dependents
 
     restOfTasks
-      .filter(t => neighbors.contains(t))
-      .filter(t => !visited.contains(t))
+      .filter { t =>
+        neighbors.contains(t)
+      }
+      .filter { t =>
+        !visited.contains(t)
+      }
   }
 
-  def sortByEdgeWeight(dependency: Task): util.List[Task] = {
-    dependency.getDependents
-      .keySet()
-      .stream()
-      .sorted(byEdgeWeight)
-      .collect(Collectors.toList[Task])
+  def topologicallySort(taskQueue: TaskQueue): TaskQueue = {
+    val sortedList: util.List[Task] = taskQueue.getTasks.asScala
+      .sortWith(_.getID < _.getID)
+      .asJava
+
+    new TaskQueue(defaultMachineType, sortedList)
   }
 }
