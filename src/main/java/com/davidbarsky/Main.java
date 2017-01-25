@@ -14,7 +14,6 @@ public class Main {
         EdgeZero edgeZero = new EdgeZero();
 
         List<TaskQueue> queues = edgeZero.generateSchedule(30);
-        System.out.println(queues);
         Actualizer.actualize(queues);
 
         List<TaskQueue> randomGraph = roundRobin.generateSchedule(2);

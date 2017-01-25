@@ -105,7 +105,7 @@ public class TaskQueue {
 	@Override
 	public String toString() {
 		return  machineType.toString()
-				+ tasks.stream().map(t -> t.toString())
+				+ tasks.stream().map(Task::toString)
 				.collect(Collectors.joining(","));
 	}
 

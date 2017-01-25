@@ -5,10 +5,11 @@ import java.util.Comparator
 import java.util.stream.Collectors
 
 import scala.collection.JavaConverters._
-import com.davidbarsky.dag.{CostAnalyzer, TopologicalSorter}
+import com.davidbarsky.dag.TopologicalSorter
 import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 
+import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.{Set => MutableSet}
 
@@ -41,18 +42,15 @@ class EdgeZero extends UnboundedScheduler {
 
     val clusteredTasks = clusterTaskToQueue(graph)
 
-    mergeClusters(clusteredTasks.asScala.toList)
-      .filter(tq => tq.getTasks.size != 0)
-      .asJava
+    mergeClusters(clusteredTasks.asScala.toList).asJava
   }
 
   def mergeClusters(as: List[TaskQueue]): List[TaskQueue] = {
     val visited = MutableSet[Task]()
     val buffer = ListBuffer[TaskQueue]()
-    for (taskQueue: TaskQueue <- as) {
+    for ((taskQueue: TaskQueue, index: Int) <- as.view.zipWithIndex) {
       val newTaskQueue = new TaskQueue(defaultMachineType)
       for (task: Task <- taskQueue.getTasks.asScala) {
-
         // First, we try to add the current task to the the TaskQueue
         if (!newTaskQueue.hasTask(task) && !visited.contains(task)) {
           newTaskQueue.add(task)
@@ -61,11 +59,7 @@ class EdgeZero extends UnboundedScheduler {
         // Then, we find the unvisited, zeroable neighbors
         val neighbors = zeroableCandidates(task, as, visited)
         neighbors
-          .filter { t: Task =>
-            !newTaskQueue.hasTask(t)
-          }
           .foreach { t: Task =>
-            println("Adding task: " + t)
             newTaskQueue.add(t)
           }
 
@@ -75,25 +69,38 @@ class EdgeZero extends UnboundedScheduler {
           visited.add(t)
         }
       }
-      buffer += newTaskQueue
+      newTaskQueue.unbuildAll()
+
+      def topologicallySortQueue(taskQueue: TaskQueue): TaskQueue = {
+        val sortedList: util.List[Task] = taskQueue.getTasks.asScala
+          .sortWith(_.degree < _.degree)
+          .asJava
+
+        sortedList.forEach(t => t.edgeWeight)
+        new TaskQueue(defaultMachineType, sortedList)
+      }
+
+      buffer += topologicallySortQueue(newTaskQueue)
     }
 
-    buffer.toList
+    buffer.filter { tq =>
+      tq.getTasks.size != 0
+    }.toList
 
-//    as.view.zipWithIndex.foreach {
-//      case (taskQueue: TaskQueue, index: Int) =>
-//        val (_, after) = as.splitAt(index + 1)
-//        val neighbors = taskQueue.getTasks.asScala
-//          .flatMap(t => zeroableCandidates(t, as, visited))
-//          .filterNot(t => visited.contains(t))
-//
-//        accumulator.addAll(taskQueue)
-//
-//        val newList: List[TaskQueue] = accumulator +: after
-//
-//        buffer += newList
-//    }
-//    buffer.toList
+    //    as.view.zipWithIndex.foreach {
+    //      case (taskQueue: TaskQueue, index: Int) =>
+    //        val (_, after) = as.splitAt(index + 1)
+    //        val neighbors = taskQueue.getTasks.asScala
+    //          .flatMap(t => zeroableCandidates(t, as, visited))
+    //          .filterNot(t => visited.contains(t))
+    //
+    //        accumulator.addAll(taskQueue)
+    //
+    //        val newList: List[TaskQueue] = accumulator +: after
+    //
+    //        buffer += newList
+    //    }
+    //    buffer.toList
   }
 
   private def zeroableCandidates(source: Task,
@@ -105,7 +112,9 @@ class EdgeZero extends UnboundedScheduler {
     val restOfTasks = rest.flatMap(_.getTasks.asScala)
     val neighbors = dependencies ++ dependents
 
-    neighbors.intersect(restOfTasks).filter(t => !visited.contains(t))
+    restOfTasks
+      .filter(t => neighbors.contains(t))
+      .filter(t => !visited.contains(t))
   }
 
   def sortByEdgeWeight(dependency: Task): util.List[Task] = {

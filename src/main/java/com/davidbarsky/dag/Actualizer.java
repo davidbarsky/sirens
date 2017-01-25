@@ -15,7 +15,7 @@ public class Actualizer {
 
 		while (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)) {
 			if (tqs.stream().noneMatch(TaskQueue::buildNextUnbuiltTask)) {
-				throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
+				throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue." + tqs);
 			}
 		}
 
