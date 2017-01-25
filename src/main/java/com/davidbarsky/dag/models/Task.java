@@ -119,18 +119,6 @@ public class Task implements Comparable<Task> {
 		return getDependencies().size() == 0 && getDependents().size() == 0;
 	}
 
-	public int degree() {
-		return this.inDegree() + this.outDegree();
-	}
-
-	public int inDegree() {
-		return getDependents().keySet().size();
-	}
-
-	public int outDegree() {
-		return getDependents().keySet().size();
-	}
-
 	public int edgeWeight() {
 		int inbound = getDependencies()
 				.values()
@@ -188,16 +176,8 @@ public class Task implements Comparable<Task> {
 		return buildStatus;
 	}
 
-	public void setBuildStatus(BuildStatus buildStatus) {
-		this.buildStatus = buildStatus;
-	}
-
 	public Optional<StartEndTime> getStartEndTime() {
 		return startEndTime;
-	}
-
-	public void setStartEndTime(Optional<StartEndTime> startEndTime) {
-		this.startEndTime = startEndTime;
 	}
 
 	@Override
@@ -237,7 +217,6 @@ public class Task implements Comparable<Task> {
 	public int getCostTo(Task task) {
 		return dependents.getOrDefault(task, 0) + dependencies.getOrDefault(task, 0);
 	}
-	
 
 	public int getID() {
 		return id;

@@ -66,7 +66,7 @@ public class BirkhoffScheduler {
 	
 	private double loss(List<double[][]> d) {
 		List<TaskQueue> tqs = permToTQs(d.get(0), d.get(1));
-		int cost = CostAnalyzer.getLatency(tqs); 
+		int cost = CostAnalyzer.getLatency(tqs);
 		return cost;
 	}
 

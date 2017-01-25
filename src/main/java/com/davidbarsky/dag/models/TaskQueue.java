@@ -35,10 +35,6 @@ public class TaskQueue {
 		this.nextUnbuilt = 0;
 	}
 
-	public void addAll(TaskQueue taskQueue) {
-		this.tasks.addAll(taskQueue.getTasks());
-	}
-
 	public int geEndTimeOfLastBuiltTask() {
 		if (nextUnbuilt == 0)
 			return 0;
