@@ -73,7 +73,7 @@ class EdgeZero extends UnboundedScheduler {
 
       def topologicallySortQueue(taskQueue: TaskQueue): TaskQueue = {
         val sortedList: util.List[Task] = taskQueue.getTasks.asScala
-          .sortWith(_.degree < _.degree)
+          .sortWith(_.getID < _.getID)
           .asJava
 
         sortedList.forEach(t => t.edgeWeight)
