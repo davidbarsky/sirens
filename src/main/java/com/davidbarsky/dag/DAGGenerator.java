@@ -18,10 +18,10 @@ public class DAGGenerator {
 	
 	private static final Random r = new Random(42);
 
-	private static final int LATENCY_FLOOR = 50;
-	private static final int LATENCY_CEIL = 200;
+	private static final int LATENCY_FLOOR = 10;
+	private static final int LATENCY_CEIL = 60;
 	private static final int EDGE_FLOOR = 10;
-	private static final int EDGE_CEIL = 30;
+	private static final int EDGE_CEIL = 60;
 
 	static {
 		GGenCommand.GGEN_PATH = System.getenv("GGEN_PATH");

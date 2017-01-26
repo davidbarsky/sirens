@@ -7,22 +7,12 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.List;
 
-import com.davidbarsky.schedulers.BoundedScheduler;
 import org.junit.Test;
-
-import com.davidbarsky.dag.models.TaskQueue;
-import com.davidbarsky.schedulers.RoundRobin;
 
 import info.rmarcus.ggen4j.graph.Vertex;
 
 public class DAGGeneratorTest {
 
-	@Test
-	public void randomGraph() {
-		BoundedScheduler roundRobin = new RoundRobin();
-		List<TaskQueue> tqs = roundRobin.generateSchedule(4);
-		assertEquals(4, tqs.size());
-	}
 
 	@Test
 	public void generateGraphRange() {

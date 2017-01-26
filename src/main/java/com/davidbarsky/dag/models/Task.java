@@ -1,10 +1,15 @@
 package com.davidbarsky.dag.models;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import com.davidbarsky.dag.Actualizer;
+import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.states.BuildStatus;
 import com.davidbarsky.dag.models.states.MachineType;
@@ -241,6 +246,28 @@ public class Task implements Comparable<Task> {
 
 	public Map<MachineType, Integer> getLatencies() {
 		return latencies;
+	}
+	
+	public static void main(String[] args) {
+		Map<MachineType, Integer> latency = new EnumMap<>(MachineType.class);
+		latency.put(MachineType.SMALL, 10);
+		latency.put(MachineType.LARGE, 10);
+		
+		Task t1 = new Task(1, latency);
+		Task t2 = new Task(2, latency);
+		
+		t2.addDependency(1000, t1);
+		
+		TaskQueue tq = new TaskQueue(MachineType.SMALL);
+		tq.add(t1);
+		tq.add(t2);
+		
+		List<TaskQueue> clusters = new ArrayList<>();
+		clusters.add(tq);
+		
+		clusters = Actualizer.actualize(clusters);
+		
+		System.out.println(CostAnalyzer.getLatency(clusters));
 	}
 
 
