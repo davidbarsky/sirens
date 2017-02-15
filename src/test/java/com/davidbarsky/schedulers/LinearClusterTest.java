@@ -1,6 +1,7 @@
 package com.davidbarsky.schedulers;
 
 import com.davidbarsky.dag.Actualizer;
+import com.davidbarsky.dag.TopologicalSorter;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.BuildStatus;

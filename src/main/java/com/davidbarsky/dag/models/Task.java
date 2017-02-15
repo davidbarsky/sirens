@@ -1,9 +1,8 @@
 package com.davidbarsky.dag.models;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.davidbarsky.dag.DAGException;
 import com.davidbarsky.dag.models.states.BuildStatus;
@@ -107,6 +106,10 @@ public class Task implements Comparable<Task> {
 		return networkingTime;
 	}
 
+	public boolean hasDependents() {
+		return getDependents().isEmpty();
+	}
+
 	public boolean isLeaf() {
 		return getDependents().isEmpty();
 	}
@@ -170,6 +173,14 @@ public class Task implements Comparable<Task> {
 
 	public Map<Task, Integer> getDependents() {
 		return dependents;
+	}
+
+	public List<Task> getNeighbors() {
+		List<Task> neighbors = new ArrayList<>();
+		neighbors.addAll(this.getDependents().keySet());
+		neighbors.addAll(this.getDependencies().keySet());
+
+		return neighbors.stream().distinct().collect(Collectors.toList());
 	}
 
 	public BuildStatus getBuildStatus() {

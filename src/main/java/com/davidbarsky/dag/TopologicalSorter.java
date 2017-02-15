@@ -23,9 +23,9 @@ import info.rmarcus.ggen4j.graph.Vertex;
 public class TopologicalSorter {
     public static List<Task> generateGraph(int numVerticies) {
         try {
-            GGenGraph graph = GGen.generateGraph().erdosGNM(numVerticies, 100)
+            GGenGraph graph = GGen.generateGraph().erdosGNM(numVerticies, 10)
                     .vertexProperty("latency").uniform(10, 30)
-                    .edgeProperty("networking").uniform(50, 120)
+                    .edgeProperty("networking").uniform(5, 12)
                     .generateGraph().topoSort();
 
             return mapToTaskList(graph);

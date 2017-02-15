@@ -4,25 +4,90 @@ import java.util
 import java.util.stream.Collectors
 
 import collection.JavaConverters._
-import java.util.{List => JavaList}
-
 import com.davidbarsky.dag.TopologicalSorter
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 import com.davidbarsky.dag.models.states.MachineType
 
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ListBuffer => Buffer, Queue => MutableQueue}
 
 // Since the LC algorithm does not schedule nodes on different paths
 // to the same processor, it cannot guarantee optimal solutions
 // for both fork and join structures.
+
+case class Edge(task: Task, networkCost: Int) extends Ordered[Edge] {
+  override def compare(that: Edge): Int =
+    this.networkCost compare that.networkCost
+}
 class LinearCluster extends UnboundedScheduler {
+
+  def test(): Unit = {
+    val graph: List[Task] =
+      TopologicalSorter.generateGraph(30).asScala.toList
+
+    def isIndependent(task: Task) = task.isFreeNode
+    val independentTasks: List[Task] = graph.filter(isIndependent)
+    val dependentTasks: List[Task] = graph.filterNot(isIndependent)
+
+    println("Dependent Tasks: " + dependentTasks.size)
+
+    val allPaths = dependentTasks
+      .filter(_.isSource)
+      .flatMap(t => findPaths(t, List[Edge]()))
+      .size
+
+    println("Build Edges: " + allPaths)
+
+    val independentQueue =
+      new TaskQueue(MachineType.SMALL, independentTasks.asJava)
+    independentQueue :: List[TaskQueue]()
+
+    longestPath(dependentTasks)
+  }
+
+  def max(as: List[Edge]): Option[Edge] = as match {
+    case Nil => None
+    case List(Edge(task: Task, cost: Int)) => Some(Edge(task, cost))
+    case x :: y :: rest =>
+      max((if (x.networkCost > y.networkCost) x else y) :: rest)
+  }
+
+  def longestPath(graph: List[Task]): Unit = {
+    graph.filterNot(_.isLeaf).foreach { t: Task =>
+      val edges = t.getDependents.asScala.map {
+        case (task: Task, cost: Integer) => Edge(task, cost)
+      }.toList
+
+      println(max(edges))
+    }
+  }
+
+  def depth(task: Task): Int = {
+    val edges = task.getDependents.asScala.map {
+      case (task: Task, cost: Integer) => Edge(task, cost)
+    }.toList
+
+    max(edges) match {
+      case None => 0
+      case Some(topEdge) => 1 + topEdge.networkCost + depth(topEdge.task)
+    }
+  }
+
+  def findPaths(task: Task, path: List[Edge]): List[Edge] = {
+    val edges = task.getDependents.asScala.map {
+      case (task: Task, cost: Integer) => Edge(task, cost)
+    }.toList
+
+    max(edges) match {
+      case None => path.reverse
+      case Some(edge) => findPaths(edge.task, edge :: path)
+    }
+  }
 
   // For the number of nodes we're working with, a DFS combined
   // with a scheduling each path onto a TaskQueue appears to be sufficient.
-  def generateSchedule(numNodes: Int): JavaList[TaskQueue] = {
+  def generateSchedule(numNodes: Int): util.List[TaskQueue] = {
     val visited = new util.HashSet[Task]()
-    val paths = new util.ArrayList[TaskQueue]()
+    val paths = Buffer[TaskQueue]()
 
     def recurse(node: Task, path: TaskQueue): Unit = {
       if (visited.contains(node)) {
@@ -31,7 +96,7 @@ class LinearCluster extends UnboundedScheduler {
       visited.add(node)
       path.add(node)
       if (node.isLeaf) {
-        paths.add(path)
+        paths += path
       }
 
       node.getDependents
@@ -52,55 +117,40 @@ class LinearCluster extends UnboundedScheduler {
       )
     }
 
-    val graph = TopologicalSorter.generateGraph(numNodes)
-    graph.stream().filter(_.isSource).forEach { t =>
-      recurse(t, new TaskQueue(MachineType.SMALL))
-    }
-    paths.add(scheduleFreeNodes(graph))
+    val graph = TopologicalSorter.generateGraph(numNodes).asScala.toList
 
-    paths
+//    graph.stream().filter(_.isSource).forEach { t =>
+//      recurse(t, new TaskQueue(MachineType.SMALL))
+//    }
+//    paths += scheduleFreeNodes(graph)
+
+    paths.foreach { tq =>
+      tq.getTasks.asScala
+        .sortWith(_.getID < _.getID)
+        .asJava
+    }
+
+    paths.asJava
   }
 
-//  def linearCluster(numNodes: Int): util.List[TaskQueue] = {
-//    val tasks = TopologicalSorter.generateGraph(numNodes)
-//    tasks.asScala.filter(_.isSource).foreach(println)
-//    val paths = ListBuffer[TaskQueue]()
-//    var visited = mutable.Set[Task]()
-//
-//    def dfs(task: Task, path: TaskQueue): Unit = {
-//      visited += task
-//      path.add(task)
-//
-//      task.getDependents
-//        .keySet()
-//        .asScala
-//        .foreach { t =>
-//          dfs(t, path)
-//        }
-//    }
-//
-//    tasks.forEach { t =>
-//      dfs(t, new TaskQueue(MachineType.SMALL))
-//    }
-//
-//    paths.toList.asJava
-//  }
+  // Must take a topologically sorted list.
+  def allPaths(graph: Seq[Task]): Unit = {
+    def findPaths(g: Seq[Task], t: Task): Unit = {
 
-//  def longestPath(numNodes: Int): Unit = {
-//    val leaves = TopologicalSorter
-//      .generateGraph(numNodes)
-//      .asScala
-//      .filter(_.isLeaf)
-//      .toList
-//
-//    val result = leaves
-//      .map { t =>
-//        t.getDependencies.keySet.asScala.filter { l =>
-//          l.outDegree() <= 1 && l.inDegree() <= 1
-//        }.toList
-//      }
-//      .filterNot(_.isEmpty)
-//
-//    println(result)
-//  }
+      val pending = MutableQueue[List[Task]]()
+
+      pending.enqueue(List(t))
+      while (pending.nonEmpty) {
+        val l = pending.dequeue()
+        val lastTask = l.last
+
+        println(l)
+        lastTask.getNeighbors.asScala
+          .foreach { neighbor: Task =>
+            pending.enqueue(l ++ List(neighbor))
+          }
+      }
+    }
+    findPaths(graph, graph.head)
+  }
 }
