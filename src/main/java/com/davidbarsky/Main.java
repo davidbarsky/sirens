@@ -12,9 +12,8 @@ public class Main {
         // Init
         BoundedScheduler roundRobin = new RoundRobin();
         EdgeZero edgeZero = new EdgeZero();
-        LinearCluster linearCluster = new LinearCluster();
 
-        linearCluster.test();
+        LinearCluster.test();
 
         List<TaskQueue> queues = edgeZero.generateSchedule(30);
         Actualizer.actualize(queues);
