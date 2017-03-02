@@ -47,6 +47,15 @@ case class Rose(task: Task, children: SortedSet[Rose]) extends Ordered[Rose] {
 //  def insert(task: Task, parent: Option[Tree]): Tree = {}
 //}
 
+// So here's the plan.
+// First, split the graph into two groups: nodes *with* neighbors and *without*.
+// The ones without neighbors are shuffled onto their own task queue. Those can be built without worry.
+// That leaves us with the rest. Of the rest (the dependent nodes) need to scheduled.
+// To do that, we will find the longest path between a source and leaf node. To accomplish this,
+// we will use a BFS (with negative weights determine the "shortest" path).
+// On each iteration of the BFS, we'll pass a set of visited nodes. We stop iteration when
+// the set of visited nodes equals the size of the dependent nodes.
+
 object LinearCluster extends UnboundedScheduler {
   override def generateSchedule(numNodes: Int): util.List[TaskQueue] = ???
 
@@ -60,15 +69,21 @@ object LinearCluster extends UnboundedScheduler {
 
     val sourceNodes = dependentTasks.filter(_.isSource)
     val leafNodes = dependentTasks.filter(_.isLeaf)
-    println("Source: " + sourceNodes)
-    println("Leaf: " + leafNodes)
-    
 
     val independentQueue =
       new TaskQueue(MachineType.SMALL, independentTasks.asJava)
     independentQueue :: List[TaskQueue]()
 
     dependentTasks.foreach(t => longestPathByWeight(t, List[Edge]()))
+  }
+
+  def findPath(start: Task, end: Task, visited: Set[Task]): List[Edge] = {
+    def findPathHelper(start: Task,
+                       end: Task,
+                       visited: Set[Task],
+                       path: List[Task]): List[Edge] = {
+      
+    }
   }
 
   def reverseList(list: List[Task]): List[Task] = {
@@ -78,7 +93,8 @@ object LinearCluster extends UnboundedScheduler {
     }
   }
 
-  @tailrec def longestPathByWeight(task: Task, path: List[Edge]): List[Edge] = {
+  @tailrec
+  def longestPathByWeight(task: Task, path: List[Edge]): List[Edge] = {
     val edges = task.getDependents.asScala.map {
       case (task: Task, cost: Integer) => Edge(task, cost)
     }.toList

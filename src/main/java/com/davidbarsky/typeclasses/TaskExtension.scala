@@ -9,7 +9,7 @@ object TaskExtension {
     def compare(x: Task, y: Task): Int = x.getID compare y.getID
   }
 
-  implicit class TaskNegateChildren(task: Task) {
+  implicit class TaskNegateNeighbors(task: Task) {
     def getNegatativeDependencies: Map[Task, Int] = {
       task.getDependencies.asScala.map { kv =>
         (kv._1, -kv._2)
