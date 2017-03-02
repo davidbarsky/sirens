@@ -6,6 +6,7 @@ import collection.JavaConverters._
 import com.davidbarsky.dag.TopologicalSorter
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 import com.davidbarsky.dag.models.states.MachineType
+import com.davidbarsky.typeclasses.TaskExtension._
 
 import collection.immutable.SortedSet
 
@@ -60,7 +61,7 @@ object LinearCluster extends UnboundedScheduler {
   override def generateSchedule(numNodes: Int): util.List[TaskQueue] = ???
 
   def test(): Unit = {
-    val graph: List[Task] = TopologicalSorter.generateGraph(30).asScala.toList
+    val graph: List[Task] = TopologicalSorter.generateGraph(90).asScala.toList
 
     def isIndependent(task: Task) = task.isFreeNode
 
@@ -70,6 +71,10 @@ object LinearCluster extends UnboundedScheduler {
     val sourceNodes = dependentTasks.filter(_.isSource)
     val leafNodes = dependentTasks.filter(_.isLeaf)
 
+    for (source <- dependentTasks) {
+      println("All Children: " + source.allChildren)
+    }
+
     val independentQueue =
       new TaskQueue(MachineType.SMALL, independentTasks.asJava)
     independentQueue :: List[TaskQueue]()
@@ -77,13 +82,15 @@ object LinearCluster extends UnboundedScheduler {
     dependentTasks.foreach(t => longestPathByWeight(t, List[Edge]()))
   }
 
-  def findPath(start: Task, end: Task, visited: Set[Task]): List[Edge] = {
-    def findPathHelper(start: Task,
+  def findPath(start: Task, end: Task): Unit = {
+    def findPathHelper(current: Task,
                        end: Task,
-                       visited: Set[Task],
-                       path: List[Task]): List[Edge] = {
-      
+                       path: List[Task]): Unit = {
+
     }
+
+    val path = List[Task]()
+    findPathHelper(start, end, path)
   }
 
   def reverseList(list: List[Task]): List[Task] = {
