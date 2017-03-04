@@ -46,9 +46,11 @@ class ExperimentLogger {
   def writeToFile(results: util.List[ExperimentResult], path: String): Unit = {
     val file = new File(path)
     val printWriter = new PrintWriter(new FileWriter(file))
-    results.forEach { result =>
-      printWriter.append(result.toCSV(","))
-    }
+    val stringBuilder = new StringBuilder()
+
+    results.forEach(result => stringBuilder.append(result.toCSV(",") + "\n"))
+    printWriter.write(stringBuilder.toString)
+
     printWriter.close()
   }
 }
