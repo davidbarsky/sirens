@@ -29,11 +29,9 @@ public class ExperimentLoggerTest {
 
         File file = File.createTempFile("output", "txt");
         file.deleteOnExit();
-
         ExperimentLogger.writeToFile(experimentResults, file);
-        List<String> strings = Files.readAllLines(file.toPath());
-        String testActual = String.join("\n", strings);
 
+        String testActual = String.join("\n", Files.readAllLines(file.toPath())) + "\n";
         assertEquals(testCSV, testActual);
     }
 }
