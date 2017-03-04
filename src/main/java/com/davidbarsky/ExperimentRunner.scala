@@ -1,6 +1,7 @@
 package com.davidbarsky
 
-import java.io.{BufferedWriter, File}
+import java.io.{File, FileWriter, PrintWriter}
+import java.util
 
 import purecsv.unsafe._
 import com.davidbarsky.dag.{Actualizer, CostAnalyzer}
@@ -11,28 +12,34 @@ case class ExperimentResult(schedulerName: String,
                             numberOfQueues: Int,
                             finalCost: Int)
 
-class ExperimentRunner(outputFile: File, bufferedWriter: BufferedWriter) {
+// Pass buffered writer in, be sure to close on finish.
+object ExperimentRunner {
 
   def runExperiment(scheduler: UnboundedScheduler,
-                    numberOfNodes: Int): Unit = {
+                    numberOfNodes: Int): ExperimentResult = {
     val unbuiltGraph = scheduler.generateSchedule(numberOfNodes)
     val builtGraph = Actualizer.actualize(unbuiltGraph)
     val cost = CostAnalyzer.findCostOfBuiltTasks(builtGraph)
 
-    writeResult(ExperimentResult(scheduler.getClass.toString, numberOfNodes, unbuiltGraph.size, cost)
+    ExperimentResult(scheduler.getClass.toString, numberOfNodes, unbuiltGraph.size, cost)
   }
   def runExperiment(scheduler: BoundedScheduler,
-                    numberOfQueues: Int): Unit = {
+                    numberOfQueues: Int): ExperimentResult = {
     val unbuiltGraph = scheduler.generateSchedule(numberOfQueues)
     val builtGraph = Actualizer.actualize(unbuiltGraph)
     val cost = CostAnalyzer.findCostOfBuiltTasks(builtGraph)
 
-    writeResult(ExperimentResult(scheduler.getClass.toString, builtGraph.size, numberOfQueues, cost))
+    ExperimentResult(scheduler.getClass.toString, builtGraph.size, numberOfQueues, cost)
   }
+}
 
-  def writeResult(result: ExperimentResult): Unit = {
-    val row = result.toCSV(",")
-    bufferedWriter.append(row)
-    bufferedWriter.newLine()
+class ExperimentLogger {
+  def writeToFile(results: util.List[ExperimentResult], path: String): Unit = {
+    val file = new File(path)
+    val printWriter = new PrintWriter(new FileWriter(file))
+    results.forEach { result =>
+      printWriter.append(result.toCSV(","))
+    }
+    printWriter.close()
   }
 }
