@@ -5,7 +5,6 @@ import java.util
 
 import collection.JavaConverters._
 
-import purecsv.unsafe._
 import com.davidbarsky.dag.{Actualizer, CostAnalyzer}
 import com.davidbarsky.schedulers.{BoundedScheduler, UnboundedScheduler}
 
@@ -42,15 +41,17 @@ object ExperimentRunner {
   }
 }
 
-class ExperimentLogger {
-  def writeToFile(results: util.List[ExperimentResult], path: String): Unit = {
-    val file = new File(path)
-    val printWriter = new PrintWriter(new FileWriter(file))
+import purecsv.safe._
+object ExperimentLogger {
+  def toCSV(results: util.List[ExperimentResult]): String = {
     val stringBuilder = new StringBuilder()
-
     results.forEach(result => stringBuilder.append(result.toCSV(",") + "\n"))
-    printWriter.write(stringBuilder.toString)
+    stringBuilder.toString
+  }
 
+  def writeToFile(results: util.List[ExperimentResult], file: File): Unit = {
+    val printWriter = new PrintWriter(new FileWriter(file))
+    printWriter.write(toCSV(results))
     printWriter.close()
   }
 }

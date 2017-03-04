@@ -43,7 +43,7 @@ public class ExperimentRunnerTest {
     public void runExperimentBounded() throws Exception {
         ExperimentResult experimentResult = ExperimentRunner.runExperiment(new RoundRobin(), 10);
         assertEquals(experimentResult.numberOfQueues(), 10);
-        assertEquals(experimentResult.schedulerName(), "class com.davidbarsky.schedulers.LinearCluster");
+        assertEquals(experimentResult.schedulerName(), "class com.davidbarsky.schedulers.RoundRobin");
         assertNotNull(experimentResult.finalCost());
     }
 }
