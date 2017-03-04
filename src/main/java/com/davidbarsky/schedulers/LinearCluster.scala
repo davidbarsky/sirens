@@ -68,11 +68,15 @@ object LinearCluster extends UnboundedScheduler {
     val independentTasks: List[Task] = graph.filter(isIndependent)
     val dependentTasks: List[Task] = graph.filterNot(isIndependent)
 
-    val sourceNodes = dependentTasks.filter(_.isSource)
-    val leafNodes = dependentTasks.filter(_.isLeaf)
+    for (source <- graph) {
+      val dependentCount = source.countDependents
+      val allChildren = source.allChildren
 
-    for (source <- dependentTasks) {
-      println("All Children: " + source.allChildren)
+      println(dependentCount, allChildren)
+      if (dependentCount != allChildren.length) {
+        println(source, dependentCount, allChildren)
+        assert(dependentCount == allChildren.length)
+      }
     }
 
     val independentQueue =
@@ -96,7 +100,7 @@ object LinearCluster extends UnboundedScheduler {
   def reverseList(list: List[Task]): List[Task] = {
     list match {
       case Nil => Nil
-      case head :: tail => reverseList(tail) ::: List(head)
+      case head :: tail => head :: reverseList(tail)
     }
   }
 

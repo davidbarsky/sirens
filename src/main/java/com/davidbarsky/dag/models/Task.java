@@ -192,12 +192,17 @@ public class Task implements Comparable<Task> {
 		return startEndTime;
 	}
 
+	public Integer countDependents() {
+		if (dependents.isEmpty()) return 0;
+		return dependents.keySet().stream().mapToInt(Task::countDependents).sum();
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Task))
 			return false;
 
-		return this.id == ((Task)o).id;		
+		return Objects.equals(this.id, ((Task) o).id);
 	}
 
 	@Override

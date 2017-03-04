@@ -10,7 +10,31 @@ object TaskExtension {
     def compare(x: Task, y: Task): Int = x.getID compare y.getID
   }
 
-  implicit class TaskNegateNeighbors(task: Task) {
+  implicit class TaskExtension(task: Task) {
+    def getDependentsAsScala: List[Task] = {
+      task.getDependents.keySet().asScala.toList
+    }
+
+    def allChildren: List[Task] = {
+      val buffer = ListBuffer[Task]()
+      def loop(t: Task): Unit = {
+        if (!t.isLeaf) {
+          buffer += t
+          t.getDependentsAsScala.foreach(child => loop(child))
+        }
+      }
+      loop(task)
+      buffer.toList
+    }
+
+    def allChildrenF: List[Task] = {
+      def loop(t: Task): List[Task] = {
+        if (t.isLeaf || task == t) Nil
+        else t.getDependentsAsScala.flatMap { child =>  t :: loop(child) }
+      }
+      loop(task)
+    }
+
     def getNegatativeDependencies: Map[Task, Int] = {
       task.getDependencies.asScala.map { kv =>
         (kv._1, -kv._2)
@@ -21,20 +45,6 @@ object TaskExtension {
       task.getDependents.asScala.map { kv =>
         (kv._1, -kv._2)
       }.toMap
-    }
-  }
-
-  implicit class TaskDependentsToList(task: Task) {
-    def getDependentsAsScala: List[Task] = {
-      task.getDependents.keySet().asScala.toList
-    }
-
-    def allChildren: List[Task] = {
-      def loop(t: Task): List[Task] = {
-        if (t.getDependentsAsScala.isEmpty) Nil
-        else t :: t.getDependentsAsScala.flatMap(loop)
-      }
-      loop(task)
     }
   }
 }
