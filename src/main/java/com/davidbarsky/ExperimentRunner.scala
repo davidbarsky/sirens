@@ -14,9 +14,7 @@ case class ExperimentResult(schedulerName: String,
                             numberOfQueues: Int,
                             finalCost: Int)
 
-// Pass buffered writer in, be sure to close on finish.
 object ExperimentRunner {
-
   def runSeries(scheduler: UnboundedScheduler, startNodes: Int, endNodes: Int): util.List[ExperimentResult] = {
     (startNodes until endNodes).map { numNodes => runExperiment(scheduler, numNodes) }.asJava
   }
