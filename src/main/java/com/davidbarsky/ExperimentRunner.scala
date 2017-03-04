@@ -3,6 +3,8 @@ package com.davidbarsky
 import java.io.{File, FileWriter, PrintWriter}
 import java.util
 
+import collection.JavaConverters._
+
 import purecsv.unsafe._
 import com.davidbarsky.dag.{Actualizer, CostAnalyzer}
 import com.davidbarsky.schedulers.{BoundedScheduler, UnboundedScheduler}
@@ -15,6 +17,14 @@ case class ExperimentResult(schedulerName: String,
 // Pass buffered writer in, be sure to close on finish.
 object ExperimentRunner {
 
+  def runSeries(scheduler: UnboundedScheduler, startNodes: Int, endNodes: Int): util.List[ExperimentResult] = {
+    (startNodes until endNodes).map { numNodes => runExperiment(scheduler, numNodes) }.asJava
+  }
+
+  def runSeries(scheduler: BoundedScheduler, startQueues: Int, endQueues: Int): util.List[ExperimentResult] = {
+    (startQueues until endQueues).map { numQueues => runExperiment(scheduler, numQueues) }.asJava
+  }
+
   def runExperiment(scheduler: UnboundedScheduler,
                     numberOfNodes: Int): ExperimentResult = {
     val unbuiltGraph = scheduler.generateSchedule(numberOfNodes)
@@ -23,6 +33,7 @@ object ExperimentRunner {
 
     ExperimentResult(scheduler.getClass.toString, numberOfNodes, unbuiltGraph.size, cost)
   }
+
   def runExperiment(scheduler: BoundedScheduler,
                     numberOfQueues: Int): ExperimentResult = {
     val unbuiltGraph = scheduler.generateSchedule(numberOfQueues)
