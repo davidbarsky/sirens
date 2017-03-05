@@ -3,12 +3,10 @@ package com.davidbarsky.experiments
 import java.util
 import java.io.{File, FileWriter, PrintWriter}
 
-import purecsv.safe._
-
 object ExperimentLogger {
   def toCSV(results: util.List[ExperimentResult]): String = {
     val stringBuilder = new StringBuilder()
-    results.forEach(result => stringBuilder.append(result.toCSV(",") + "\n"))
+    results.forEach(result => stringBuilder.append(result.toCSV))
     stringBuilder.toString
   }
 
