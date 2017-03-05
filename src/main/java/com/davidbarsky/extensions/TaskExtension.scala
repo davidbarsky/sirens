@@ -1,4 +1,4 @@
-package com.davidbarsky.typeclasses
+package com.davidbarsky.extensions
 
 import com.davidbarsky.dag.models.Task
 
@@ -30,7 +30,10 @@ object TaskExtension {
     def allChildrenF: List[Task] = {
       def loop(t: Task): List[Task] = {
         if (t.isLeaf || task == t) Nil
-        else t.getDependentsAsScala.flatMap { child =>  t :: loop(child) }
+        else
+          t.getDependentsAsScala.flatMap { child =>
+            t :: loop(child)
+          }
       }
       loop(task)
     }

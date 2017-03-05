@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class LinearClusterTest {
     @Test
     public void generateSchedule() throws Exception {
-        List<TaskQueue> schedule = LinearCluster.generateSchedule(30);
+        List<TaskQueue> schedule = new LinearCluster().generateSchedule(30);
         List<Task> sortedTasks = schedule
                 .stream()
                 .flatMap(taskQueue -> taskQueue.getTasks().stream())
@@ -29,7 +29,7 @@ public class LinearClusterTest {
 
     @Test
     public void linearClusterCanBeActualized() throws Exception {
-        List<TaskQueue> schedule = LinearCluster.generateSchedule(30);
+        List<TaskQueue> schedule = new LinearCluster().generateSchedule(30);
 
         List<TaskQueue> actualizedSchedule = Actualizer.actualize(schedule);
         assertNotNull(actualizedSchedule);

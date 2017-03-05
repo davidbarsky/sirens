@@ -1,9 +1,7 @@
-package com.davidbarsky;
+package com.davidbarsky.experiments;
 
 import com.davidbarsky.schedulers.EdgeZero;
-import com.davidbarsky.schedulers.LinearCluster$;
 import com.davidbarsky.schedulers.RoundRobin;
-import org.apache.commons.math3.analysis.function.Exp;
 import org.junit.Assert;
 import org.junit.Test;
 

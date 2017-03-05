@@ -1,4 +1,4 @@
-package com.davidbarsky.schedulers;
+package com.davidbarsky;
 
 import com.davidbarsky.dag.Actualizer;
 import com.davidbarsky.dag.TopologicalSorter;

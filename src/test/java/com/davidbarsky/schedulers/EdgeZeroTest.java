@@ -19,7 +19,6 @@ public class EdgeZeroTest {
 
     @Before
     public void init() {
-        edgeZero = new EdgeZero();
         graph = edgeZero.generateSchedule(30);
     }
 

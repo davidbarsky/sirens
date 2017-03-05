@@ -6,7 +6,7 @@ import collection.JavaConverters._
 import com.davidbarsky.dag.TopologicalSorter
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 import com.davidbarsky.dag.models.states.MachineType
-import com.davidbarsky.typeclasses.TaskExtension._
+import com.davidbarsky.extensions.TaskExtension._
 
 import collection.immutable.SortedSet
 
@@ -57,7 +57,7 @@ case class Rose(task: Task, children: SortedSet[Rose]) extends Ordered[Rose] {
 // On each iteration of the BFS, we'll pass a set of visited nodes. We stop iteration when
 // the set of visited nodes equals the size of the dependent nodes.
 
-object LinearCluster extends UnboundedScheduler {
+class LinearCluster extends UnboundedScheduler {
   override def generateSchedule(numNodes: Int): util.List[TaskQueue] = ???
 
   def test(): Unit = {
@@ -87,11 +87,7 @@ object LinearCluster extends UnboundedScheduler {
   }
 
   def findPath(start: Task, end: Task): Unit = {
-    def findPathHelper(current: Task,
-                       end: Task,
-                       path: List[Task]): Unit = {
-
-    }
+    def findPathHelper(current: Task, end: Task, path: List[Task]): Unit = {}
 
     val path = List[Task]()
     findPathHelper(start, end, path)
@@ -104,8 +100,8 @@ object LinearCluster extends UnboundedScheduler {
     }
   }
 
-  @tailrec
-  def longestPathByWeight(task: Task, path: List[Edge]): List[Edge] = {
+  @tailrec final def longestPathByWeight(task: Task,
+                                         path: List[Edge]): List[Edge] = {
     val edges = task.getDependents.asScala.map {
       case (task: Task, cost: Integer) => Edge(task, cost)
     }.toList
@@ -116,7 +112,7 @@ object LinearCluster extends UnboundedScheduler {
     }
   }
 
-  @tailrec def max(as: List[Edge]): Option[Edge] = as match {
+  @tailrec final def max(as: List[Edge]): Option[Edge] = as match {
     case Nil => None
     case List(Edge(task: Task, cost: Int)) => Some(Edge(task, cost))
     case x :: y :: tail =>

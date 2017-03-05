@@ -1,11 +1,10 @@
-package com.davidbarsky;
+package com.davidbarsky.experiments;
 
 import com.davidbarsky.schedulers.EdgeZero;
 import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
