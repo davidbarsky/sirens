@@ -23,7 +23,7 @@ public class ActualizerTest {
 	@Test
 	public void actualize() {
 		BoundedScheduler roundRobin = new RoundRobin();
-		ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) roundRobin.generateSchedule(2);
+		ArrayList<TaskQueue> tqs = (ArrayList<TaskQueue>) roundRobin.generateSchedule(2, MachineType.SMALL);
 
 		final List<TaskQueue> tasks = Actualizer.actualize(tqs);
 		List<TaskQueue> copied = new ArrayList<>(tasks);

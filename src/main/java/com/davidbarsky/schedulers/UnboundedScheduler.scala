@@ -1,9 +1,10 @@
 package com.davidbarsky.schedulers
 
-import java.util.{List => JavaList}
+import java.util
 
 import com.davidbarsky.dag.models.TaskQueue
+import com.davidbarsky.dag.models.states.MachineType
 
 trait UnboundedScheduler {
-  def generateSchedule(numNodes: Int): JavaList[TaskQueue]
+  def generateSchedule(numNodes: Int, machineType: MachineType): util.List[TaskQueue]
 }

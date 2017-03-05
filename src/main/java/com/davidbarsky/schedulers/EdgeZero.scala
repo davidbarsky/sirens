@@ -17,16 +17,14 @@ import scala.collection.mutable.{Set => MutableSet}
 // for both fork and join structures.
 class EdgeZero extends UnboundedScheduler {
 
-  private val defaultMachineType = MachineType.SMALL
-
   private val byEdgeWeight: Comparator[Task] = (t1: Task, t2: Task) =>
     Integer.compare(t2.edgeWeight(), t1.edgeWeight())
 
-  override def generateSchedule(numNodes: Int): util.List[TaskQueue] = {
+  override def generateSchedule(numNodes: Int, machineType: MachineType): util.List[TaskQueue] = {
     def clusterTaskToQueue(tasks: util.List[Task]): util.List[TaskQueue] = {
       val cluster = new util.ArrayList[TaskQueue](tasks.size())
       tasks.forEach { t: Task =>
-        val taskQueue = new TaskQueue(defaultMachineType)
+        val taskQueue = new TaskQueue(machineType)
         taskQueue.add(t)
         cluster.add(taskQueue)
       }
@@ -41,14 +39,14 @@ class EdgeZero extends UnboundedScheduler {
 
     val clusteredTasks = clusterTaskToQueue(graph)
 
-    mergeClusters(clusteredTasks.asScala.toList).asJava
+    mergeClusters(clusteredTasks.asScala.toList, machineType).asJava
   }
 
-  def mergeClusters(as: List[TaskQueue]): List[TaskQueue] = {
+  private def mergeClusters(as: List[TaskQueue], machineType: MachineType): List[TaskQueue] = {
     val visited = MutableSet[Task]()
     val buffer = ListBuffer[TaskQueue]()
     for ((taskQueue: TaskQueue, index: Int) <- as.view.zipWithIndex) {
-      val newTaskQueue = new TaskQueue(defaultMachineType)
+      val newTaskQueue = new TaskQueue(machineType)
       for (task: Task <- taskQueue.getTasks.asScala) {
         // First, we try to add the current task to the the TaskQueue
         if (!newTaskQueue.hasTask(task) && !visited.contains(task)) {
@@ -68,7 +66,7 @@ class EdgeZero extends UnboundedScheduler {
         }
       }
 
-      val sortedQueue: TaskQueue = topologicallySort(newTaskQueue)
+      val sortedQueue: TaskQueue = topologicallySort(newTaskQueue, machineType)
 //      val intermediate: List[TaskQueue] =
 //        generateIntermediate(sortedQueue, as, buffer, index)
 //      val cost = costIntermediateList(intermediate)
@@ -113,11 +111,15 @@ class EdgeZero extends UnboundedScheduler {
       }
   }
 
-  def topologicallySort(taskQueue: TaskQueue): TaskQueue = {
+  def topologicallySort(taskQueue: TaskQueue, machineType: MachineType): TaskQueue = {
     val sortedList: util.List[Task] = taskQueue.getTasks.asScala
       .sortWith(_.getID < _.getID)
       .asJava
 
-    new TaskQueue(defaultMachineType, sortedList)
+    new TaskQueue(machineType, sortedList)
+  }
+
+  override def toString: String = {
+    "EdgeZero"
   }
 }

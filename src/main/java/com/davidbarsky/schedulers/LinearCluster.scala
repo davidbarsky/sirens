@@ -58,7 +58,7 @@ case class Rose(task: Task, children: SortedSet[Rose]) extends Ordered[Rose] {
 // the set of visited nodes equals the size of the dependent nodes.
 
 class LinearCluster extends UnboundedScheduler {
-  override def generateSchedule(numNodes: Int): util.List[TaskQueue] = ???
+  override def generateSchedule(numNodes: Int, machineType: MachineType): util.List[TaskQueue] = ???
 
   def test(): Unit = {
     val graph: List[Task] = TopologicalSorter.generateGraph(90).asScala.toList
@@ -117,6 +117,10 @@ class LinearCluster extends UnboundedScheduler {
     case List(Edge(task: Task, cost: Int)) => Some(Edge(task, cost))
     case x :: y :: tail =>
       max((if (x.networkCost > y.networkCost) x else y) :: tail)
+  }
+
+  override def toString: String = {
+    "LinearCluster"
   }
 }
 

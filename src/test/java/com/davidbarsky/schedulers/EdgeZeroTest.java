@@ -14,16 +14,11 @@ import static org.junit.Assert.*;
 
 public class EdgeZeroTest {
 
-    EdgeZero edgeZero;
-    List<TaskQueue> graph;
-
-    @Before
-    public void init() {
-        graph = edgeZero.generateSchedule(30);
-    }
-
     @Test
     public void generateSchedule() throws Exception {
+        EdgeZero edgeZero = new EdgeZero();
+        List<TaskQueue> graph = edgeZero.generateSchedule(30, MachineType.SMALL);
+
         List<TaskQueue> schedule = Actualizer.actualize(graph);
         schedule.forEach(tq -> {
             assertNotNull(tq.getStartTime());

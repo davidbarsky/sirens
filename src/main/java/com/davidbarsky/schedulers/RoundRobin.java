@@ -11,15 +11,16 @@ import java.util.stream.IntStream;
 
 public class RoundRobin implements BoundedScheduler {
 
+
     public RoundRobin() {}
 
-    public List<TaskQueue> generateSchedule(int numQueues) {
+    public List<TaskQueue> generateSchedule(int numQueues, MachineType machineType) {
         ArrayList<TaskQueue> queues = new ArrayList<>(numQueues);
         Map<Integer, Task> tasks = new HashMap<>();
         int i = 0;
 
         IntStream.range(0, numQueues)
-                .forEach(k -> queues.add(new TaskQueue(MachineType.SMALL)));
+                .forEach(k -> queues.add(new TaskQueue(machineType)));
 
         Collection<Vertex> vertices = DAGGenerator.getErdosGNMSources(20);
         // round-robin each vertex to a task queue
@@ -50,5 +51,10 @@ public class RoundRobin implements BoundedScheduler {
         }
 
         return queues;
+    }
+
+    @Override
+    public String toString() {
+        return "RoundRobin";
     }
 }
