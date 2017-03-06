@@ -107,10 +107,6 @@ public class Task implements Comparable<Task> {
 		return networkingTime;
 	}
 
-	public boolean hasDependents() {
-		return getDependents().isEmpty();
-	}
-
 	public boolean isLeaf() {
 		return getDependents().isEmpty();
 	}
@@ -119,8 +115,8 @@ public class Task implements Comparable<Task> {
 		return getDependencies().isEmpty();
 	}
 
-	public boolean isFreeNode() {
-		return getDependencies().size() == 0 && getDependents().size() == 0;
+	public boolean isIndependent() {
+		return getDependencies().isEmpty() && getDependents().isEmpty();
 	}
 
 	public int edgeWeight() {

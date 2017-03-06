@@ -13,7 +13,7 @@ object ExperimentRunner {
                 startNodes: Int,
                 endNodes: Int,
                 machineType: MachineType): util.List[ExperimentResult] = {
-    (startNodes until endNodes).map { numNodes =>
+    (startNodes to endNodes).map { numNodes =>
       runExperiment(scheduler, numNodes, machineType)
     }.asJava
   }
@@ -22,7 +22,7 @@ object ExperimentRunner {
                 startQueues: Int,
                 endQueues: Int,
                 machineType: MachineType): util.List[ExperimentResult] = {
-    (startQueues until endQueues).map { numQueues =>
+    (startQueues to endQueues).map { numQueues =>
       runExperiment(scheduler, numQueues, machineType)
     }.asJava
   }

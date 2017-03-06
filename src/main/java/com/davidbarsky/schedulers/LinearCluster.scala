@@ -58,15 +58,24 @@ case class Rose(task: Task, children: SortedSet[Rose]) extends Ordered[Rose] {
 // the set of visited nodes equals the size of the dependent nodes.
 
 class LinearCluster extends UnboundedScheduler {
-  override def generateSchedule(numNodes: Int, machineType: MachineType): util.List[TaskQueue] = ???
+
+  override def generateSchedule(numNodes: Int, machineType: MachineType): util.List[TaskQueue] = {
+    val graph: List[Task] = TopologicalSorter.generateGraph(numNodes).asScala.toList
+
+    val independentTasks: List[Task] = graph.filter(_.isIndependent)
+    val dependentTasks: List[Task] = graph.filterNot(_.isIndependent)
+
+    print(dependentTasks.flatMap(_.allChildren).size)
+
+    val independentQueue = new TaskQueue(machineType, independentTasks.asJava) :: Nil
+    independentQueue.asJava
+  }
 
   def test(): Unit = {
     val graph: List[Task] = TopologicalSorter.generateGraph(90).asScala.toList
 
-    def isIndependent(task: Task) = task.isFreeNode
-
-    val independentTasks: List[Task] = graph.filter(isIndependent)
-    val dependentTasks: List[Task] = graph.filterNot(isIndependent)
+    val independentTasks: List[Task] = graph.filter(_.isIndependent)
+    val dependentTasks: List[Task] = graph.filterNot(_.isIndependent)
 
     for (source <- graph) {
       val dependentCount = source.countDependents

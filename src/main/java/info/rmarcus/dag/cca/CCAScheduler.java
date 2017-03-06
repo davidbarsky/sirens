@@ -17,7 +17,7 @@ public class CCAScheduler {
 
 	public CCAScheduler(Collection<Task> tasks) {
 		this.topo = tasks.stream()
-				.sorted((a, b) -> a.getID() - b.getID())
+				.sorted(Comparator.comparingInt(Task::getID))
 				.collect(Collectors.toList());
 
 		this.rtopo = new ArrayList<>(topo.size());

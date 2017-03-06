@@ -17,9 +17,9 @@ public class ExperimentLoggerTest {
         List<ExperimentResult> experimentResults = ExperimentRunner.runSeries(new EdgeZero(), 10, 12, MachineType.SMALL);
         String csv = ExperimentLogger.toCSV(experimentResults);
 
-        // There's probably a better way to test formatting. Cost is non-deterministic
-        System.out.println(csv);
-        assertNotNull(csv);
+        // We're checking the first parts of the CSV fit the pattern of "EdgeZero,SMALL". Numbers that follow
+        // are non-deterministic
+        assertEquals(csv.substring(0, 14), "EdgeZero,SMALL");
     }
 
     @Test

@@ -32,10 +32,17 @@ public class LinearClusterTest {
     public void linearClusterCanBeActualized() throws Exception {
         List<TaskQueue> schedule = new LinearCluster().generateSchedule(30, MachineType.SMALL);
 
+        long count = schedule.stream().mapToLong(tq -> tq.getTasks().size()).sum();
+        assertEquals(30, count);
+
         List<TaskQueue> actualizedSchedule = Actualizer.actualize(schedule);
         assertNotNull(actualizedSchedule);
         assertTrue(actualizedSchedule.stream()
                 .flatMap(tq -> tq.getTasks().stream())
                 .noneMatch(task -> task.getBuildStatus() == BuildStatus.NOT_BUILT));
+
+        assertTrue(actualizedSchedule.stream()
+                .flatMap(tq -> tq.getTasks().stream())
+                .allMatch(task -> task.getBuildStatus() == BuildStatus.BUILT));
     }
 }
