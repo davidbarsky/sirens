@@ -1,5 +1,6 @@
 package com.davidbarsky.dag;
 
+import java.net.CookieHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -28,18 +29,18 @@ public class TopologicalSorter {
                     .edgeProperty("networking").uniform(5, 12)
                     .generateGraph().topoSort();
 
-            return mapToTaskList(graph);
+            return mapToTaskList(graph.allVertices());
         } catch (GGenException e) {
             throw new DAGException(e.getMessage());
         }
     }
 
-    public static List<Task> mapToTaskList(GGenGraph graph) {
+    public static List<Task> mapToTaskList(Collection<Vertex> graph) {
         List<Task> sortedTaskGraph = new ArrayList<>();
         Map<Integer, Task> tasks = new HashMap<>();
 
         // Transform them into Tasks and add them to the tasks map
-        for (Vertex v : graph.allVertices()) {
+        for (Vertex v : graph) {
             int vertexLatency = (int) (double) Double.valueOf(v.getVertexProperties().get("latency"));
             Map<MachineType, Integer> latencies = new EnumMap<>(MachineType.class);
             latencies.put(MachineType.SMALL, vertexLatency);
@@ -50,7 +51,7 @@ public class TopologicalSorter {
         }
 
         // Assign each task its dependencies
-        for (Vertex v : graph.allVertices()) {
+        for (Vertex v : graph) {
             Task t = tasks.get(v.getID());
             for (Map.Entry<Vertex, Map<String, String>> child : v.getChildren().entrySet()) {
                 Integer childID = child.getKey().getID();

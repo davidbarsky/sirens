@@ -2,35 +2,41 @@ package com.davidbarsky.experiments
 
 import java.util
 
+import com.davidbarsky.dag.models.Task
 import com.davidbarsky.dag.models.states.MachineType
-import com.davidbarsky.dag.{Actualizer, CostAnalyzer}
+import com.davidbarsky.dag.{Actualizer, CostAnalyzer, TopologicalSorter}
 import com.davidbarsky.schedulers.{BoundedScheduler, UnboundedScheduler}
 
-import scala.collection.JavaConverters._
+import collection.JavaConverters._
 
 object ExperimentRunner {
+  // Make this run a generic graph
   def runSeries(scheduler: UnboundedScheduler,
                 startNodes: Int,
                 endNodes: Int,
                 machineType: MachineType): util.List[ExperimentResult] = {
     (startNodes to endNodes).map { numNodes =>
-      runExperiment(scheduler, numNodes, machineType)
+      val graph = TopologicalSorter.generateGraph(numNodes)
+      runExperiment(scheduler, numNodes, graph, machineType)
     }.asJava
   }
 
+  // Make this run a generic graph
   def runSeries(scheduler: BoundedScheduler,
                 startQueues: Int,
                 endQueues: Int,
                 machineType: MachineType): util.List[ExperimentResult] = {
     (startQueues to endQueues).map { numQueues =>
-      runExperiment(scheduler, numQueues, machineType)
+      val graph = TopologicalSorter.generateGraph(numQueues * 3)
+      runExperiment(scheduler, numQueues, graph, machineType)
     }.asJava
   }
 
   def runExperiment(scheduler: UnboundedScheduler,
                     numberOfNodes: Int,
+                    graph: util.List[Task],
                     machineType: MachineType): ExperimentResult = {
-    val unbuiltGraph = scheduler.generateSchedule(numberOfNodes, machineType)
+    val unbuiltGraph = scheduler.generateSchedule(graph, machineType)
     val builtGraph = Actualizer.actualize(unbuiltGraph)
     val cost = CostAnalyzer.findCostOfBuiltTasks(builtGraph)
 
@@ -43,6 +49,7 @@ object ExperimentRunner {
 
   def runExperiment(scheduler: BoundedScheduler,
                     numberOfQueues: Int,
+                    graph: util.List[Task],
                     machineType: MachineType): ExperimentResult = {
     val unbuiltGraph = scheduler.generateSchedule(numberOfQueues, machineType)
     val builtGraph = Actualizer.actualize(unbuiltGraph)

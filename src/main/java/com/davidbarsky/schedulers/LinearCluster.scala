@@ -59,11 +59,11 @@ case class Rose(task: Task, children: SortedSet[Rose]) extends Ordered[Rose] {
 
 class LinearCluster extends UnboundedScheduler {
 
-  override def generateSchedule(numNodes: Int, machineType: MachineType): util.List[TaskQueue] = {
-    val graph: List[Task] = TopologicalSorter.generateGraph(numNodes).asScala.toList
+  override def generateSchedule(graph: util.List[Task], machineType: MachineType): util.List[TaskQueue] = {
+    val immutableGraph = graph.asScala.toList
 
-    val independentTasks: List[Task] = graph.filter(_.isIndependent)
-    val dependentTasks: List[Task] = graph.filterNot(_.isIndependent)
+    val independentTasks: List[Task] = immutableGraph.filter(_.isIndependent)
+    val dependentTasks: List[Task] = immutableGraph.filterNot(_.isIndependent)
 
     print(dependentTasks.flatMap(_.allChildren).size)
 

@@ -1,5 +1,6 @@
 package com.davidbarsky.experiments;
 
+import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.states.MachineType;
 import com.davidbarsky.schedulers.EdgeZero;
 import com.davidbarsky.schedulers.RoundRobin;
@@ -32,16 +33,18 @@ public class ExperimentRunnerTest {
 
     @Test
     public void runExperimentUnbounded() throws Exception {
-        ExperimentResult experimentResult = ExperimentRunner.runExperiment(new EdgeZero(), 30, MachineType.SMALL);
-        assertEquals(experimentResult.numberOfNodes(), 30);
+        List<Task> genericGraph = GraphGenerator.genericGraph(50);
+        ExperimentResult experimentResult = ExperimentRunner.runExperiment(new EdgeZero(), genericGraph.size(), genericGraph, MachineType.SMALL);
+        assertEquals(experimentResult.numberOfNodes(), 50);
         assertEquals(experimentResult.schedulerName(), "EdgeZero");
         assertNotNull(experimentResult.finalCost());
     }
 
     @Test
     public void runExperimentBounded() throws Exception {
-        ExperimentResult experimentResult = ExperimentRunner.runExperiment(new RoundRobin(), 10, MachineType.SMALL);
-        assertEquals(experimentResult.numberOfQueues(), 10);
+        List<Task> genericGraph = GraphGenerator.genericGraph(50);
+        ExperimentResult experimentResult = ExperimentRunner.runExperiment(new RoundRobin(), 5, genericGraph, MachineType.SMALL);
+        assertEquals(experimentResult.numberOfQueues(), 5);
         assertEquals(experimentResult.schedulerName(), "RoundRobin");
         assertNotNull(experimentResult.finalCost());
     }

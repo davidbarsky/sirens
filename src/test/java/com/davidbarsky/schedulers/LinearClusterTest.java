@@ -6,6 +6,7 @@ import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
 import com.davidbarsky.dag.models.states.BuildStatus;
 import com.davidbarsky.dag.models.states.MachineType;
+import com.davidbarsky.experiments.GraphGenerator;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
@@ -18,7 +19,8 @@ import static org.junit.Assert.*;
 public class LinearClusterTest {
     @Test
     public void generateSchedule() throws Exception {
-        List<TaskQueue> schedule = new LinearCluster().generateSchedule(30, MachineType.SMALL);
+        List<Task> genericGraph = GraphGenerator.genericGraph(50);
+        List<TaskQueue> schedule = new LinearCluster().generateSchedule(genericGraph, MachineType.SMALL);
         List<Task> sortedTasks = schedule
                 .stream()
                 .flatMap(taskQueue -> taskQueue.getTasks().stream())
@@ -30,7 +32,8 @@ public class LinearClusterTest {
 
     @Test
     public void linearClusterCanBeActualized() throws Exception {
-        List<TaskQueue> schedule = new LinearCluster().generateSchedule(30, MachineType.SMALL);
+        List<Task> genericGraph = GraphGenerator.genericGraph(50);
+        List<TaskQueue> schedule = new LinearCluster().generateSchedule(genericGraph, MachineType.SMALL);
 
         long count = schedule.stream().mapToLong(tq -> tq.getTasks().size()).sum();
         assertEquals(30, count);

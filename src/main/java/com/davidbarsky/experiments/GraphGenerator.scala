@@ -2,45 +2,56 @@ package com.davidbarsky.experiments
 
 import java.util
 
-import collection.JavaConverters._
+import com.davidbarsky.dag.models.Task
 
-import com.davidbarsky.dag.DAGGenerator
+import collection.JavaConverters._
+import com.davidbarsky.dag.{DAGGenerator, TopologicalSorter}
 import info.rmarcus.ggen4j.graph.Vertex
 
 object GraphGenerator {
 
+  def genericGraph(graphSize: Int): util.List[Task] = {
+    val vertexGraph = DAGGenerator.getErdosGNMSources(graphSize)
+    TopologicalSorter.mapToTaskList(vertexGraph)
+  }
+
   // Cholesky: 220, 364, 560, 816, 1140, 1540. Uses "blocks"
-  def cholesky: util.List[util.List[Vertex]] = {
+  def cholesky: util.List[util.List[Task]] = {
     (220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
-      DAGGenerator.getCholesky(n).asInstanceOf[util.List[Vertex]]
+      val vertexGraph = DAGGenerator.getCholesky(n).asInstanceOf[util.List[Vertex]]
+      TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava
   }
 
   // Fibonacci: 15, 25, 41, 67, 109, 177
-  def fibonacci: util.List[util.List[Vertex]] = {
+  def fibonacci: util.List[util.List[Task]] = {
     (15 :: 25 :: 41 :: 67 :: 109 :: 177 :: Nil).map { n =>
-      DAGGenerator.getFibonacci(n).asInstanceOf[util.List[Vertex]]
+      val vertexGraph = DAGGenerator.getFibonacci(n).asInstanceOf[util.List[Vertex]]
+      TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava
   }
 
   // Fork/Join: 35, 52, 69, 86, 103, 120
-  def forkJoin: util.List[util.List[Vertex]] = {
+  def forkJoin: util.List[util.List[Task]] = {
     (35 :: 52 :: 69 :: 86 :: 103 :: 120 :: Nil).map { n =>
-      DAGGenerator.getForkJoin(n).asInstanceOf[util.List[Vertex]]
+      val vertexGraph = DAGGenerator.getForkJoin(n).asInstanceOf[util.List[Vertex]]
+      TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava
   }
 
   // Poisson 2D: 288, 324, 360, 396, 432, 468
-  def poisson: util.List[util.List[Vertex]] = {
+  def poisson: util.List[util.List[Task]] = {
     (288 :: 324 :: 360 :: 396 :: 432 :: 468 :: Nil).map { n =>
-      DAGGenerator.getPoisson(n).asInstanceOf[util.List[Vertex]]
+      val vertexGraph = DAGGenerator.getPoisson(n).asInstanceOf[util.List[Vertex]]
+      TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava
   }
 
   // Sparse LU: 80, 84, 141, 145, 226, 230
-  def sparseLU: util.List[util.List[Vertex]] = {
+  def sparseLU: util.List[util.List[Task]] = {
     (80 :: 84 :: 141 :: 145 :: 226 :: 230 :: Nil).map { n =>
-      DAGGenerator.getSparseLU(n).asInstanceOf[util.List[Vertex]]
+      val vertexGraph = DAGGenerator.getSparseLU(n).asInstanceOf[util.List[Vertex]]
+      TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava
   }
 }
