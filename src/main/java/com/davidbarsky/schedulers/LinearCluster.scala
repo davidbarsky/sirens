@@ -3,50 +3,12 @@ package com.davidbarsky.schedulers
 import java.util
 
 import collection.JavaConverters._
-import com.davidbarsky.dag.TopologicalSorter
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.extensions.TaskExtension._
 
-import collection.immutable.SortedSet
-
 import scala.annotation.tailrec
-
-// Since the LC algorithm does not schedule nodes on different paths
-// to the same processor, it cannot guarantee optimal solutions
-// for both fork and join structures.
-
-case class Edge(task: Task, networkCost: Int) extends Ordered[Edge] {
-  override def compare(that: Edge): Int =
-    this.networkCost compare that.networkCost
-}
-
-case class Rose(task: Task, children: SortedSet[Rose]) extends Ordered[Rose] {
-  override def compare(that: Rose): Int =
-    this.task.getID compare that.task.getID
-
-  def insert(newTask: Task): Rose = {
-    this.copy(this.task, this.children + Rose(newTask, SortedSet[Rose]()))
-  }
-}
-
-//case class Tree(value: Task,
-//                parent: Option[Tree],
-//                children: MutableSortedSet[Tree])
-//    extends Ordered[Tree] {
-//  def compare(that: Tree): Int =
-//    this.value.getID compare that.value.getID
-//}
-//
-//object TreeOps {
-//  def getImmediateChildren(parent: Tree): MutableSortedSet[Tree] = {
-//    val taskChildren = parent.value.getDependents.keySet().asScala.toList
-//    val children = taskChildren.map(t => Tree(t, Some(parent), MutableSortedSet[Tree]()))
-//    val mutableSortedSet = MutableSortedSet[Tree]()
-//    children.foreach(t => mutableSortedSet.add(t))
-//  }
-//  def insert(task: Task, parent: Option[Tree]): Tree = {}
-//}
+import collection.mutable.{ListBuffer, Set => MutableSet}
 
 // So here's the plan.
 // First, split the graph into two groups: nodes *with* neighbors and *without*.
@@ -58,149 +20,78 @@ case class Rose(task: Task, children: SortedSet[Rose]) extends Ordered[Rose] {
 // the set of visited nodes equals the size of the dependent nodes.
 
 class LinearCluster extends UnboundedScheduler {
-
-  override def generateSchedule(graph: util.List[Task], machineType: MachineType): util.List[TaskQueue] = {
+  override def generateSchedule(
+      graph: util.List[Task],
+      machineType: MachineType): util.List[TaskQueue] = {
     val immutableGraph = graph.asScala.toList
 
     val independentTasks: List[Task] = immutableGraph.filter(_.isIndependent)
     val dependentTasks: List[Task] = immutableGraph.filterNot(_.isIndependent)
 
-    print(dependentTasks.flatMap(_.allChildren).size)
+    val scheduled = MutableSet[Task]()
+    val buffer = ListBuffer[TaskQueue]()
 
-    val independentQueue = new TaskQueue(machineType, independentTasks.asJava) :: Nil
-    independentQueue.asJava
+    immutableGraph.map(findPath).foreach { path: List[Task] =>
+      val taskPath = path
+        .filterNot(t => scheduled.contains(t))
+        .sortWith(_.getID < _.getID)
+        .distinct
+      buffer += new TaskQueue(machineType, taskPath.asJava)
+      taskPath.foreach(t => scheduled.add(t))
+    }
+
+    buffer += new TaskQueue(machineType, independentTasks.asJava)
+    buffer.asJava
   }
 
-  def test(): Unit = {
-    val graph: List[Task] = TopologicalSorter.generateGraph(90).asScala.toList
+  def longestPath(list: List[Task]): List[Int] = {
+    @tailrec def max(as: List[Int]): Int = as match {
+      case Nil => 0
+      case _ :: Nil => 1
+      case a :: b :: rest => max((if (a > b) a else b) :: rest)
+    }
 
-    val independentTasks: List[Task] = graph.filter(_.isIndependent)
-    val dependentTasks: List[Task] = graph.filterNot(_.isIndependent)
-
-    for (source <- graph) {
-      val dependentCount = source.countDependents
-      val allChildren = source.allChildren
-
-      println(dependentCount, allChildren)
-      if (dependentCount != allChildren.length) {
-        println(source, dependentCount, allChildren)
-        assert(dependentCount == allChildren.length)
+    def distance(t: Task): Int = {
+      if (t.isLeaf) 0
+      else {
+        max(t.getNegativeDependents.map { entry =>
+          1 + distance(entry._1)
+        }.toList)
       }
     }
 
-    val independentQueue =
-      new TaskQueue(MachineType.SMALL, independentTasks.asJava)
-    independentQueue :: List[TaskQueue]()
-
-    dependentTasks.foreach(t => longestPathByWeight(t, List[Edge]()))
+    list.map(distance)
   }
 
-  def findPath(start: Task, end: Task): Unit = {
-    def findPathHelper(current: Task, end: Task, path: List[Task]): Unit = {}
-
-    val path = List[Task]()
-    findPathHelper(start, end, path)
-  }
-
-  def reverseList(list: List[Task]): List[Task] = {
-    list match {
-      case Nil => Nil
-      case head :: tail => head :: reverseList(tail)
+  private def findPath(current: Task): List[Task] = {
+    if (current.isLeaf) {
+      current :: Nil
+    } else {
+      current.getNegativeDependents.flatMap { entry =>
+        current :: findPath(entry._1)
+      }.toList
     }
   }
 
-  @tailrec final def longestPathByWeight(task: Task,
-                                         path: List[Edge]): List[Edge] = {
-    val edges = task.getDependents.asScala.map {
-      case (task: Task, cost: Integer) => Edge(task, cost)
-    }.toList
-
-    max(edges) match {
-      case None => path.reverse
-      case Some(edge) => longestPathByWeight(edge.task, edge :: path)
-    }
-  }
-
-  @tailrec final def max(as: List[Edge]): Option[Edge] = as match {
-    case Nil => None
-    case List(Edge(task: Task, cost: Int)) => Some(Edge(task, cost))
-    case x :: y :: tail =>
-      max((if (x.networkCost > y.networkCost) x else y) :: tail)
-  }
+//  private def longestPathByWeight(task: Task): List[Edge] = {
+//    val edges = task.getDependents.asScala.map {
+//      case (task: Task, cost: Integer) => Edge(task, cost)
+//    }.toList
+//
+//    max(edges) match {
+//      case None => Nil
+//      case Some(edge) => edge :: longestPathByWeight(edge.task)
+//    }
+//  }
+//
+//  @tailrec private def max(as: List[Edge]): Option[Edge] = as match {
+//    case Nil => None
+//    case List(Edge(task: Task, cost: Int)) => Some(Edge(task, cost))
+//    case x :: y :: tail =>
+//      max((if (x.networkCost > y.networkCost) x else y) :: tail)
+//  }
 
   override def toString: String = {
     "LinearCluster"
   }
 }
-
-//  // For the number of nodes we're working with, a DFS combined
-//  // with a scheduling each path onto a TaskQueue appears to be sufficient.
-//  def generateSchedule(numNodes: Int): util.List[TaskQueue] = {
-//    val visited = new util.HashSet[Task]()
-//    val paths = Buffer[TaskQueue]()
-//
-//    def recurse(node: Task, path: TaskQueue): Unit = {
-//      if (visited.contains(node)) {
-//        return
-//      }
-//      visited.add(node)
-//      path.add(node)
-//      if (node.isLeaf) {
-//        paths += path
-//      }
-//
-//      node.getDependents
-//        .keySet()
-//        .asScala
-//        .foreach { t =>
-//          recurse(t, path)
-//        }
-//    }
-//
-//    def scheduleFreeNodes(graph: util.List[Task]): TaskQueue = {
-//      new TaskQueue(
-//        MachineType.SMALL,
-//        graph
-//          .stream()
-//          .filter(_.isFreeNode)
-//          .collect(Collectors.toList())
-//      )
-//    }
-//
-//    val graph = TopologicalSorter.generateGraph(numNodes).asScala.toList
-//
-////    graph.stream().filter(_.isSource).forEach { t =>
-////      recurse(t, new TaskQueue(MachineType.SMALL))
-////    }
-////    paths += scheduleFreeNodes(graph)
-//
-//    paths.foreach { tq =>
-//      tq.getTasks.asScala
-//        .sortWith(_.getID < _.getID)
-//        .asJava
-//    }
-//
-//    paths.asJava
-//  }
-//
-//  // Must take a topologically sorted list.
-//  def allPaths(graph: Seq[Task]): Unit = {
-//    def findPaths(g: Seq[Task], t: Task): Unit = {
-//
-//      val pending = MutableQueue[List[Task]]()
-//
-//      pending.enqueue(List(t))
-//      while (pending.nonEmpty) {
-//        val l = pending.dequeue()
-//        val lastTask = l.last
-//
-//        println(l)
-//        lastTask.getNeighbors.asScala
-//          .foreach { neighbor: Task =>
-//            pending.enqueue(l ++ List(neighbor))
-//          }
-//      }
-//    }
-//    findPaths(graph, graph.head)
-//  }
-//}

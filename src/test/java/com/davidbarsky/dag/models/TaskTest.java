@@ -7,7 +7,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import com.davidbarsky.experiments.GraphGenerator;
 import org.junit.Test;
 
 import com.davidbarsky.dag.DAGException;
@@ -66,5 +69,14 @@ public class TaskTest {
 	public void isSource() {
 		Task task = new Task(1, new TaskQueue(MachineType.LARGE), new HashMap<>());
 		assertTrue(task.isSource());
+	}
+
+	@Test
+	public void isIndependent() {
+		List<Task> graph = GraphGenerator.genericGraph(30);
+		long independentTaskSize = graph.stream().filter(Task::isIndependent).count();
+		long dependentTaskSize = graph.stream().filter(task -> !task.isIndependent()).count();
+
+		assertEquals(graph.size(), independentTaskSize + dependentTaskSize);
 	}
 }

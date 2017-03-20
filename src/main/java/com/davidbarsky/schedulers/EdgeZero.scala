@@ -3,7 +3,7 @@ package com.davidbarsky.schedulers
 import java.util
 
 import scala.collection.JavaConverters._
-import com.davidbarsky.dag.{Actualizer, CostAnalyzer, TopologicalSorter}
+import com.davidbarsky.dag.{Actualizer, CostAnalyzer}
 import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 
@@ -15,7 +15,9 @@ import scala.collection.mutable.{Set => MutableSet}
 // for both fork and join structures.
 class EdgeZero extends UnboundedScheduler {
 
-  override def generateSchedule(graph: util.List[Task], machineType: MachineType): util.List[TaskQueue] = {
+  override def generateSchedule(
+      graph: util.List[Task],
+      machineType: MachineType): util.List[TaskQueue] = {
     def clusterTaskToQueue(tasks: util.List[Task]): util.List[TaskQueue] = {
       val cluster = new util.ArrayList[TaskQueue](tasks.size())
       tasks.forEach { t: Task =>
@@ -30,7 +32,8 @@ class EdgeZero extends UnboundedScheduler {
     mergeClusters(clusteredTasks.asScala.toList, machineType).asJava
   }
 
-  private def mergeClusters(as: List[TaskQueue], machineType: MachineType): List[TaskQueue] = {
+  private def mergeClusters(as: List[TaskQueue],
+                            machineType: MachineType): List[TaskQueue] = {
     val visited = MutableSet[Task]()
     val buffer = ListBuffer[TaskQueue]()
     for ((taskQueue: TaskQueue, index: Int) <- as.view.zipWithIndex) {
@@ -64,9 +67,9 @@ class EdgeZero extends UnboundedScheduler {
   }
 
   private def generateIntermediate(sortedQueue: TaskQueue,
-                           original: List[TaskQueue],
-                           buffer: ListBuffer[TaskQueue],
-                           currentIndex: Int): List[TaskQueue] = {
+                                   original: List[TaskQueue],
+                                   buffer: ListBuffer[TaskQueue],
+                                   currentIndex: Int): List[TaskQueue] = {
     val (_, after) = original.splitAt(currentIndex + 1)
     (buffer.clone() += sortedQueue).toList ++ after
   }
@@ -77,8 +80,8 @@ class EdgeZero extends UnboundedScheduler {
   }
 
   private def findNearestNeighbors(source: Task,
-                           rest: List[TaskQueue],
-                           visited: MutableSet[Task]): List[Task] = {
+                                   rest: List[TaskQueue],
+                                   visited: MutableSet[Task]): List[Task] = {
     val dependencies = source.getDependencies.keySet().asScala.toList
     val dependents = source.getDependents.keySet().asScala.toList
 
@@ -94,7 +97,8 @@ class EdgeZero extends UnboundedScheduler {
       }
   }
 
-  private def topologicallySort(taskQueue: TaskQueue, machineType: MachineType): TaskQueue = {
+  private def topologicallySort(taskQueue: TaskQueue,
+                                machineType: MachineType): TaskQueue = {
     val sortedList: util.List[Task] = taskQueue.getTasks.asScala
       .sortWith(_.getID < _.getID)
       .asJava

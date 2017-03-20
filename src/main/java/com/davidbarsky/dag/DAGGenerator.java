@@ -86,7 +86,7 @@ public class DAGGenerator {
 	public static Collection<Vertex> getForkJoin(int n) {
 		GGenGraph graph;
 		try {
-			graph = GGen.staticGraph().forkJoin(n, 16)
+			graph = GGen.staticGraph().forkJoin(n, 15)
 					.vertexProperty("latency").uniform(10, 60)
 					.edgeProperty("networking").uniform(10, 60)
 					.generateGraph().topoSort();

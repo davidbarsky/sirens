@@ -21,6 +21,15 @@ object ExperimentRunner {
     }.asJava
   }
 
+  def runSeries(scheduler: UnboundedScheduler,
+                graphs: util.List[util.List[Task]],
+                machineType: MachineType): util.List[ExperimentResult] = {
+    graphs.asScala.toList.map { graph =>
+      println(graph)
+      runExperiment(scheduler, graph.size(), graph, machineType)
+    }.asJava
+  }
+
   // Make this run a generic graph
   def runSeries(scheduler: BoundedScheduler,
                 startQueues: Int,
