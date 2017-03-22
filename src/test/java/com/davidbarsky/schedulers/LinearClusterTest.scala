@@ -15,7 +15,7 @@ class LinearClusterTest {
   @Test
   @throws[Exception]
   def generateSchedule() {
-    val genericGraph: util.List[Task] = GraphGenerator.singleCholeskyGraph(10)
+    val genericGraph: util.List[Task] = GraphGenerator.genericGraph(70)
     val schedule: util.List[TaskQueue] =
       new LinearCluster().generateSchedule(genericGraph, MachineType.SMALL)
 

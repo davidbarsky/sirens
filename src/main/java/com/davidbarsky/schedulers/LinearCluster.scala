@@ -28,23 +28,22 @@ class LinearCluster extends UnboundedScheduler {
     val immutableGraph = graph.asScala.toList
     val independentTasks: List[Task] = immutableGraph.filter(_.isIndependent)
     val sourceTasks: List[Task] = immutableGraph.filter(_.isSource)
-    val levels: Map[Task, Int] = GraphProperties.findBottomLevel(immutableGraph, machineType)
-    val criticalPaths = sourceTasks.map(t => findCriticalPath(t, levels))
-    val adjacentNodes = criticalPaths.map(neighborsOfCriticalPath)
+    val levels: Map[Task, Int] =
+      GraphProperties.findBottomLevel(immutableGraph, machineType)
+    val criticalPaths: List[List[Task]] =
+      sourceTasks.map(t => findCriticalPath(t, levels))
+    val adjacentNodes: List[List[Task]] =
+      criticalPaths.map(neighborsOfCriticalPath)
 
-    val scheduled = Set[Task]()
+    val examined = MutableSet[Task]()
     val buffer = ListBuffer[TaskQueue]()
 
+    for (member <- adjacentNodes) {
+      val candidates = member.filterNot(t => examined.contains(t)).sortWith(_.getID < _.getID)
+      buffer += new TaskQueue(machineType, candidates.asJava)
+      candidates.foreach(t => examined.add(t))
+    }
     buffer += new TaskQueue(machineType, independentTasks.asJava)
-
-//    immutableGraph.map(findPath).foreach { path: List[Task] =>
-//      val taskPath = path
-//        .filterNot(t => scheduled.contains(t))
-//        .sortWith(_.getID < _.getID)
-//        .distinct
-//      buffer += new TaskQueue(machineType, taskPath.asJava)
-//      taskPath.foreach(t => scheduled.add(t))
-//    }
 
     buffer.filterNot(_.getTasks.isEmpty).asJava
   }
@@ -78,53 +77,6 @@ class LinearCluster extends UnboundedScheduler {
     }
     path.toList.sortWith(_.getID < _.getID)
   }
-
-//  def longestPath(list: List[Task]): List[Int] = {
-//    @tailrec def max(as: List[Int]): Int = as match {
-//      case Nil => 0
-//      case _ :: Nil => 1
-//      case a :: b :: rest => max((if (a > b) a else b) :: rest)
-//    }
-//
-//    def distance(t: Task): Int = {
-//      if (t.isLeaf) 0
-//      else {
-//        max(t.getNegativeDependents.map { entry =>
-//          1 + distance(entry._1)
-//        }.toList)
-//      }
-//    }
-//
-//    list.map(distance)
-//  }
-//
-//  private def findPath(current: Task): List[Task] = {
-//    if (current.isLeaf) {
-//      current :: Nil
-//    } else {
-//      current.getNegativeDependents.flatMap { entry =>
-//        current :: findPath(entry._1)
-//      }.toList
-//    }
-//  }
-
-//  private def longestPathByWeight(task: Task): List[Edge] = {
-//    val edges = task.getDependents.asScala.map {
-//      case (task: Task, cost: Integer) => Edge(task, cost)
-//    }.toList
-//
-//    max(edges) match {
-//      case None => Nil
-//      case Some(edge) => edge :: longestPathByWeight(edge.task)
-//    }
-//  }
-//
-//  @tailrec private def max(as: List[Edge]): Option[Edge] = as match {
-//    case Nil => None
-//    case List(Edge(task: Task, cost: Int)) => Some(Edge(task, cost))
-//    case x :: y :: tail =>
-//      max((if (x.networkCost > y.networkCost) x else y) :: tail)
-//  }
 
   override def toString: String = {
     "LinearCluster"
