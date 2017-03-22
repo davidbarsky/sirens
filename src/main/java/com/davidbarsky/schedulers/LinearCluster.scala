@@ -10,36 +10,23 @@ import com.davidbarsky.extensions.TaskExtension._
 import scala.annotation.tailrec
 import collection.mutable.{ListBuffer, Set => MutableSet}
 
-// So here's the plan.
-// First, split the graph into two groups: nodes *with* neighbors and *without*.
-// The ones without neighbors are shuffled onto their own task queue. Those can be built without worry.
-// That leaves us with the rest. Of the rest (the dependent nodes) need to scheduled.
-// To do that, we will find the longest path between a source and leaf node. To accomplish this,
-// we will use a BFS (with negative weights determine the "shortest" path).
-// On each iteration of the BFS, we'll pass a set of visited nodes. We stop iteration when
-// the set of visited nodes equals the size of the dependent nodes.
-
 class LinearCluster extends UnboundedScheduler {
-  override def generateSchedule(
-      graph: util.List[Task],
-      machineType: MachineType): util.List[TaskQueue] = {
-
-    // Initialization
+  override def generateSchedule(graph: util.List[Task],
+                                machineType: MachineType): util.List[TaskQueue] = {
     val immutableGraph = graph.asScala.toList
-    val independentTasks: List[Task] = immutableGraph.filter(_.isIndependent)
-    val sourceTasks: List[Task] = immutableGraph.filter(_.isSource)
-    val levels: Map[Task, Int] =
-      GraphProperties.findBottomLevel(immutableGraph, machineType)
-    val criticalPaths: List[List[Task]] =
-      sourceTasks.map(t => findCriticalPath(t, levels))
-    val adjacentNodes: List[List[Task]] =
-      criticalPaths.map(neighborsOfCriticalPath)
+    val independentTasks = immutableGraph.filter(_.isIndependent)
+    val sourceTasks = immutableGraph.filter(_.isSource)
+    val levels = GraphProperties.findBottomLevel(immutableGraph, machineType)
+
+    val criticalPaths = sourceTasks.map(t => findCriticalPath(t, levels))
+    val adjacentNodes = criticalPaths.map(neighborsOfCriticalPath)
 
     val examined = MutableSet[Task]()
     val buffer = ListBuffer[TaskQueue]()
 
     for (member <- adjacentNodes) {
-      val candidates = member.filterNot(t => examined.contains(t)).sortWith(_.getID < _.getID)
+      val candidates =
+        member.filterNot(t => examined.contains(t)).sortWith(_.getID < _.getID)
       buffer += new TaskQueue(machineType, candidates.asJava)
       candidates.foreach(t => examined.add(t))
     }

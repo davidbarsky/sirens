@@ -59,8 +59,7 @@ object GraphProperties {
   // So far, cost of all tasks is either 1 or 2, depending if they're scheduled
   // on a small/large machine. Since we don't know the *cost* of a task until its scheduled
   // on a machine, tLevel  & bLevel will assume MachineType.SMALL, with a default value of 1.
-  def findTopLevel(graph: util.List[Task],
-                   machineType: MachineType): util.HashMap[Task, Integer] = {
+  def findTopLevel(graph: util.List[Task], machineType: MachineType): util.HashMap[Task, Integer] = {
     val levels = new util.HashMap[Task, Integer]()
 
     graph.forEach { task: Task =>
@@ -80,8 +79,7 @@ object GraphProperties {
     levels
   }
 
-  def findBottomLevel(graph: List[Task],
-                      machineType: MachineType): Map[Task, Int] = {
+  def findBottomLevel(graph: List[Task], machineType: MachineType): Map[Task, Int] = {
     val levels = MutableMap[Task, Int]().withDefaultValue(0)
     graph.foreach { task: Task =>
       val computationCost = task.getLatencies.get(machineType)

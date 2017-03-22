@@ -15,9 +15,8 @@ import scala.collection.mutable.{Set => MutableSet}
 // for both fork and join structures.
 class EdgeZero extends UnboundedScheduler {
 
-  override def generateSchedule(
-      graph: util.List[Task],
-      machineType: MachineType): util.List[TaskQueue] = {
+  override def generateSchedule(graph: util.List[Task],
+                                machineType: MachineType): util.List[TaskQueue] = {
     def clusterTaskToQueue(tasks: util.List[Task]): util.List[TaskQueue] = {
       val cluster = new util.ArrayList[TaskQueue](tasks.size())
       tasks.forEach { t: Task =>
@@ -32,10 +31,9 @@ class EdgeZero extends UnboundedScheduler {
     mergeClusters(clusteredTasks.asScala.toList, machineType).asJava
   }
 
-  private def mergeClusters(as: List[TaskQueue],
-                            machineType: MachineType): List[TaskQueue] = {
+  private def mergeClusters(as: List[TaskQueue], machineType: MachineType): List[TaskQueue] = {
     val visited = MutableSet[Task]()
-    val buffer = ListBuffer[TaskQueue]()
+    val buffer  = ListBuffer[TaskQueue]()
     for ((taskQueue: TaskQueue) <- as) {
       val newTaskQueue = new TaskQueue(machineType)
       for (task: Task <- taskQueue.getTasks.asScala) {
@@ -82,7 +80,7 @@ class EdgeZero extends UnboundedScheduler {
   private def findNearestNeighbors(source: Task,
                                    rest: List[TaskQueue],
                                    visited: MutableSet[Task]): List[Task] = {
-    val neighbors = source.getChildren ++ source.getParents
+    val neighbors   = source.getChildren ++ source.getParents
     val restOfTasks = rest.flatMap(_.getTasks.asScala)
 
     restOfTasks
@@ -94,8 +92,7 @@ class EdgeZero extends UnboundedScheduler {
       }
   }
 
-  private def topologicallySort(taskQueue: TaskQueue,
-                                machineType: MachineType): TaskQueue = {
+  private def topologicallySort(taskQueue: TaskQueue, machineType: MachineType): TaskQueue = {
     val sortedList: util.List[Task] = taskQueue.getTasks.asScala
       .sortWith(_.getID < _.getID)
       .asJava
