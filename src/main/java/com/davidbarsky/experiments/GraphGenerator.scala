@@ -14,6 +14,11 @@ object GraphGenerator {
     TopologicalSorter.mapToTaskList(vertexGraph)
   }
 
+  def singleCholeskyGraph(size: Int): util.List[Task] = {
+    val vertexGraph = DAGGenerator.getCholesky(size)
+    TopologicalSorter.mapToTaskList(vertexGraph)
+  }
+
   // Cholesky: 220, 364, 560, 816, 1140, 1540. Uses "blocks"
   def cholesky: util.List[util.List[Task]] = {
     (220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
@@ -40,6 +45,10 @@ object GraphGenerator {
   // Fork/Join: 35, 52, 69, 86, 103, 120
   def forkJoin: util.List[util.List[Task]] = {
     (35 :: 52 :: 69 :: 86 :: 103 :: 120 :: Nil).map { n =>
+      val vertexGraph = DAGGenerator.getForkJoin(n)
+      TopologicalSorter.mapToTaskList(vertexGraph)
+    }.asJava
+    (10 :: 15 :: 20 :: 25 :: 30 :: 35 :: Nil).map { n =>
       val vertexGraph = DAGGenerator.getForkJoin(n)
       TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava

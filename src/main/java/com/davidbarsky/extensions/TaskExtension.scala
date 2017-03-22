@@ -22,5 +22,13 @@ object TaskExtension {
         (kv._1, -kv._2)
       }.toMap
     }
+
+    def getChildren: List[Task] = {
+      task.getDependents.asScala.keys.toList
+    }
+
+    def getParents: List[Task] = {
+      task.getDependencies.asScala.keys.toList
+    }
   }
 }

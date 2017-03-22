@@ -7,9 +7,9 @@ import com.davidbarsky.schedulers._
 
 object Bench {
   def runExperiments(): Unit = {
-    val graphs = GraphGenerator.sparseLU
+    val graphs = GraphGenerator.forkJoin
     val results =
-      ExperimentRunner.runSeries(new EdgeZero(), graphs, MachineType.SMALL)
+      ExperimentRunner.runSeries(new LinearCluster(), graphs, MachineType.SMALL)
 
     results.asScala.map(_.toCSV).foreach(println)
   }

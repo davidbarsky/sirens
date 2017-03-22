@@ -7,6 +7,7 @@ import com.davidbarsky.dag.{Actualizer, CostAnalyzer}
 import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.dag.models.{Task, TaskQueue}
 
+import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.{Set => MutableSet}
 
