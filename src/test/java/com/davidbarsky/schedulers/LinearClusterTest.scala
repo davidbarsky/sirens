@@ -1,6 +1,6 @@
 package com.davidbarsky.schedulers
 
-import com.davidbarsky.dag.Actualizer
+import com.davidbarsky.dag.{Actualizer, TopologicalSorter}
 import com.davidbarsky.dag.models.Task
 import com.davidbarsky.dag.models.TaskQueue
 import com.davidbarsky.dag.models.states.BuildStatus
@@ -8,27 +8,136 @@ import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.experiments.GraphGenerator
 import org.junit.Test
 import java.util
+
+import info.rmarcus.ggen4j.GGen
+import info.rmarcus.ggen4j.graph.GGenGraph
 import org.junit.Assert._
+
 import collection.JavaConverters._
 
 class LinearClusterTest {
-  @Test
-  @throws[Exception]
-  def generateSchedule() {
-    val genericGraph: util.List[Task] = GraphGenerator.genericGraph(70)
+  private def build(graph: GGenGraph): util.List[TaskQueue] = {
+    val edgeZero: EdgeZero = new EdgeZero
+    System.out.println(graph.toGraphviz)
+
+    val taskGraph: util.List[Task] =
+      TopologicalSorter.mapToTaskList(graph.allVertices)
     val schedule: util.List[TaskQueue] =
-      new LinearCluster().generateSchedule(genericGraph, MachineType.SMALL)
+      edgeZero.generateSchedule(taskGraph, MachineType.SMALL)
 
-    val actualizedSchedule: List[TaskQueue] =
-      Actualizer.actualize(schedule).asScala.toList
+    return Actualizer.actualize(schedule)
+  }
 
-    assertTrue(actualizedSchedule.nonEmpty)
-    assertNotNull(actualizedSchedule)
-
+  private def verifyGraph(builtGraph: util.List[TaskQueue]) = {
     assertTrue(
-      actualizedSchedule
+     builtGraph.asScala.toList
         .flatMap(_.getTasks.asScala.toList)
         .forall(_.getBuildStatus == BuildStatus.BUILT))
+  }
+
+  @Test
+  @throws[Exception]
+  def generateScheduleWithFibonacci() {
+    val gg: GGenGraph = GGen.staticGraph
+      .fibonacci(8, 1)
+      .vertexProperty("latency")
+      .uniform(10, 60)
+      .edgeProperty("networking")
+      .uniform(10, 60)
+      .generateGraph
+      .topoSort
+    val builtGraph: util.List[TaskQueue] = build(gg)
+    verifyGraph(builtGraph)
+  }
+
+  @Test
+  @throws[Exception]
+  def generateScheduleWithErdos() {
+    val gg: GGenGraph = GGen.generateGraph
+      .erdosGNM(70, 100)
+      .vertexProperty("latency")
+      .uniform(10, 30)
+      .edgeProperty("networking")
+      .uniform(50, 120)
+      .generateGraph
+      .topoSort
+    val builtGraph: util.List[TaskQueue] = build(gg)
+    verifyGraph(builtGraph)
+  }
+
+  @Test
+  @throws[Exception]
+  def generateScheduleWithSparceLU() {
+    val gg: GGenGraph = GGen.dataflowGraph
+      .sparseLU(10)
+      .vertexProperty("latency")
+      .uniform(10, 30)
+      .edgeProperty("networking")
+      .uniform(50, 120)
+      .generateGraph
+      .topoSort
+    val builtGraph: util.List[TaskQueue] = build(gg)
+    verifyGraph(builtGraph)
+  }
+
+  @Test
+  @throws[Exception]
+  def generateScheduleWithCholskey() {
+    val gg: GGenGraph = GGen.dataflowGraph
+      .cholesky(5)
+      .vertexProperty("latency")
+      .uniform(10, 30)
+      .edgeProperty("networking")
+      .uniform(50, 120)
+      .generateGraph
+      .topoSort
+    val builtGraph: util.List[TaskQueue] = build(gg)
+    verifyGraph(builtGraph)
+  }
+
+  @Test
+  @throws[Exception]
+  def generateScheduleWithDenseLU() {
+    val gg: GGenGraph = GGen.dataflowGraph
+      .denseLU(10)
+      .vertexProperty("latency")
+      .uniform(10, 30)
+      .edgeProperty("networking")
+      .uniform(50, 120)
+      .generateGraph
+      .topoSort
+    val builtGraph: util.List[TaskQueue] = build(gg)
+    verifyGraph(builtGraph)
+  }
+
+  @Test
+  @throws[Exception]
+  def generateScheduleWithForkJoin() {
+    val gg: GGenGraph = GGen.staticGraph
+      .forkJoin(10, 15)
+      .vertexProperty("latency")
+      .uniform(10, 60)
+      .edgeProperty("networking")
+      .uniform(10, 60)
+      .generateGraph
+      .topoSort
+    val builtGraph: util.List[TaskQueue] = build(gg)
+    verifyGraph(builtGraph)
+  }
+
+  @Test
+  @throws[Exception]
+  def generateScheduleWithPoisson2D() {
+    val gg: GGenGraph = GGen.dataflowGraph
+      .poisson2D(20, 6)
+      .vertexProperty("latency")
+      .uniform(10, 60)
+      .edgeProperty("networking")
+      .uniform(10, 60)
+      .generateGraph
+      .topoSort
+    val builtGraph: util.List[TaskQueue] = build(gg)
+    verifyGraph(builtGraph)
   }
 
   @Test
@@ -37,7 +146,8 @@ class LinearClusterTest {
     val genericGraph: List[Task] =
       GraphGenerator.genericGraph(60).asScala.toList
     val linearCluster: LinearCluster = new LinearCluster
-    val levels = GraphProperties.findBottomLevel(genericGraph, MachineType.SMALL)
+    val levels =
+      GraphProperties.findBottomLevel(genericGraph, MachineType.SMALL)
     val sources = genericGraph.filter(_.isSource)
     println(sources)
 
