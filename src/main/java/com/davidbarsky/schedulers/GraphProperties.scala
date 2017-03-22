@@ -3,13 +3,14 @@ package com.davidbarsky.schedulers
 import java.util
 import java.util.Comparator
 
+import collection.mutable.{Map => MutableMap}
+
 import com.davidbarsky.dag.models.Task
 import com.davidbarsky.dag.models.states.MachineType
 
 object GraphProperties {
 
-  def constructALAP(
-      graph: util.List[Task]): util.Map[Task, Integer] = {
+  def constructALAP(graph: util.List[Task]): util.Map[Task, Integer] = {
     val alap = new util.HashMap[Task, Integer]()
 
     graph.forEach { task: Task =>
@@ -70,8 +71,8 @@ object GraphProperties {
               + computationCost
               + parent.getCostTo(task) > max) {
           max = (levels.getOrDefault(parent, 0)
-              + computationCost
-              + parent.getCostTo(task))
+            + computationCost
+            + parent.getCostTo(task))
         }
       }
       levels.put(task, max)
@@ -79,21 +80,20 @@ object GraphProperties {
     levels
   }
 
-  def findBottomLevel(graph: util.List[Task],
-                      machineType: MachineType): util.HashMap[Task, Integer] = {
-    val levels = new util.HashMap[Task, Integer]()
-    graph.forEach { task: Task =>
+  def findBottomLevel(graph: List[Task],
+                      machineType: MachineType): Map[Task, Int] = {
+    val levels = MutableMap[Task, Int]().withDefaultValue(0)
+    graph.foreach { task: Task =>
       val computationCost = task.getLatencies.get(machineType)
       var max = 0
       task.getDependents.keySet.forEach { child: Task =>
-        if (child.getCostTo(task) + levels.getOrDefault(task, 0) > max) {
-          max = (levels.getOrDefault(child, 0)
-              + child.getCostTo(task))
+        if (child.getCostTo(task) + levels(task) > max) {
+          max = levels(child) + child.getCostTo(task)
         }
       }
       levels.put(task, max + computationCost)
     }
 
-    levels
+    levels.toMap
   }
 }
