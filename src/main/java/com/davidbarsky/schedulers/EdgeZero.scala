@@ -3,11 +3,10 @@ package com.davidbarsky.schedulers
 import java.util
 
 import scala.collection.JavaConverters._
-import com.davidbarsky.dag.{Actualizer, CostAnalyzer}
 import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.dag.models.{Task, TaskQueue}
+import com.davidbarsky.extensions.TaskExtension._
 
-import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.{Set => MutableSet}
 
@@ -37,7 +36,7 @@ class EdgeZero extends UnboundedScheduler {
                             machineType: MachineType): List[TaskQueue] = {
     val visited = MutableSet[Task]()
     val buffer = ListBuffer[TaskQueue]()
-    for ((taskQueue: TaskQueue, index: Int) <- as.view.zipWithIndex) {
+    for ((taskQueue: TaskQueue) <- as) {
       val newTaskQueue = new TaskQueue(machineType)
       for (task: Task <- taskQueue.getTasks.asScala) {
         // First, we try to add the current task to the the TaskQueue
@@ -67,27 +66,24 @@ class EdgeZero extends UnboundedScheduler {
     }.toList
   }
 
-  private def generateIntermediate(sortedQueue: TaskQueue,
-                                   original: List[TaskQueue],
-                                   buffer: ListBuffer[TaskQueue],
-                                   currentIndex: Int): List[TaskQueue] = {
-    val (_, after) = original.splitAt(currentIndex + 1)
-    (buffer.clone() += sortedQueue).toList ++ after
-  }
-
-  private def costIntermediateList(as: List[TaskQueue]): Int = {
-    val builtGraph = Actualizer.actualize(as.asJava)
-    CostAnalyzer.getLatency(builtGraph)
-  }
+//  private def generateIntermediate(sortedQueue: TaskQueue,
+//                                   original: List[TaskQueue],
+//                                   buffer: ListBuffer[TaskQueue],
+//                                   currentIndex: Int): List[TaskQueue] = {
+//    val (_, after) = original.splitAt(currentIndex + 1)
+//    (buffer.clone() += sortedQueue).toList ++ after
+//  }
+//
+//  private def costIntermediateList(as: List[TaskQueue]): Int = {
+//    val builtGraph = Actualizer.actualize(as.asJava)
+//    CostAnalyzer.getLatency(builtGraph)
+//  }
 
   private def findNearestNeighbors(source: Task,
                                    rest: List[TaskQueue],
                                    visited: MutableSet[Task]): List[Task] = {
-    val dependencies = source.getDependencies.keySet().asScala.toList
-    val dependents = source.getDependents.keySet().asScala.toList
-
+    val neighbors = source.getChildren ++ source.getParents
     val restOfTasks = rest.flatMap(_.getTasks.asScala)
-    val neighbors = dependencies ++ dependents
 
     restOfTasks
       .filter { t =>

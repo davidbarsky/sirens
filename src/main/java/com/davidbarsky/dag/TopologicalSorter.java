@@ -1,11 +1,7 @@
 package com.davidbarsky.dag;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.states.MachineType;
@@ -39,16 +35,16 @@ public class TopologicalSorter {
             Map<MachineType, Integer> latencies = new EnumMap<>(MachineType.class);
             latencies.put(MachineType.SMALL, vertexLatency);
 
-            Task t = new Task(v.getID(), latencies);
-            tasks.put(v.getID(), t);
-            sortedTaskGraph.add(v.getTopographicalOrder(), t);
+            Task t = new Task(v.getTopographicalOrder(), latencies);
+            tasks.put(v.getTopographicalOrder(), t);
+            sortedTaskGraph.add(t);
         }
 
         // Assign each task its dependencies
         for (Vertex v : graph) {
             Task t = tasks.get(v.getID());
             for (Map.Entry<Vertex, Map<String, String>> child : v.getChildren().entrySet()) {
-                Integer childID = child.getKey().getID();
+                Integer childID = child.getKey().getTopographicalOrder();
                 Task dependent = tasks.get(childID);
                 Integer networkCost = (int) (double) Double.valueOf(child.getValue().get("networking"));
 
@@ -56,6 +52,8 @@ public class TopologicalSorter {
             }
         }
 
-        return sortedTaskGraph;
+        return sortedTaskGraph.stream()
+                .sorted(Comparator.comparingLong(Task::getID))
+                .collect(Collectors.toList());
     }
 }
