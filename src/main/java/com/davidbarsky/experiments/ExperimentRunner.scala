@@ -10,34 +10,23 @@ import com.davidbarsky.schedulers.{BoundedScheduler, UnboundedScheduler}
 import collection.JavaConverters._
 
 object ExperimentRunner {
-  // Make this run a generic graph
-  def runSeries(scheduler: UnboundedScheduler,
-                startNodes: Int,
-                endNodes: Int,
-                machineType: MachineType): util.List[ExperimentResult] = {
-    (startNodes to endNodes).map { numNodes =>
-      val graph = TopologicalSorter.generateGraph(numNodes)
-      runExperiment(scheduler, numNodes, graph, machineType)
-    }.asJava
-  }
-
   def runSeries(scheduler: UnboundedScheduler,
                 graphs: util.List[util.List[Task]],
-                machineType: MachineType): util.List[ExperimentResult] = {
+                machineType: MachineType): List[ExperimentResult] = {
     graphs.asScala.toList.map { graph =>
       runExperiment(scheduler, graph.size(), graph, machineType)
-    }.asJava
+    }
   }
 
   // Make this run a generic graph
   def runSeries(scheduler: BoundedScheduler,
                 startQueues: Int,
                 endQueues: Int,
-                machineType: MachineType): util.List[ExperimentResult] = {
+                machineType: MachineType): List[ExperimentResult] = {
     (startQueues to endQueues).map { numQueues =>
       val graph = TopologicalSorter.generateGraph(numQueues * 3)
       runExperiment(scheduler, numQueues, graph, machineType)
-    }.asJava
+    }.toList
   }
 
   def runExperiment(scheduler: UnboundedScheduler,
@@ -48,11 +37,7 @@ object ExperimentRunner {
     val builtGraph = Actualizer.actualize(unbuiltGraph)
     val cost = CostAnalyzer.findCostOfBuiltTasks(builtGraph)
 
-    ExperimentResult(scheduler.toString,
-                     machineType,
-                     numberOfNodes,
-                     unbuiltGraph.size,
-                     cost)
+    ExperimentResult(scheduler.toString, machineType, numberOfNodes, unbuiltGraph.size, cost)
   }
 
   def runExperiment(scheduler: BoundedScheduler,
@@ -63,10 +48,6 @@ object ExperimentRunner {
     val builtGraph = Actualizer.actualize(unbuiltGraph)
     val cost = CostAnalyzer.findCostOfBuiltTasks(builtGraph)
 
-    ExperimentResult(scheduler.toString,
-                     machineType,
-                     builtGraph.size,
-                     numberOfQueues,
-                     cost)
+    ExperimentResult(scheduler.toString, machineType, builtGraph.size, numberOfQueues, cost)
   }
 }

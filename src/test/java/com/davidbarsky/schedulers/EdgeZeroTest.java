@@ -1,6 +1,7 @@
 package com.davidbarsky.schedulers;
 
 import com.davidbarsky.dag.Actualizer;
+import com.davidbarsky.dag.CostAnalyzer;
 import com.davidbarsky.dag.TopologicalSorter;
 import com.davidbarsky.dag.models.Task;
 import com.davidbarsky.dag.models.TaskQueue;
@@ -18,6 +19,7 @@ import static org.junit.Assert.*;
 public class EdgeZeroTest {
 
     private void verifyGraph(List<TaskQueue> builtGraph) throws Exception {
+        CostAnalyzer.findCostOfBuiltTasks(builtGraph);
         builtGraph.forEach(tq -> {
             assertNotNull(tq.getStartTime());
             assertNotNull(tq.getEndTime());
@@ -75,7 +77,7 @@ public class EdgeZeroTest {
 
     @Test
     public void generateScheduleWithCholskey() throws Exception {
-        GGenGraph gg = GGen.dataflowGraph().cholesky(5)
+        GGenGraph gg = GGen.dataflowGraph().cholesky(16)
                 .vertexProperty("latency").uniform(10, 30)
                 .edgeProperty("networking").uniform(50, 120)
                 .generateGraph().topoSort();

@@ -6,12 +6,18 @@ import com.davidbarsky.dag.models.Task
 
 import collection.JavaConverters._
 import com.davidbarsky.dag.{DAGGenerator, TopologicalSorter}
+import info.rmarcus.ggen4j.GGen
 
 object GraphGenerator {
 
   def genericGraph(graphSize: Int): util.List[Task] = {
-    val vertexGraph = DAGGenerator.getErdosGNMSources(graphSize)
-    TopologicalSorter.mapToTaskList(vertexGraph)
+    // @formatter:off
+    val graph = GGen.staticGraph().forkJoin(graphSize, 8)
+      .vertexProperty("latency").uniform(10, 30)
+      .edgeProperty("networking").uniform(50, 120)
+      .generateGraph().topoSort()
+
+    TopologicalSorter.mapToTaskList(graph.allVertices())
   }
 
   def singleCholeskyGraph(size: Int): util.List[Task] = {
@@ -21,9 +27,12 @@ object GraphGenerator {
 
   // Cholesky: 220, 364, 560, 816, 1140, 1540. Uses "blocks"
   def cholesky: util.List[util.List[Task]] = {
-    (220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
-      val vertexGraph = DAGGenerator.getCholesky(n)
-      TopologicalSorter.mapToTaskList(vertexGraph)
+    (5 :: 6 :: 10 :: 12 :: 14 :: 16 :: Nil).map { n =>
+      val graph = GGen.dataflowGraph().cholesky(n)
+        .vertexProperty("latency").uniform(10, 30)
+        .edgeProperty("networking").uniform(50, 120)
+        .generateGraph().topoSort()
+      TopologicalSorter.mapToTaskList(graph.allVertices())
     }.asJava
   }
 
@@ -56,7 +65,7 @@ object GraphGenerator {
 
   // Poisson 2D: 288, 324, 360, 396, 432, 468
   def poisson: util.List[util.List[Task]] = {
-    (288 :: 324 :: 360 :: 396 :: 432 :: 468 :: Nil).map { n =>
+    (20 :: 30 :: 40 :: 50 :: 60 :: 70 :: Nil).map { n =>
       val vertexGraph = DAGGenerator.getPoisson(n)
       TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava
@@ -64,7 +73,7 @@ object GraphGenerator {
 
   // Sparse LU: 80, 84, 141, 145, 226, 230
   def sparseLU: util.List[util.List[Task]] = {
-    (80 :: 84 :: 141 :: 145 :: 226 :: 230 :: Nil).map { n =>
+    (4 :: 6 :: 8 :: 10 :: 12 :: 14 :: Nil).map { n =>
       val vertexGraph = DAGGenerator.getSparseLU(n)
       TopologicalSorter.mapToTaskList(vertexGraph)
     }.asJava
