@@ -20,13 +20,12 @@ object ExperimentRunner {
 
   // Make this run a generic graph
   def runSeries(scheduler: BoundedScheduler,
-                startQueues: Int,
-                endQueues: Int,
+                numberOfQueues: Int,
+                graphs: util.List[util.List[Task]],
                 machineType: MachineType): List[ExperimentResult] = {
-    (startQueues to endQueues).map { numQueues =>
-      val graph = TopologicalSorter.generateGraph(numQueues * 3)
-      runExperiment(scheduler, numQueues, graph, machineType)
-    }.toList
+    graphs.asScala.toList.map { graph =>
+      runExperiment(scheduler, numberOfQueues, graph, machineType)
+    }
   }
 
   def runExperiment(scheduler: UnboundedScheduler,

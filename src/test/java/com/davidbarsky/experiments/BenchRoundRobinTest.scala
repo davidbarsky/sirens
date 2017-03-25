@@ -4,12 +4,12 @@ import java.util
 
 import com.davidbarsky.dag.models.states.MachineType
 import com.davidbarsky.dag.models.Task
-import com.davidbarsky.schedulers.EdgeZero
+import com.davidbarsky.schedulers.RoundRobin
 import org.junit.Test
 
-class BenchEdgeZeroTest {
+class BenchRoundRobinTest {
   def runEdgeZero(graphs: util.List[util.List[Task]]): Unit = {
-    val results = ExperimentRunner.runSeries(new EdgeZero, graphs, MachineType.SMALL)
+    val results = ExperimentRunner.runSeries(new RoundRobin, 4, graphs, MachineType.SMALL)
     results.map(_.toCSV).foreach(println)
   }
 
