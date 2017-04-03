@@ -125,8 +125,6 @@ public class DAGGenerator {
 		}
 	}
 
-
-
 	public static List<Task> verticesToTasks(Collection<Vertex> vertices) {
 		Map<Integer, Task> tasks = new HashMap<>();
 
@@ -217,8 +215,5 @@ public class DAGGenerator {
 				.collect(Collectors.toList());
 
 		return NullUtils.orThrow(l);
-
 	}
-
-
 }

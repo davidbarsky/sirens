@@ -8,10 +8,9 @@ import collection.JavaConverters._
 import com.davidbarsky.dag.{DAGGenerator, TopologicalSorter}
 import info.rmarcus.ggen4j.GGen
 
+// @formatter:off
 object GraphGenerator {
-
   def genericGraph(graphSize: Int): util.List[Task] = {
-    // @formatter:off
     val graph = GGen.staticGraph().forkJoin(graphSize, 8)
       .vertexProperty("latency").uniform(10, 30)
       .edgeProperty("networking").uniform(50, 120)
