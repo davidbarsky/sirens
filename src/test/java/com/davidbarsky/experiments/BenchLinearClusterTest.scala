@@ -20,8 +20,14 @@ class BenchLinearClusterTest {
   }
 
   @Test
-  def erdos(): Unit = {
+  def erdosGNM(): Unit = {
     val graphs = GraphGenerator.erdos
+    run(graphs)
+  }
+
+  @Test
+  def erdosGNP(): Unit = {
+    val graphs = GraphGenerator.erdosGNP
     run(graphs)
   }
 

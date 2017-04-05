@@ -10,71 +10,90 @@ import info.rmarcus.ggen4j.GGen
 
 // @formatter:off
 object GraphGenerator {
+  val latencyBounds: (Int, Int) = (10, 60)
+  val networkingBounds: (Int, Int) = (10, 60)
+
   def genericGraph(graphSize: Int): util.List[Task] = {
     val graph = GGen.staticGraph().forkJoin(graphSize, 8)
-      .vertexProperty("latency").uniform(10, 30)
-      .edgeProperty("networking").uniform(50, 120)
+      .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+      .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
       .generateGraph().topoSort()
 
     TopologicalSorter.mapToTaskList(graph.allVertices())
   }
 
-  def singleCholeskyGraph(size: Int): util.List[Task] = {
-    val vertexGraph = DAGGenerator.getCholesky(size)
-    TopologicalSorter.mapToTaskList(vertexGraph)
-  }
-
-  // Cholesky: 220, 364, 560, 816, 1140, 1540. Uses "blocks"
   def cholesky: util.List[util.List[Task]] = {
-    (5 :: 6 :: 10 :: 12 :: 14 :: 16 :: Nil).map { n =>
+    (10 :: 12 :: 14 :: 16 :: 18 :: 20 :: Nil).map { n =>
       val graph = GGen.dataflowGraph().cholesky(n)
-        .vertexProperty("latency").uniform(10, 30)
-        .edgeProperty("networking").uniform(50, 120)
+        .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+        .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
         .generateGraph().topoSort()
       TopologicalSorter.mapToTaskList(graph.allVertices())
     }.asJava
   }
 
-  // Fibonacci: 15, 25, 41, 67, 109, 177
   def fibonacci: util.List[util.List[Task]] = {
-    (6 :: 8 :: 10 :: 12 :: 14 :: 16 :: Nil).map { n =>
-      val vertexGraph = DAGGenerator.getFibonacci(n)
-      TopologicalSorter.mapToTaskList(vertexGraph)
+    (5 :: 6 :: 7 :: 8 :: 9 :: 10 :: Nil).map { n =>
+      val graph = GGen.staticGraph().fibonacci(n, 1)
+        .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+        .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
+        .generateGraph().topoSort()
+
+      TopologicalSorter.mapToTaskList(graph.allVertices())
+    }.asJava
+  }
+
+  def forkJoin: util.List[util.List[Task]] = {
+    (2 :: 3 ::4 :: 5 ::6 ::7 :: Nil).map { n =>
+      // `15` is the diameter of the graph
+      val graph = GGen.staticGraph().forkJoin(n, 15)
+        .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+        .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
+        .generateGraph().topoSort()
+
+      TopologicalSorter.mapToTaskList(graph.allVertices())
+    }.asJava
+  }
+
+  def poisson: util.List[util.List[Task]] = {
+    (6 :: 7 :: 8 :: 9 :: 10 :: 11 :: 12 :: 13 :: Nil).map { n =>
+      val graph = GGen.dataflowGraph().poisson2D(20, n)
+        .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+        .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
+        .generateGraph().topoSort()
+
+      TopologicalSorter.mapToTaskList(graph.allVertices())
+    }.asJava
+  }
+
+  def sparseLU: util.List[util.List[Task]] = {
+    (7 :: 8 :: 9 :: 10 :: 11 :: 12 :: Nil).map { n =>
+      val graph = GGen.dataflowGraph().sparseLU(n)
+        .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+        .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
+        .generateGraph().topoSort()
+
+      TopologicalSorter.mapToTaskList(graph.allVertices())
     }.asJava
   }
 
   def erdos: util.List[util.List[Task]] = {
+    (20 :: 220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
+      val graph = GGen.generateGraph().erdosGNM(n, 100)
+        .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+        .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
+        .generateGraph().topoSort()
+      TopologicalSorter.mapToTaskList(graph.allVertices())
+    }.asJava
+  }
+
+  def erdosGNP: util.List[util.List[Task]] = {
     (220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
-      val vertexGraph = DAGGenerator.getErdosGNMSources(n)
-      TopologicalSorter.mapToTaskList(vertexGraph)
-    }.asJava
-  }
-
-  // Fork/Join: 35, 52, 69, 86, 103, 120
-  def forkJoin: util.List[util.List[Task]] = {
-    (35 :: 52 :: 69 :: 86 :: 103 :: 120 :: Nil).map { n =>
-      val vertexGraph = DAGGenerator.getForkJoin(n)
-      TopologicalSorter.mapToTaskList(vertexGraph)
-    }.asJava
-    (10 :: 15 :: 20 :: 25 :: 30 :: 35 :: Nil).map { n =>
-      val vertexGraph = DAGGenerator.getForkJoin(n)
-      TopologicalSorter.mapToTaskList(vertexGraph)
-    }.asJava
-  }
-
-  // Poisson 2D: 288, 324, 360, 396, 432, 468
-  def poisson: util.List[util.List[Task]] = {
-    (20 :: 30 :: 40 :: 50 :: 60 :: 70 :: Nil).map { n =>
-      val vertexGraph = DAGGenerator.getPoisson(n)
-      TopologicalSorter.mapToTaskList(vertexGraph)
-    }.asJava
-  }
-
-  // Sparse LU: 80, 84, 141, 145, 226, 230
-  def sparseLU: util.List[util.List[Task]] = {
-    (4 :: 6 :: 8 :: 10 :: 12 :: 14 :: Nil).map { n =>
-      val vertexGraph = DAGGenerator.getSparseLU(n)
-      TopologicalSorter.mapToTaskList(vertexGraph)
+      val graph = GGen.generateGraph().erdosGNP(n, 0.5)
+        .vertexProperty("latency").uniform(latencyBounds._1, latencyBounds._2)
+        .edgeProperty("networking").uniform(networkingBounds._1, networkingBounds._2)
+        .generateGraph().topoSort()
+      TopologicalSorter.mapToTaskList(graph.allVertices())
     }.asJava
   }
 }

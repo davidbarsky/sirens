@@ -20,8 +20,14 @@ class BenchEdgeZeroTest {
   }
 
   @Test
-  def erdos(): Unit = {
+  def erdosGNM(): Unit = {
     val graphs = GraphGenerator.erdos
+    runEdgeZero(graphs)
+  }
+
+  @Test
+  def erdosGNP(): Unit = {
+    val graphs = GraphGenerator.erdosGNP
     runEdgeZero(graphs)
   }
 

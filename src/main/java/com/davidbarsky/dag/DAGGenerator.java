@@ -45,8 +45,8 @@ public class DAGGenerator {
 		GGenGraph graph;
 		try {
 			graph = GGen.generateGraph().erdosGNM(numVertices, 100)
-					.vertexProperty("latency").uniform(10, 30)
-					.edgeProperty("networking").uniform(50, 120)
+					.vertexProperty("latency").uniform(10, 60)
+					.edgeProperty("networking").uniform(10, 60)
 					.generateGraph().topoSort();
 
 			return graph.allVertices();
@@ -59,8 +59,8 @@ public class DAGGenerator {
 		GGenGraph graph;
 		try {
 			graph = GGen.dataflowGraph().cholesky(matrixBlocks)
-					.vertexProperty("latency").uniform(10, 30)
-					.edgeProperty("networking").uniform(50, 120)
+					.vertexProperty("latency").uniform(10, 60)
+					.edgeProperty("networking").uniform(50, 60)
 					.generateGraph().topoSort();
 
 			return graph.allVertices();

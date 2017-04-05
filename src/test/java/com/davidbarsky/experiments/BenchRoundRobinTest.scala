@@ -8,7 +8,7 @@ import com.davidbarsky.schedulers.RoundRobin
 import org.junit.Test
 
 class BenchRoundRobinTest {
-  def runEdgeZero(graphs: util.List[util.List[Task]]): Unit = {
+  def run(graphs: util.List[util.List[Task]]): Unit = {
     val results = ExperimentRunner.runSeries(new RoundRobin, 4, graphs, MachineType.SMALL)
     results.map(_.toCSV).foreach(println)
   }
@@ -16,36 +16,42 @@ class BenchRoundRobinTest {
   @Test
   def cholskey(): Unit = {
     val graphs = GraphGenerator.cholesky
-    runEdgeZero(graphs)
+    run(graphs)
   }
 
   @Test
-  def erdos(): Unit = {
+  def erdosGNM(): Unit = {
     val graphs = GraphGenerator.erdos
-    runEdgeZero(graphs)
+    run(graphs)
+  }
+
+  @Test
+  def erdosGNP(): Unit = {
+    val graphs = GraphGenerator.erdosGNP
+    run(graphs)
   }
 
   @Test
   def fibonacci(): Unit = {
     val graphs = GraphGenerator.fibonacci
-    runEdgeZero(graphs)
+    run(graphs)
   }
 
   @Test
   def forkJoin(): Unit = {
     val graphs = GraphGenerator.forkJoin
-    runEdgeZero(graphs)
+    run(graphs)
   }
 
   @Test
   def poisson2D(): Unit = {
     val graphs = GraphGenerator.poisson
-    runEdgeZero(graphs)
+    run(graphs)
   }
 
   @Test
   def sparseLU(): Unit = {
     val graphs = GraphGenerator.sparseLU
-    runEdgeZero(graphs)
+    run(graphs)
   }
 }
