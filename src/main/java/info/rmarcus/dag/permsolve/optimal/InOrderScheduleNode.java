@@ -2,7 +2,7 @@ package info.rmarcus.dag.permsolve.optimal;
 
 import java.util.List;
 
-import com.davidbarsky.dag.models.Task;
+import sirens.dag.models.Task;
 
 public class InOrderScheduleNode extends ScheduleNode {
 

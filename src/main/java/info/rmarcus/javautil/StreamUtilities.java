@@ -1,5 +1,3 @@
- 
-
 package info.rmarcus.javautil;
 
 import java.util.Iterator;

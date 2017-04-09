@@ -1,9 +1,9 @@
 package info.rmarcus.dag.birkhoff;
 
-import com.davidbarsky.dag.CostAnalyzer;
-import com.davidbarsky.dag.DAGGenerator;
-import com.davidbarsky.dag.models.Task;
-import com.davidbarsky.dag.models.TaskQueue;
+import sirens.dag.CostAnalyzer;
+import sirens.dag.DAGGenerator;
+import sirens.dag.models.Task;
+import sirens.dag.models.TaskQueue;
 import info.rmarcus.birkhoffvonneumann.CoeffAndMatrix;
 import info.rmarcus.birkhoffvonneumann.learners.generalized_loss.MHJointPermutationLearner;
 import info.rmarcus.dag.cca.CCAScheduler;
@@ -18,8 +18,6 @@ public class BirkhoffScheduler {
 
 	private List<Task> tasks;
 	private MHJointPermutationLearner jps;
-
-
 
 	public void measure(int n) {
 		Collection<Vertex> vertices = DAGGenerator.getSparseLU(n);
