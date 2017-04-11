@@ -5,9 +5,10 @@ import java.util.{List => JavaList}
 import org.junit.Assert._
 import org.junit.Test
 import sirens.experiments.{ExperimentResult, ExperimentRunner, GraphGenerator}
+import sirens.models.data.{LatencyBounds, NetworkingBounds}
 import sirens.models.Task
 import sirens.models.states.MachineType
-import sirens.schedulers.{EdgeZero, RoundRobin}
+import sirens.schedulers.{EdgeZero, LinearCluster, RoundRobin}
 
 class ExperimentRunnerTest {
   @Test
@@ -15,7 +16,15 @@ class ExperimentRunnerTest {
   def runSeriesUnbounded() {
     val graph = GraphGenerator.genericGraph(40)
     val result: ExperimentResult =
-      ExperimentRunner.runExperiment(new EdgeZero, graph.size, graph, MachineType.SMALL)
+      ExperimentRunner.runExperiment(
+        scheduler = new RoundRobin,
+        numberOfQueues = graph.size,
+        graph = graph,
+        machineType = MachineType.SMALL,
+        networkingBounds = NetworkingBounds(10, 60),
+        latencyBounds = LatencyBounds(10, 60)
+      )
+    assert(result.schedulerName == "RoundRobin")
   }
 
   @Test
@@ -23,7 +32,14 @@ class ExperimentRunnerTest {
   def runSeriesBounded() {
     val graph = GraphGenerator.genericGraph(40)
     val result: ExperimentResult =
-      ExperimentRunner.runExperiment(new RoundRobin, graph.size, graph, MachineType.SMALL)
+      ExperimentRunner.runExperiment(
+        scheduler = new LinearCluster,
+        numberOfNodes = graph.size,
+        graph = graph,
+        machineType = MachineType.SMALL,
+        networkingBounds = NetworkingBounds(10, 60),
+        latencyBounds = LatencyBounds(10, 60)
+      )
 
     assertEquals(result.schedulerName, "RoundRobin")
   }
@@ -31,25 +47,17 @@ class ExperimentRunnerTest {
   @Test
   @throws[Exception]
   def runExperimentUnbounded() {
-    val genericGraph: JavaList[Task] = GraphGenerator.genericGraph(50)
-    val experimentResult: ExperimentResult = ExperimentRunner.runExperiment(new EdgeZero,
-                                                                            genericGraph.size,
-                                                                            genericGraph,
-                                                                            MachineType.SMALL)
-    assert(experimentResult.numberOfNodes > 0)
-    assertEquals(experimentResult.schedulerName, "EdgeZero")
-    assertNotNull(experimentResult.finalCost)
-  }
-
-  @Test
-  @throws[Exception]
-  def runExperimentBounded() {
-    val genericGraph: JavaList[Task] = GraphGenerator.genericGraph(50)
-    val experimentResult: ExperimentResult =
-      ExperimentRunner.runExperiment(new RoundRobin, 5, genericGraph, MachineType.SMALL)
-
-    assertEquals(experimentResult.numberOfQueues, 5)
-    assertEquals(experimentResult.schedulerName, "RoundRobin")
-    assertNotNull(experimentResult.finalCost)
+    val graph = GraphGenerator.genericGraph(50)
+    val result = ExperimentRunner.runExperiment(
+      scheduler = new EdgeZero,
+      numberOfNodes = graph.size,
+      graph = graph,
+      machineType = MachineType.SMALL,
+      networkingBounds = NetworkingBounds(10, 60),
+      latencyBounds = LatencyBounds(10, 60)
+    )
+    assert(result.numberOfNodes > 0)
+    assertEquals(result.schedulerName, "EdgeZero")
+    assertNotNull(result.finalCost)
   }
 }

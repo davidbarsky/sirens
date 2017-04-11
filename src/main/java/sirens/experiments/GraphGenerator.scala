@@ -3,11 +3,11 @@ package sirens.experiments
 import java.util
 
 import sirens.models.Task
-import sirens.Data._
 
 import collection.JavaConverters._
 import info.rmarcus.ggen4j.GGen
 import sirens.dag.TopologicalSorter
+import sirens.models.data.{LatencyBounds, NetworkingBounds}
 
 // @formatter:off
 object GraphGenerator {
@@ -16,14 +16,14 @@ object GraphGenerator {
 
   def genericGraph(graphSize: Int): util.List[Task] = {
     val graph = GGen.staticGraph().forkJoin(graphSize, 8)
-      .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
-      .edgeProperty("networking").uniform(networkingBounds.lower, networkingBounds.upper)
+      .vertexProperty("latency").uniform(10, 60)
+      .edgeProperty("networking").uniform(10, 60)
       .generateGraph().topoSort()
 
     TopologicalSorter.mapToTaskList(graph.allVertices())
   }
 
-  def cholesky: util.List[util.List[Task]] = {
+  def cholesky(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (10 :: 12 :: 14 :: 16 :: 18 :: 20 :: Nil).map { n =>
       val graph = GGen.dataflowGraph().cholesky(n)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
@@ -33,7 +33,7 @@ object GraphGenerator {
     }.asJava
   }
 
-  def fibonacci: util.List[util.List[Task]] = {
+  def fibonacci(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (5 :: 6 :: 7 :: 8 :: 9 :: 10 :: Nil).map { n =>
       val graph = GGen.staticGraph().fibonacci(n, 1)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
@@ -44,7 +44,7 @@ object GraphGenerator {
     }.asJava
   }
 
-  def forkJoin: util.List[util.List[Task]] = {
+  def forkJoin(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (2 :: 3 ::4 :: 5 ::6 ::7 :: Nil).map { n =>
       // `15` is the diameter of the graph
       val graph = GGen.staticGraph().forkJoin(n, 15)
@@ -56,7 +56,7 @@ object GraphGenerator {
     }.asJava
   }
 
-  def poisson: util.List[util.List[Task]] = {
+  def poisson(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (6 :: 7 :: 8 :: 9 :: 10 :: 11 :: 12 :: 13 :: Nil).map { n =>
       val graph = GGen.dataflowGraph().poisson2D(20, n)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
@@ -67,7 +67,7 @@ object GraphGenerator {
     }.asJava
   }
 
-  def sparseLU: util.List[util.List[Task]] = {
+  def sparseLU(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (7 :: 8 :: 9 :: 10 :: 11 :: 12 :: Nil).map { n =>
       val graph = GGen.dataflowGraph().sparseLU(n)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
@@ -78,7 +78,7 @@ object GraphGenerator {
     }.asJava
   }
 
-  def erdos: util.List[util.List[Task]] = {
+  def erdos(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (20 :: 220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
       val graph = GGen.generateGraph().erdosGNM(n, 100)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
@@ -88,7 +88,7 @@ object GraphGenerator {
     }.asJava
   }
 
-  def erdosGNP: util.List[util.List[Task]] = {
+  def erdosGNP(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
       val graph = GGen.generateGraph().erdosGNP(n, 0.5)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)

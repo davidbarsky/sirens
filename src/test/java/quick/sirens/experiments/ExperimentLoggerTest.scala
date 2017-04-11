@@ -7,6 +7,7 @@ import org.junit.Assert._
 import org.junit.Test
 import sirens.experiments.{ExperimentLogger, ExperimentResult, ExperimentRunner, GraphGenerator}
 import sirens.models.states.MachineType
+import sirens.models.data.{LatencyBounds, NetworkingBounds}
 import sirens.schedulers.EdgeZero
 
 class ExperimentLoggerTest {
@@ -15,7 +16,12 @@ class ExperimentLoggerTest {
   def toCSV(): Unit = {
     val graph = GraphGenerator.genericGraph(8)
     val experimentResult: ExperimentResult =
-      ExperimentRunner.runExperiment(new EdgeZero, graph.size, graph, MachineType.SMALL)
+      ExperimentRunner.runExperiment(new EdgeZero,
+                                     graph.size,
+                                     graph,
+                                     MachineType.SMALL,
+                                     NetworkingBounds(10, 60),
+                                     LatencyBounds(10, 60))
     val csv: String = ExperimentLogger.toCSV(experimentResult :: Nil)
     // We're checking the first parts of the CSV fit the pattern of "EdgeZero,SMALL". Numbers that follow
     // are non-deterministic
@@ -27,7 +33,12 @@ class ExperimentLoggerTest {
   def writeToFile(): Unit = {
     val graph = GraphGenerator.genericGraph(8)
     val experimentResult: ExperimentResult =
-      ExperimentRunner.runExperiment(new EdgeZero, graph.size, graph, MachineType.SMALL)
+      ExperimentRunner.runExperiment(new EdgeZero,
+                                     graph.size,
+                                     graph,
+                                     MachineType.SMALL,
+                                     NetworkingBounds(10, 60),
+                                     LatencyBounds(10, 60))
     val testCSV: String = ExperimentLogger.toCSV(experimentResult :: Nil)
 
     val file: File = File.createTempFile("output", "txt")
