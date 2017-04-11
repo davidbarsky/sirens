@@ -10,9 +10,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import sirens.dag.Actualizer;
 import sirens.dag.CostAnalyzer;
 import sirens.dag.DAGException;
-import sirens.dag.models.Task;
-import sirens.dag.models.TaskQueue;
-import sirens.dag.models.states.MachineType;
+import sirens.models.Task;
+import sirens.models.TaskQueue;
+import sirens.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
 import info.rmarcus.dag.permsolve.PermSolveException;

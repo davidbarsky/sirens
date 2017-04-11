@@ -3,9 +3,9 @@ package info.rmarcus.dag.cca;
 import sirens.dag.Actualizer;
 import sirens.dag.CostAnalyzer;
 import sirens.dag.DAGException;
-import sirens.dag.models.Task;
-import sirens.dag.models.TaskQueue;
-import sirens.dag.models.states.MachineType;
+import sirens.models.Task;
+import sirens.models.TaskQueue;
+import sirens.models.states.MachineType;
 
 import java.util.*;
 import java.util.stream.Collectors;

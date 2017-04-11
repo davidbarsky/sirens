@@ -3,9 +3,9 @@ package sirens.schedulers
 import java.util
 
 import collection.JavaConverters._
-import sirens.extensions.TaskExtension._
-import sirens.dag.models.{Task, TaskQueue}
-import sirens.dag.models.states.MachineType
+import sirens.typeclasses.TaskExtension._
+import sirens.models.{Task, TaskQueue}
+import sirens.models.states.MachineType
 
 import scala.annotation.tailrec
 import collection.mutable.{ListBuffer, Set => MutableSet}

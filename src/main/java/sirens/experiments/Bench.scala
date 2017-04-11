@@ -1,6 +1,6 @@
 package sirens.experiments
 
-import sirens.dag.models.states.MachineType
+import sirens.models.states.MachineType
 import sirens.schedulers.LinearCluster
 
 object Bench {

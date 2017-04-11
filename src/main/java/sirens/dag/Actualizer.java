@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import sirens.dag.models.Task;
-import sirens.dag.models.TaskQueue;
+import sirens.models.Task;
+import sirens.models.TaskQueue;
 
 public class Actualizer {
 	private Actualizer() { }
@@ -21,14 +21,7 @@ public class Actualizer {
 
 		// check invariant: all tasks should now be built
 		if (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)){
-//			String violating = tqs.stream()
-//					.flatMap(tq -> tq.getTasks().stream())
-//					.filter(t -> !t.isBuilt())
-//					.map(t -> String.valueOf(t.getID()))
-//					.collect(Collectors.joining(","));
-
 			System.out.println(tqs.stream().map(TaskQueue::toShortString).collect(Collectors.joining("|")));
-
 			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
 		}
 
@@ -68,14 +61,7 @@ public class Actualizer {
 
 		// check invariant: all tasks should now be built
 		if (tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask)){
-//			String violating = tqs.stream()
-//					.flatMap(tq -> tq.getTasks().stream())
-//					.filter(t -> !t.isBuilt())
-//					.map(t -> String.valueOf(t.getID()))
-//					.collect(Collectors.joining(","));
-
 			System.out.println(tqs.stream().map(TaskQueue::toShortString).collect(Collectors.joining("|")));
-
 			throw new DAGException("Could not build task! Check input graph for cycles, and make sure all dependencies are in a task queue.");
 		}
 

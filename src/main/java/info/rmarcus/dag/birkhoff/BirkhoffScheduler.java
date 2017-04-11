@@ -2,8 +2,8 @@ package info.rmarcus.dag.birkhoff;
 
 import sirens.dag.CostAnalyzer;
 import sirens.dag.DAGGenerator;
-import sirens.dag.models.Task;
-import sirens.dag.models.TaskQueue;
+import sirens.models.Task;
+import sirens.models.TaskQueue;
 import info.rmarcus.birkhoffvonneumann.CoeffAndMatrix;
 import info.rmarcus.birkhoffvonneumann.learners.generalized_loss.MHJointPermutationLearner;
 import info.rmarcus.dag.cca.CCAScheduler;

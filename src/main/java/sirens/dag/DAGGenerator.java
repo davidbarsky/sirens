@@ -11,9 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import sirens.dag.models.Task;
-import sirens.dag.models.TaskQueue;
-import sirens.dag.models.states.MachineType;
+import sirens.models.Task;
+import sirens.models.TaskQueue;
+import sirens.models.states.MachineType;
 
 import info.rmarcus.NullUtils;
 import info.rmarcus.ggen4j.GGen;

@@ -2,12 +2,11 @@ package sirens.experiments
 
 import java.util
 
-import sirens.dag.models.Task
+import sirens.models.Task
 import sirens.dag.CostAnalyzer
-import sirens.schedulers.BoundedScheduler
 import sirens.dag.Actualizer
-import sirens.dag.models.states.MachineType
-import sirens.schedulers.UnboundedScheduler
+import sirens.models.states.MachineType
+import sirens.schedulers.{BoundedScheduler, UnboundedScheduler}
 
 import collection.JavaConverters._
 
@@ -45,7 +44,7 @@ object ExperimentRunner {
                     numberOfQueues: Int,
                     graph: util.List[Task],
                     machineType: MachineType): ExperimentResult = {
-    val unbuiltGraph = scheduler.generateSchedule(numberOfQueues, machineType)
+    val unbuiltGraph = scheduler.generateSchedule(graph, numberOfQueues, machineType)
     val builtGraph = Actualizer.actualize(unbuiltGraph)
     val cost = CostAnalyzer.findCostOfBuiltTasks(builtGraph)
 

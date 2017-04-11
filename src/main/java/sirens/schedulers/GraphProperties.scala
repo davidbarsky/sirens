@@ -5,8 +5,8 @@ import java.util.Comparator
 
 import collection.mutable.{Map => MutableMap}
 
-import sirens.dag.models.Task
-import sirens.dag.models.states.MachineType
+import sirens.models.Task
+import sirens.models.states.MachineType
 
 object GraphProperties {
 

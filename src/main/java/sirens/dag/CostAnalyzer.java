@@ -2,25 +2,11 @@ package sirens.dag;
 
 import java.util.List;
 
-import sirens.dag.models.Task;
-import sirens.dag.models.TaskQueue;
-import sirens.dag.models.states.MachineType;
+import sirens.models.TaskQueue;
 
 public class CostAnalyzer {
     private CostAnalyzer() {}
 
-    public static int findCostOfBuiltTasks(List<Task> tasks, MachineType machineType) {
-        if (tasks.stream().anyMatch(task -> !task.isBuilt())) {
-            throw new RuntimeException("TaskQueues have unbuilt tasks!");
-        }
-
-        Task first = tasks.get(0);
-        Task last = tasks.get(tasks.size() - 1);
-
-        return (last.getStartEndTime().get().getEnd() -
-                first.getStartEndTime().get().getStart()) * machineType.getCost();
-    }
-    
     public static int findCostOfBuiltTasks(List<TaskQueue> tqs) {
         Boolean hasUnbuilt = tqs.stream().anyMatch(TaskQueue::hasUnbuiltTask);
         if (hasUnbuilt) {
