@@ -25,7 +25,7 @@ class ExperimentLoggerTest {
     val csv: String = ExperimentLogger.toCSV(experimentResult :: Nil)
     // We're checking the first parts of the CSV fit the pattern of "EdgeZero,SMALL". Numbers that follow
     // are non-deterministic
-    assertEquals(csv.substring(0, 14), "EdgeZero,SMALL")
+    assertEquals("EdgeZero,SMALL", csv.substring(0, 14))
   }
 
   @Test
@@ -44,7 +44,7 @@ class ExperimentLoggerTest {
     val file: File = File.createTempFile("output", "txt")
     file.deleteOnExit()
     ExperimentLogger.writeToFile(experimentResult :: Nil, file)
-    val testActual: String = String.join("\n", Files.readAllLines(file.toPath)) + "\n"
+    val testActual: String = String.join("\n", Files.readAllLines(file.toPath))
     assertEquals(testCSV, testActual)
   }
 }

@@ -11,6 +11,6 @@ case class ExperimentResult(schedulerName: String,
                             latencyBounds: LatencyBounds,
                             finalCost: Int) {
   def toCSV: String = {
-    s"$schedulerName, $machineType, $numberOfNodes, $numberOfQueues, $networkingBounds, $latencyBounds, $finalCost"
+    s"$schedulerName,$machineType,$numberOfNodes,$numberOfQueues,$networkingBounds,$latencyBounds,$finalCost"
   }
 }
