@@ -29,6 +29,7 @@ class ExperimentRunnerTest {
     val graph = GraphGenerator.genericGraph(40)
     val result = ExperimentRunner.runExperiment(
       scheduler = new RoundRobin,
+      numberOfNodes = graph.size,
       numberOfQueues = 4,
       graph = graph,
       machineType = MachineType.SMALL,
