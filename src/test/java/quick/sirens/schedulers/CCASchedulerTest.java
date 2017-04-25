@@ -17,12 +17,11 @@ public class CCASchedulerTest {
         Collection<Task> tasks = GraphGenerator.genericGraph(20);
         CCAScheduler ccaScheduler = new CCAScheduler(tasks);
 
-        Collection<TaskQueue> schedule = ccaScheduler.schedule(800);
+        Collection<TaskQueue> schedule = ccaScheduler.schedule(8000);
         Actualizer.actualize(schedule).forEach(tq -> {
             assertNotNull(tq);
             boolean isBuilt = tq.getTasks().stream().allMatch(Task::isBuilt);
             assertTrue(isBuilt);
         });
     }
-
 }
