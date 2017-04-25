@@ -2,6 +2,7 @@ package sirens.experiments
 
 import java.util
 
+import info.rmarcus.dag.cca.CCAScheduler
 import sirens.models.Task
 
 import collection.JavaConverters._
@@ -57,7 +58,7 @@ object GraphGenerator {
   }
 
   def poisson(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
-    (6 :: 7 :: 8 :: 9 :: 10 :: 11 :: 12 :: 13 :: Nil).map { n =>
+    (8 :: 9 :: 10 :: 11 :: 12 :: 13 :: Nil).map { n =>
       val graph = GGen.dataflowGraph().poisson2D(20, n)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
         .edgeProperty("networking").uniform(networkingBounds.lower, networkingBounds.upper)
@@ -79,7 +80,7 @@ object GraphGenerator {
   }
 
   def erdos(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
-    (20 :: 220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
+    (220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
       val graph = GGen.generateGraph().erdosGNM(n, 100)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
         .edgeProperty("networking").uniform(networkingBounds.lower, networkingBounds.upper)

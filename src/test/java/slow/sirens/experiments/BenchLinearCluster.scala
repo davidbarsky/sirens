@@ -9,7 +9,7 @@ import sirens.models.data.{LatencyBounds, NetworkingBounds}
 import sirens.models.states.MachineType
 import sirens.schedulers.LinearCluster
 
-class BenchLinearClusterTest {
+class BenchLinearCluster {
   val latencyBounds: LatencyBounds = LatencyBounds(10, 60)
   val networkingBounds: NetworkingBounds = NetworkingBounds(10, 60)
 

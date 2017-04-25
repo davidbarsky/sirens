@@ -9,7 +9,7 @@ import sirens.models.Task
 import sirens.models.states.MachineType
 import sirens.schedulers.EdgeZero
 
-class BenchEdgeZeroTest {
+class BenchEdgeZero {
   val latencyBounds: LatencyBounds = LatencyBounds(10, 60)
   val networkingBounds: NetworkingBounds = NetworkingBounds(10, 60)
 

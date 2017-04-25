@@ -46,16 +46,16 @@ class VariableLatencyLinearCluster {
     }
   }
 
-  @Test
-  def erdosGNP(): Unit = {
-    (100 :: 200 :: 300 :: 400 :: Nil).foreach { lowerBound =>
-      val latencyBounds = LatencyBounds(lowerBound, lowerBound)
-      val networkingBounds = NetworkingBounds(lowerBound, lowerBound)
-
-      val graphs = GraphGenerator.erdosGNP(latencyBounds, networkingBounds)
-      run(graphs, latencyBounds, networkingBounds)
-    }
-  }
+//  @Test
+//  def erdosGNP(): Unit = {
+//    (100 :: 200 :: 300 :: 400 :: Nil).foreach { lowerBound =>
+//      val latencyBounds = LatencyBounds(lowerBound, lowerBound)
+//      val networkingBounds = NetworkingBounds(lowerBound, lowerBound)
+//
+//      val graphs = GraphGenerator.erdosGNP(latencyBounds, networkingBounds)
+//      run(graphs, latencyBounds, networkingBounds)
+//    }
+//  }
 
   @Test
   def forkJoin(): Unit = {

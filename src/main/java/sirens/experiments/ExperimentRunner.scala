@@ -2,6 +2,7 @@ package sirens.experiments
 
 import java.util
 
+import info.rmarcus.dag.cca.CCAScheduler
 import sirens.models.Task
 import sirens.dag.CostAnalyzer
 import sirens.dag.Actualizer
@@ -32,6 +33,43 @@ object ExperimentRunner {
     graphs.asScala.toList.map { graph =>
       runExperiment(scheduler, numberOfQueues, graph, machineType, networkingBounds, latencyBounds)
     }
+  }
+
+  def runSeriesCCA(graphs: util.List[util.List[Task]],
+                   machineType: MachineType,
+                   networkingBounds: NetworkingBounds,
+                   latencyBounds: LatencyBounds,
+                   deadline: Int): List[ExperimentResult] = {
+    graphs.asScala.toList.map { graph =>
+      val scheduler = new CCAScheduler(graph)
+      runExperiment(scheduler,
+                    graph.size(),
+                    graph,
+                    machineType,
+                    networkingBounds,
+                    latencyBounds,
+                    deadline)
+    }
+  }
+
+  def runExperiment(scheduler: CCAScheduler,
+                    numberOfNodes: Int,
+                    graph: util.List[Task],
+                    machineType: MachineType,
+                    networkingBounds: NetworkingBounds,
+                    latencyBounds: LatencyBounds,
+                    deadline: Int): ExperimentResult = {
+    val unbuiltGraph = scheduler.schedule(deadline)
+    val builtGraph = Actualizer.actualize(unbuiltGraph)
+    val cost = CostAnalyzer.findCostOfBuiltTasks(builtGraph)
+
+    ExperimentResult(scheduler.toString,
+                     machineType,
+                     numberOfNodes,
+                     unbuiltGraph.size,
+                     networkingBounds,
+                     latencyBounds,
+                     cost)
   }
 
   def runExperiment(scheduler: UnboundedScheduler,
