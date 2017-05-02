@@ -7,15 +7,16 @@ import sirens.experiments.{ExperimentRunner, GraphGenerator}
 import sirens.models.Task
 import sirens.models.data.{LatencyBounds, NetworkingBounds}
 import sirens.models.states.MachineType
-import sirens.schedulers.LinearCluster
+import sirens.schedulers.RoundRobin
 
-class BenchLinearCluster {
+class CostRoundRobin {
   val latencyBounds: LatencyBounds = LatencyBounds(10, 60)
   val networkingBounds: NetworkingBounds = NetworkingBounds(10, 60)
 
   def run(graphs: util.List[util.List[Task]]): Unit = {
     val results = ExperimentRunner.runSeries(
-      scheduler = new LinearCluster,
+      scheduler = new RoundRobin,
+      numberOfQueues = 4,
       graphs = graphs,
       machineType = MachineType.SMALL,
       networkingBounds = networkingBounds,
@@ -24,6 +25,7 @@ class BenchLinearCluster {
     results.map(_.toCSV).foreach(println)
   }
 
+  @Test
   def cholskey(): Unit = {
     val graphs = GraphGenerator.cholesky(latencyBounds, networkingBounds)
     run(graphs)
@@ -34,12 +36,6 @@ class BenchLinearCluster {
     val graphs = GraphGenerator.erdos(latencyBounds, networkingBounds)
     run(graphs)
   }
-
-//  @Test
-//  def erdosGNP(): Unit = {
-//    val graphs = GraphGenerator.erdosGNP(latencyBounds, networkingBounds)
-//    run(graphs)
-//  }
 
   @Test
   def forkJoin(): Unit = {

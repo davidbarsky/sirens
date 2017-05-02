@@ -22,6 +22,17 @@ object TaskExtension {
       }.toMap
     }
 
+    def getNeighbors: Map[Task, Int] = {
+      val children = task.getDependents.asScala.map { pair =>
+        (pair._1, pair._2.toInt)
+      }.toMap
+      val parents = task.getDependencies.asScala.map { pair =>
+        (pair._1, pair._2.toInt)
+      }.toMap
+
+      children ++ parents
+    }
+
     def getChildren: List[Task] = {
       task.getDependents.asScala.keys.toList
     }

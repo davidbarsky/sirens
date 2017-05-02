@@ -9,7 +9,7 @@ import sirens.models.Task
 import sirens.models.states.MachineType
 import sirens.schedulers.EdgeZero
 
-class BenchEdgeZero {
+class CostEdgeZero {
   val latencyBounds: LatencyBounds = LatencyBounds(10, 60)
   val networkingBounds: NetworkingBounds = NetworkingBounds(10, 60)
 
@@ -33,18 +33,6 @@ class BenchEdgeZero {
   @Test
   def erdosGNM(): Unit = {
     val graphs = GraphGenerator.erdos(latencyBounds, networkingBounds)
-    run(graphs)
-  }
-
-//  @Test
-//  def erdosGNP(): Unit = {
-//    val graphs = GraphGenerator.erdosGNP(latencyBounds, networkingBounds)
-//    run(graphs)
-//  }
-
-  @Test
-  def fibonacci(): Unit = {
-    val graphs = GraphGenerator.fibonacci(latencyBounds, networkingBounds)
     run(graphs)
   }
 

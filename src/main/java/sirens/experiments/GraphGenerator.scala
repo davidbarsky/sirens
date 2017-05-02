@@ -2,7 +2,6 @@ package sirens.experiments
 
 import java.util
 
-import info.rmarcus.dag.cca.CCAScheduler
 import sirens.models.Task
 
 import collection.JavaConverters._
@@ -16,11 +15,10 @@ object GraphGenerator {
   val networkingBounds: NetworkingBounds = NetworkingBounds(10, 60)
 
   def genericGraph(graphSize: Int): util.List[Task] = {
-    val graph = GGen.staticGraph().forkJoin(graphSize, 8)
+    val graph = GGen.generateGraph().erdosGNM(graphSize, 100)
       .vertexProperty("latency").uniform(10, 60)
       .edgeProperty("networking").uniform(10, 60)
       .generateGraph().topoSort()
-
     TopologicalSorter.mapToTaskList(graph.allVertices())
   }
 
@@ -30,6 +28,7 @@ object GraphGenerator {
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
         .edgeProperty("networking").uniform(networkingBounds.lower, networkingBounds.upper)
         .generateGraph().topoSort()
+
       TopologicalSorter.mapToTaskList(graph.allVertices())
     }.asJava
   }

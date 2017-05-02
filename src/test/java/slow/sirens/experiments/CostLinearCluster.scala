@@ -7,16 +7,15 @@ import sirens.experiments.{ExperimentRunner, GraphGenerator}
 import sirens.models.Task
 import sirens.models.data.{LatencyBounds, NetworkingBounds}
 import sirens.models.states.MachineType
-import sirens.schedulers.RoundRobin
+import sirens.schedulers.LinearCluster
 
-class BenchRoundRobin {
+class CostLinearCluster {
   val latencyBounds: LatencyBounds = LatencyBounds(10, 60)
   val networkingBounds: NetworkingBounds = NetworkingBounds(10, 60)
 
   def run(graphs: util.List[util.List[Task]]): Unit = {
     val results = ExperimentRunner.runSeries(
-      scheduler = new RoundRobin,
-      numberOfQueues = 4,
+      scheduler = new LinearCluster,
       graphs = graphs,
       machineType = MachineType.SMALL,
       networkingBounds = networkingBounds,
@@ -34,18 +33,6 @@ class BenchRoundRobin {
   @Test
   def erdosGNM(): Unit = {
     val graphs = GraphGenerator.erdos(latencyBounds, networkingBounds)
-    run(graphs)
-  }
-
-//  @Test
-//  def erdosGNP(): Unit = {
-//    val graphs = GraphGenerator.erdosGNP(latencyBounds, networkingBounds)
-//    run(graphs)
-//  }
-
-  @Test
-  def fibonacci(): Unit = {
-    val graphs = GraphGenerator.fibonacci(latencyBounds, networkingBounds)
     run(graphs)
   }
 

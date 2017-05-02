@@ -171,15 +171,7 @@ public class Task implements Comparable<Task> {
 		return dependents;
 	}
 
-	public List<Task> getNeighbors() {
-		List<Task> neighbors = new ArrayList<>();
-		neighbors.addAll(this.getDependents().keySet());
-		neighbors.addAll(this.getDependencies().keySet());
-
-		return neighbors.stream().distinct().collect(Collectors.toList());
-	}
-
-	public BuildStatus getBuildStatus() {
+  public BuildStatus getBuildStatus() {
 		return buildStatus;
 	}
 
