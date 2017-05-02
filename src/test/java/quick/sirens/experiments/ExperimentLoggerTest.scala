@@ -14,7 +14,7 @@ class ExperimentLoggerTest {
   @Test
   @throws[Exception]
   def toCSV(): Unit = {
-    val graph = GraphGenerator.genericGraph(8)
+    val graph = GraphGenerator.genericGraph(30)
     val experimentResult: ExperimentResult =
       ExperimentRunner.runExperiment(new EdgeZero,
                                      graph.size,
@@ -31,7 +31,7 @@ class ExperimentLoggerTest {
   @Test
   @throws[Exception]
   def writeToFile(): Unit = {
-    val graph = GraphGenerator.genericGraph(8)
+    val graph = GraphGenerator.genericGraph(30)
     val experimentResult: ExperimentResult =
       ExperimentRunner.runExperiment(new EdgeZero,
                                      graph.size,

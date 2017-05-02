@@ -42,17 +42,6 @@ public class EdgeZeroTest {
     }
 
     @Test
-    public void generateScheduleWithFibonacci() throws Exception {
-        GGenGraph gg = GGen.staticGraph().fibonacci(8, 1)
-                .vertexProperty("latency").uniform(10, 60)
-                .edgeProperty("networking").uniform(10, 60)
-                .generateGraph().topoSort();
-
-        List<TaskQueue> builtGraph = build(gg);
-        verifyGraph(builtGraph);
-    }
-
-    @Test
     public void generateScheduleWithErdos() throws Exception {
         GGenGraph gg = GGen.generateGraph().erdosGNM(70, 100)
                 .vertexProperty("latency").uniform(10, 30)

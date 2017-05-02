@@ -72,7 +72,7 @@ public class TaskTest {
 
 	@Test
 	public void isIndependent() {
-		List<Task> graph = GraphGenerator.genericGraph(4);
+		List<Task> graph = GraphGenerator.genericGraph(30);
 		long independentTaskSize = graph.stream().filter(Task::isIndependent).count();
 		long dependentTaskSize = graph.stream().filter(task -> !task.isIndependent()).count();
 
