@@ -17,10 +17,10 @@ class BenchmarkErdos {
       val end = System.currentTimeMillis()
       println(s"Time to Schedule with Dynamic Critical Path: ${end - start} milliseconds")
       (end - start).toInt
-    }.foldLeft(0)(_+_)
+    }.sum
 
     val average = sum / 20
-    println(s"Average Time for RoundRobin: ${average}")
+    println(s"Average Time for RoundRobin: $average")
   }
 
   @Test
@@ -34,10 +34,10 @@ class BenchmarkErdos {
       val end = System.currentTimeMillis()
       println(s"Time to Schedule with Linear Cluster: ${end - start} milliseconds")
       (end - start).toInt
-    }.foldLeft(0)(_+_)
+    }.sum
 
     val average = sum / 20
-    println(s"Average Time for Round Robin: ${average}")
+    println(s"Average Time for Round Robin: $average")
   }
 
   @Test
@@ -51,10 +51,10 @@ class BenchmarkErdos {
       val end = System.currentTimeMillis()
       println(s"Time to Schedule with Edge Zero: ${end - start} milliseconds")
       (end - start).toInt
-    }.foldLeft(0)(_+_)
+    }.sum
 
     val average = sum / 20
-    println(s"Average Time for Edge Zero: ${average}")
+    println(s"Average Time for Edge Zero: $average")
   }
 
   @Test
@@ -68,7 +68,7 @@ class BenchmarkErdos {
       val end = System.currentTimeMillis()
       println(s"Time to Schedule with Round Robin: ${end - start} milliseconds")
       (end - start).toInt
-    }.foldLeft(0)(_+_)
+    }.sum
 
     val average = sum / 20
     println(s"Average Time for Round Robin: ${average}")

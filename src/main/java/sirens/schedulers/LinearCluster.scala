@@ -18,7 +18,7 @@ class LinearCluster extends UnboundedScheduler {
     val sourceTasks = immutableGraph.filter(_.isSource)
     val levels = GraphProperties.findBottomLevel(immutableGraph, machineType)
 
-    val criticalPaths = immutableGraph.map(t => findCriticalPath(t, levels))
+    val criticalPaths = immutableGraph.map(t => GraphProperties.findCriticalPathWithLevels(t, levels))
     val adjacentNodes = criticalPaths.map(neighborsOfCriticalPath)
 
     val examined = MutableSet[Task]()
@@ -33,27 +33,6 @@ class LinearCluster extends UnboundedScheduler {
     buffer += new TaskQueue(machineType, independentTasks.asJava)
 
     buffer.filterNot(_.getTasks.isEmpty).asJava
-  }
-
-  def findCriticalPath(source: Task, levels: Map[Task, Int]): List[Task] = {
-    @tailrec def go(t: Task, acc: List[Task]): List[Task] = {
-      if (t.isLeaf) {
-        acc.reverse
-      } else {
-        val maxChild = max(t.getChildren)
-        go(maxChild, maxChild :: acc)
-      }
-    }
-
-    @tailrec def max(as: List[Task]): Task = {
-      as match {
-        case List(t: Task) => t
-        case a :: b :: rest =>
-          max((if (levels(a) > levels(b)) a else b) :: rest)
-      }
-    }
-
-    go(source, Nil)
   }
 
   def neighborsOfCriticalPath(criticalPath: List[Task]): List[Task] = {

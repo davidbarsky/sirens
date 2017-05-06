@@ -3,10 +3,13 @@ package sirens.schedulers
 import java.util
 import java.util.Comparator
 
-import collection.mutable.{Map => MutableMap}
-
+import collection.JavaConverters._
 import sirens.models.Task
 import sirens.models.states.MachineType
+import sirens.typeclasses.TaskExtension._
+
+import scala.annotation.tailrec
+import scala.collection.mutable
 
 object GraphProperties {
 
@@ -23,6 +26,36 @@ object GraphProperties {
       alap.put(task, min_ft - 1)
     }
     alap
+  }
+
+  def countCriticalPaths(graph: util.List[Task]): Int = {
+    val immutableGraph = graph.asScala.toList
+    val bottomLevels = findBottomLevel(immutableGraph, machineType = MachineType.SMALL)
+
+    immutableGraph.filter(_.isSource).map { task =>
+      findCriticalPathWithLevels(task, levels = bottomLevels)
+    }.size
+  }
+
+  def findCriticalPathWithLevels(source: Task, levels: Map[Task, Int]): List[Task] = {
+    @tailrec def go(t: Task, acc: List[Task]): List[Task] = {
+      if (t.isLeaf) {
+        acc.reverse
+      } else {
+        val maxChild = max(t.getChildren)
+        go(maxChild, maxChild :: acc)
+      }
+    }
+
+    @tailrec def max(as: List[Task]): Task = {
+      as match {
+        case List(t: Task) => t
+        case a :: b :: rest =>
+          max((if (levels(a) > levels(b)) a else b) :: rest)
+      }
+    }
+
+    go(source, Nil)
   }
 
   def lengthOfLongestCP(graph: util.List[Task]): Integer = {
@@ -80,7 +113,7 @@ object GraphProperties {
   }
 
   def findBottomLevel(graph: List[Task], machineType: MachineType): Map[Task, Int] = {
-    val levels = MutableMap[Task, Int]().withDefaultValue(0)
+    val levels = mutable.Map[Task, Int]().withDefaultValue(0)
     graph.foreach { task: Task =>
       val computationCost = task.getLatencies.get(machineType)
       var max = 0

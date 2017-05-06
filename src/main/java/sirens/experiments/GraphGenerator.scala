@@ -90,7 +90,7 @@ object GraphGenerator {
 
   def erdosGNP(latencyBounds: LatencyBounds, networkingBounds: NetworkingBounds): util.List[util.List[Task]] = {
     (220 :: 364 :: 560 :: 816 :: 1140 :: 1540 :: Nil).map { n =>
-      val graph = GGen.generateGraph().erdosGNP(n, 0.5)
+      val graph = GGen.generateGraph().erdosGNP(n, 0.2)
         .vertexProperty("latency").uniform(latencyBounds.lower, latencyBounds.upper)
         .edgeProperty("networking").uniform(networkingBounds.lower, networkingBounds.upper)
         .generateGraph().topoSort()

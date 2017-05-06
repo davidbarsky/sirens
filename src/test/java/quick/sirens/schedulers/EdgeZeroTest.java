@@ -32,8 +32,6 @@ public class EdgeZeroTest {
     private List<TaskQueue> build(GGenGraph graph) {
         EdgeZero edgeZero = new EdgeZero();
 
-        System.out.println(graph.toGraphviz());
-
         List<Task> taskGraph = TopologicalSorter.mapToTaskList(graph.allVertices());
         List<TaskQueue> schedule = edgeZero.generateSchedule(taskGraph, MachineType.SMALL);
 

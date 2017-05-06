@@ -18,7 +18,6 @@ import collection.JavaConverters._
 class LinearClusterTest {
   private def build(graph: GGenGraph): util.List[TaskQueue] = {
     val linearCluster: LinearCluster = new LinearCluster
-    System.out.println(graph.toGraphviz)
 
     val taskGraph: util.List[Task] =
       TopologicalSorter.mapToTaskList(graph.allVertices)
@@ -50,7 +49,6 @@ class LinearClusterTest {
 //  }
 
   @Test
-  @throws[Exception]
   def generateScheduleWithErdos() {
 
     // @formatter:off
@@ -64,7 +62,6 @@ class LinearClusterTest {
   }
 
   @Test
-  @throws[Exception]
   def generateScheduleWithSparceLU() {
 
     // @formatter:off
@@ -78,7 +75,6 @@ class LinearClusterTest {
   }
 
   @Test
-  @throws[Exception]
   def generateScheduleWithCholskey() {
 
     // @formatter:off
@@ -92,7 +88,6 @@ class LinearClusterTest {
   }
 
   @Test
-  @throws[Exception]
   def generateScheduleWithDenseLU() {
 
     // @formatter:off
@@ -142,9 +137,8 @@ class LinearClusterTest {
     val levels =
       GraphProperties.findBottomLevel(genericGraph, MachineType.SMALL)
     val sources = genericGraph.filter(_.isSource)
-    println(sources)
 
-    val paths = sources.map(t => linearCluster.findCriticalPath(t, levels))
+    val paths = sources.map(t => GraphProperties.findCriticalPathWithLevels(t, levels))
     paths.map(linearCluster.neighborsOfCriticalPath).foreach(println)
   }
 }
