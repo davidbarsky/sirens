@@ -136,9 +136,7 @@ class LinearClusterTest {
     val linearCluster: LinearCluster = new LinearCluster
     val levels =
       GraphProperties.findBottomLevel(genericGraph, MachineType.SMALL)
-    val sources = genericGraph.filter(_.isSource)
 
-    val paths = sources.map(t => GraphProperties.findCriticalPathWithLevels(t, levels))
-    paths.map(linearCluster.neighborsOfCriticalPath).foreach(println)
+    assert(levels.nonEmpty)
   }
 }
